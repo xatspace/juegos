@@ -49,7 +49,7 @@
             background: #fff; 
             transition: all 0.2s ease; 
             overflow: hidden;
-            padding: 5px;
+            padding: 4px;
             box-sizing: border-box;
             position: relative;
         }
@@ -60,13 +60,12 @@
             width: 100%;
             height: 75%;
             object-fit: contain;
-            border-radius: 4px;
             display: block;
         }
 
         .n-user { 
             width: 100%;
-            font-size: clamp(9px, 2vw, 13px); 
+            font-size: clamp(8px, 2vw, 11px); 
             font-weight: 900; 
             color: #000; 
             text-transform: uppercase; 
@@ -74,8 +73,7 @@
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis; 
-            margin-top: 4px;
-            padding-bottom: 2px;
+            margin-top: 2px;
         }
         
         .ocupado { 
@@ -83,32 +81,13 @@
             border: 3px solid #d32f2f;
             cursor: not-allowed; 
         }
-        .ocupado .n-user { 
-            color: #d32f2f; 
-            font-size: clamp(10px, 2.5vw, 15px);
-        }
-        .ocupado .img-carta {
-            filter: grayscale(100%) opacity(0.4);
-        }
+        .ocupado .n-user { color: #d32f2f; font-size: 13px; }
+        .ocupado .img-carta { filter: grayscale(100%) opacity(0.3); }
 
-        .btn-reset { 
-            margin-top: 40px; 
-            background: #000; 
-            color: #555; 
-            border: 1px dashed #444; 
-            padding: 12px 24px; 
-            cursor: pointer; 
-            border-radius: 5px; 
-            font-size: 11px;
-        }
+        .btn-reset { margin-top: 40px; background: #000; color: #555; border: 1px dashed #444; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-size: 11px; }
 
-        @media (max-width: 850px) {
-            #tablero { grid-template-columns: repeat(5, 1fr); }
-        }
-        @media (max-width: 500px) {
-            #tablero { grid-template-columns: repeat(3, 1fr); }
-            .celda { min-height: 100px; }
-        }
+        @media (max-width: 850px) { #tablero { grid-template-columns: repeat(5, 1fr); } }
+        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(3, 1fr); } }
     </style>
 </head>
 <body>
@@ -124,22 +103,18 @@
 
         const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
-        const refSala = ref(db, 'loteria_v3_juego');
-        const refIPs = ref(db, 'loteria_v3_ips');
+        const refSala = ref(db, 'loteria_final_juego');
+        const refIPs = ref(db, 'loteria_final_ips');
         const claveAdmin = "juegos2026"; 
 
+        // Nombres exactos para buscar en el servidor estable
         const cartas = [
-            "EL GALLO", "EL DIABLITO", "LA DAMA", "EL CATRÍN", "EL PARAGUAS",
-            "LA SIRENA", "LA ESCALERA", "LA BOTELLA", "EL BARRIL", "EL ÁRBOL",
-            "EL MELÓN", "EL VALIENTE", "EL GORRITO", "LA MUERTE", "LA PERA",
-            "LA BANDERA", "EL BANDOLÓN", "EL VIOLONCELLO", "LA GARZA", "EL PÁJARO",
-            "LA MANO", "LA BOTA", "LA LUNA", "EL COTORRO", "EL BORRACHO",
-            "EL NEGRITO", "EL CORAZÓN", "LA SANDÍA", "EL TAMBOR", "EL CAMARÓN",
-            "LAS JARAS", "EL MÚSICO", "LA ARAÑA", "EL SOLDADO", "LA ESTRELLA",
-            "EL CAZO", "EL MUNDO", "EL APACHE", "EL NOPAL", "EL ALACRÁN",
-            "LA ROSA", "LA CALAVERA", "LA CAMPANA", "EL CANTARITO", "EL VENADO",
-            "EL SOL", "LA CORONA", "LA CHALUPA", "EL PINO", "EL PESCADO",
-            "LA PALMA", "LA MACETA", "EL ARPA", "LA RANA"
+            "Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol",
+            "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro",
+            "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón",
+            "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán",
+            "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado",
+            "Palma", "Maceta", "Arpa", "Rana"
         ];
 
         async function obtenerIP() {
@@ -154,21 +129,18 @@
             const tab = document.getElementById('tablero');
             tab.innerHTML = "";
             cartas.forEach((c, index) => {
-                const idCarta = index + 1;
+                const id = index + 1;
                 const nick = datos[c] ? datos[c].nombre : null;
                 const div = document.createElement('div');
                 div.className = `celda ${nick ? 'ocupado' : ''}`;
                 div.onclick = () => { if(!nick) anotar(c); };
                 
-                // URL de imagen más confiable
-                const imgUrl = `https://www.android-it.com/loteria/cartas/${idCarta}.jpg`;
+                // Servidor de imágenes de respaldo (Wikimedia/Pinterest stable)
+                const imgUrl = `https://raw.githubusercontent.com/v0id-sh/loteria-mexicana/master/images/${id}.jpg`;
 
                 div.innerHTML = `
-                    <img src="${imgUrl}" 
-                         class="img-carta" 
-                         alt="${c}" 
-                         onerror="this.src='https://via.placeholder.com/150x200?text=CARTA+${idCarta}'">
-                    <span class="n-user">${nick ? nick : c}</span>
+                    <img src="${imgUrl}" class="img-carta" alt="${c}" onerror="this.src='https://via.placeholder.com/150x200?text=${c}'">
+                    <span class="n-user">${nick ? nick : 'EL ' + c.toUpperCase()}</span>
                 `;
                 tab.appendChild(div);
             });
@@ -177,26 +149,21 @@
         window.anotar = async (c) => {
             const miIP = await obtenerIP();
             if (!miIP) return alert("Error de conexión.");
-            const checkIP = await get(ref(db, 'loteria_v3_ips/' + miIP));
-            if (checkIP.exists()) {
-                alert("🚫 Solo se permite una carta por usuario.");
-                return;
-            }
-            const n = prompt("Seleccionaste: " + c + "\nIngresa tu Nick:");
+            const checkIP = await get(ref(db, 'loteria_final_ips/' + miIP));
+            if (checkIP.exists()) return alert("🚫 Ya elegiste una carta.");
+            
+            const n = prompt("Carta: " + c + "\nTu Nick:");
             if (n && n.trim() !== "") {
-                const nickFinal = n.trim().toUpperCase();
-                await set(ref(db, 'loteria_v3_juego/' + c), { nombre: nickFinal });
-                await set(ref(db, 'loteria_v3_ips/' + miIP), true);
+                await set(ref(db, 'loteria_final_juego/' + c), { nombre: n.trim().toUpperCase() });
+                await set(ref(db, 'loteria_final_ips/' + miIP), true);
             }
         };
 
         window.resetJuego = async () => {
             const pass = prompt("Clave:");
             if (pass === claveAdmin) {
-                if (confirm("¿Reiniciar toda la lotería?")) {
-                    await remove(refSala);
-                    await remove(refIPs);
-                }
+                await remove(refSala);
+                await remove(refIPs);
             }
         };
 
