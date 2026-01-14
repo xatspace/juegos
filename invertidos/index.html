@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invertidos - Manual</title>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; }
+        .neon-title { color: #ffb6c1; text-shadow: 0 0 15px #ffb6c1; font-size: 28px; text-transform: uppercase; margin: 15px 0; }
+        #tablero { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; width: 715px; background: #111; border: 3px solid #ffb6c1; padding: 12px; border-radius: 12px; }
+        .celda { height: 65px; border: 1px solid #444; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; background: #050505; transition: 0.3s; }
+        .celda:hover { border-color: #ffb6c1; background: #1a1a1a; }
+        .n-info { font-size: 14px; color: #ffb6c1; font-weight: bold; }
+        .n-user { font-size: 10px; font-weight: bold; color: #fff; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%; margin-top: 4px;}
+        .ocupado { background: #222 !important; border-color: #ffb6c1; cursor: not-allowed; }
+        .btn-reset { margin-top: 40px; background: #000; color: #444; border: 1px dashed #444; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-size: 12px; }
+        @media (max-width: 730px) { #tablero { width: 98vw; grid-template-columns: repeat(5, 1fr); } }
+    </style>
+</head>
+<body>
+
+    <div class="neon-title">TABLA INVERTIDOS</div>
+    <div id="tablero"></div>
+
+    <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TODO EL JUEGO</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
+        const db = getDatabase(app);
+        const refSala = ref(db, 'invertidos_juego');
+        const refIPs = ref(db, 'usuarios_ips');
+        const claveAdmin = "juegos2026"; 
+
+        // --- EDITÁ ESTA LISTA CON TUS NÚMEROS EXACTOS ---
+        const pares = [
+            "01-10", "02-20", "03-30", "04-40", "05-50", 
+            "06-60", "07-70", "08-80", "09-90", "11-22",
+            "12-21", "13-31", "14-41", "15-51", "16-61",
+            "17-71", "18-81", "19-29", "23-32", "24-42", 
+			"25-52", "26-62", "27-72", "28-82", "33-44",
+            "34-43", "35-53", "36-63", "37-73", "38-83",
+            "39-49", "45-54", "46-64", "47-74", "48-84",
+            "55-66", "56-65", "57-75", "58-85", "59-69",
+            "67-76", "68-86", "77-88", "78-87", "79-89"
+        ];
+
+        async function obtenerIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip.replace(/\./g, '_');
+            } catch (e) { return null; }
+        }
+
+        function render(datos = {}) {
+            const tab = document.getElementById('tablero');
+            tab.innerHTML = "";
+            pares.forEach(p => {
+                const nick = datos[p] ? datos[p].nombre : null;
+                const div = document.createElement('div');
+                div.className = `celda ${nick ? 'ocupado' : ''}`;
+                div.onclick = () => { if(!nick) anotar(p); };
+                div.innerHTML = `<span class="n-info">${p}</span><span class="n-user">${nick ? nick : '---'}</span>`;
+                tab.appendChild(div);
+            });
+        }
+
+        window.anotar = async (p) => {
+            const miIP = await obtenerIP();
+            if (!miIP) return alert("Error de conexión.");
+            const checkIP = await get(ref(db, 'usuarios_ips/' + miIP));
+            if (checkIP.exists()) {
+                alert("🚫 Solo se permite un número por usuario.");
+                return;
+            }
+            const n = prompt("Número " + p + " - Tu Nick:");
+            if (n && n.trim() !== "") {
+                const nickFinal = n.trim().toUpperCase();
+                await set(ref(db, 'invertidos_juego/' + p), { nombre: nickFinal });
+                await set(ref(db, 'usuarios_ips/' + miIP), true);
+            }
+        };
+
+        window.resetJuego = async () => {
+            const pass = prompt("Clave:");
+            if (pass === claveAdmin) {
+                if (confirm("¿Reiniciar?")) {
+                    await remove(refSala);
+                    await remove(refIPs);
+                }
+            }
+        };
+
+        onValue(refSala, (snap) => render(snap.val() || {}));
+    </script>
+</body>
+</html>
