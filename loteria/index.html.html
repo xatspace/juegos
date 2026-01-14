@@ -5,96 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lotería Mexicana</title>
     <style>
-        body { 
-            background: #000; 
-            color: #fff; 
-            font-family: 'Arial Black', sans-serif; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 10px; 
-            margin: 0;
-        }
-        .neon-title { 
-            color: #00e5ff; 
-            text-shadow: 0 0 15px #00e5ff; 
-            font-size: clamp(22px, 6vw, 32px); 
-            text-transform: uppercase; 
-            margin: 20px 0; 
-        }
-        
-        #tablero { 
-            display: grid; 
-            grid-template-columns: repeat(9, 1fr); 
-            gap: 10px; 
-            width: 98%; 
-            max-width: 1100px; 
-            background: #111; 
-            border: 3px solid #00e5ff; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-sizing: border-box;
-        }
-
-        .celda { 
-            aspect-ratio: 2 / 3.3; 
-            border: 2px solid #333; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: space-between; 
-            cursor: pointer; 
-            border-radius: 8px; 
-            background: #fff; 
-            transition: 0.2s; 
-            overflow: hidden;
-            padding: 5px;
-            box-sizing: border-box;
-        }
-        
-        .celda:hover { border-color: #00e5ff; transform: scale(1.05); z-index: 10; }
-        
-        .img-carta {
-            width: 100%;
-            height: 75%;
-            object-fit: contain;
-            pointer-events: none;
-        }
-
-        /* NOMBRE MÁS GRANDE */
-        .n-user { 
-            width: 100%;
-            font-size: clamp(10px, 2.5vw, 15px); /* Aumentado */
-            font-weight: 900; 
-            color: #000; 
-            text-transform: uppercase; 
-            text-align: center;
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis;
-            padding: 4px 0;
-        }
-        
-        .ocupado { 
-            background: #ffeb3b !important; 
-            border: 3px solid #d32f2f;
-            cursor: not-allowed; 
-        }
-        .ocupado .n-user { color: #d32f2f; font-size: clamp(11px, 2.8vw, 16px); }
-        .ocupado .img-carta { filter: grayscale(100%) opacity(0.3); }
-
-        .btn-reset { margin-top: 40px; background: #000; color: #444; border: 1px dashed #444; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-size: 11px; }
-
-        @media (max-width: 850px) { #tablero { grid-template-columns: repeat(5, 1fr); } }
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        .neon-title { color: #00e5ff; text-shadow: 0 0 15px #00e5ff; font-size: 28px; text-transform: uppercase; margin: 15px 0; }
+        #tablero { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; width: 100%; max-width: 1000px; background: #111; border: 3px solid #00e5ff; padding: 12px; border-radius: 12px; box-sizing: border-box; }
+        .celda { aspect-ratio: 1 / 1.5; border: 1px solid #444; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; background: #fff; transition: 0.3s; padding: 4px; overflow: hidden; }
+        .celda:hover { border-color: #00e5ff; background: #f0f0f0; }
+        .img-carta { width: 90%; height: 75%; object-fit: contain; }
+        .n-user { font-size: 11px; color: #000; font-weight: bold; text-transform: uppercase; text-align: center; margin-top: 4px; }
+        .ocupado { background: #ffeb3b !important; border-color: #d32f2f; }
+        .ocupado .n-user { color: #d32f2f; }
+        .ocupado .img-carta { opacity: 0.3; filter: grayscale(1); }
+        .btn-reset { margin-top: 30px; background: #000; color: #555; border: 1px dashed #444; padding: 10px; cursor: pointer; font-size: 10px; }
+        @media (max-width: 800px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
         @media (max-width: 500px) { #tablero { grid-template-columns: repeat(3, 1fr); } }
     </style>
 </head>
 <body>
-
     <div class="neon-title">LOTERÍA MEXICANA</div>
     <div id="tablero"></div>
-
-    <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TODO</button>
+    <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -102,62 +31,63 @@
 
         const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
-        const refSala = ref(db, 'loteria_v_pro_juego');
-        const refIPs = ref(db, 'loteria_v_pro_ips');
-        const claveAdmin = "juegos2026"; 
+        const refSala = ref(db, 'loteria_v_final_real');
+        const refIPs = ref(db, 'ips_v_final_real');
 
-        const cartas = [
-            "El Gallo", "El Diablito", "La Dama", "El Catrín", "El Paraguas", "La Sirena", "La Escalera", "La Botella", "El Barril", "El Árbol",
-            "El Melón", "El Valiente", "El Gorrito", "La Muerte", "La Pera", "La Bandera", "El Bandolón", "El Violoncello", "La Garza", "El Pájaro",
-            "La Mano", "La Bota", "La Luna", "El Cotorro", "El Borracho", "El Negrito", "El Corazón", "La Sandía", "El Tambor", "El Camarón",
-            "Las Jaras", "El Músico", "La Araña", "El Soldado", "La Estrella", "El Cazo", "El Mundo", "El Apache", "El Nopal", "El Alacrán",
-            "La Rosa", "La Calavera", "La Campana", "El Cantarito", "El Venado", "El Sol", "La Corona", "La Chalupa", "El Pino", "El Pescado",
-            "La Palma", "La Maceta", "El Arpa", "La Rana"
-        ];
+        // Códigos únicos de Wikimedia para que no fallen los links
+        const hashes = {
+            1: "1/1a/01_el_gallo", 2: "0/0e/02_el_diablito", 3: "d/d7/03_la_dama", 4: "3/3d/04_el_catrin",
+            5: "4/4b/05_el_paraguas", 6: "a/a2/06_la_sirena", 7: "5/52/07_la_escalera", 8: "a/a3/08_la_botella",
+            9: "9/91/09_el_barril", 10: "0/07/10_el_arbol", 11: "e/e0/11_el_melon", 12: "f/f3/12_el_valiente",
+            13: "1/1b/13_el_gorrito", 14: "0/05/14_la_muerte", 15: "4/47/15_la_pera", 16: "9/91/16_la_bandera",
+            17: "3/30/17_el_bandolon", 18: "b/b3/18_el_violoncello", 19: "0/01/19_la_garza", 20: "3/33/20_el_pajaro",
+            21: "3/35/21_la_mano", 22: "7/70/22_la_bota", 23: "1/1a/23_la_luna", 24: "e/e4/24_el_cotorro",
+            25: "6/67/25_el_borracho", 26: "b/be/26_el_negrito", 27: "5/52/27_el_corazon", 28: "1/1d/28_la_sandia",
+            29: "4/4f/29_el_tambor", 30: "8/86/30_el_camaron", 31: "d/df/31_las_jaras", 32: "e/ed/32_el_musico",
+            33: "d/d3/33_la_arana", 34: "e/e5/34_el_soldado", 35: "0/07/35_la_estrella", 36: "e/ef/36_el_cazo",
+            37: "9/9f/37_el_mundo", 38: "d/d4/38_el_apache", 39: "f/f6/39_el_nopal", 40: "8/87/40_el_alacran",
+            41: "0/0d/41_la_rosa", 42: "a/ad/42_la_calavera", 43: "c/c5/43_la_campana", 44: "4/4c/44_el_cantarito",
+            45: "d/db/45_el_venado", 46: "f/f0/46_el_sol", 47: "c/ca/47_la_corona", 48: "f/fb/48_la_chalupa",
+            49: "b/be/49_el_pino", 50: "a/a2/50_el_pescado", 51: "9/93/51_la_palma", 52: "d/df/52_la_maceta",
+            53: "f/f3/53_el_arpa", 54: "2/29/54_la_rana"
+        };
 
-        async function obtenerIP() {
-            try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                return data.ip.replace(/\./g, '_');
-            } catch (e) { return "user_" + Math.floor(Math.random() * 9999); }
-        }
+        const nombres = ["Gallo", "Diablito", "Dama", "Catrin", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Arbol", "Melon", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolon", "Violoncello", "Garza", "Pajaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazon", "Sandia", "Tambor", "Camaron", "Jaras", "Musico", "Arana", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacran", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
 
         function render(datos = {}) {
             const tab = document.getElementById('tablero');
             tab.innerHTML = "";
-            cartas.forEach((c, index) => {
-                const id = index + 1;
-                const nick = datos[c] ? datos[c].nombre : null;
+            nombres.forEach((nom, index) => {
+                const num = index + 1;
+                const nick = datos[nom] ? datos[nom].nombre : null;
                 const div = document.createElement('div');
                 div.className = `celda ${nick ? 'ocupado' : ''}`;
-                div.onclick = () => { if(!nick) anotar(c); };
+                div.onclick = () => { if(!nick) anotar(nom); };
                 
-                // NUEVO LINK PROBADO Y FUNCIONAL
-                const imgUrl = `https://www.donnaipe.com/wp-content/uploads/2016/11/${id}.png`;
+                // Formato exacto que me pasaste al inicio
+                const imgUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/${hashes[num]}.jpg/150px-${hashes[num].split('/').pop()}.jpg`;
 
                 div.innerHTML = `
-                    <img src="${imgUrl}" class="img-carta" alt="${c}" onerror="this.src='https://via.placeholder.com/150x220?text=${id}'">
-                    <span class="n-user">${nick ? nick : c}</span>
+                    <img src="${imgUrl}" class="img-carta">
+                    <span class="n-user">${nick ? nick : nom.toUpperCase()}</span>
                 `;
                 tab.appendChild(div);
             });
         }
 
-        window.anotar = async (c) => {
-            const miIP = await obtenerIP();
-            const checkIP = await get(ref(db, 'loteria_v_pro_ips/' + miIP));
-            if (checkIP.exists()) return alert("🚫 Ya elegiste una carta.");
-            
-            const n = prompt("Carta: " + c + "\nIngresa tu Nick:");
-            if (n && n.trim() !== "") {
-                await set(ref(db, 'loteria_v_pro_juego/' + c), { nombre: n.trim().toUpperCase() });
-                await set(ref(db, 'loteria_v_pro_ips/' + miIP), true);
+        window.anotar = async (nom) => {
+            const miIP = await fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => d.ip.replace(/\./g, '_')).catch(() => "temp");
+            const checkIP = await get(ref(db, 'ips_v_final_real/' + miIP));
+            if (checkIP.exists()) return alert("Ya elegiste.");
+            const n = prompt("Carta: " + nom + "\nNick:");
+            if (n) {
+                await set(ref(db, 'loteria_v_final_real/' + nom), { nombre: n.toUpperCase() });
+                await set(ref(db, 'ips_v_final_real/' + miIP), true);
             }
         };
 
         window.resetJuego = async () => {
-            if (prompt("Clave:") === claveAdmin) {
+            if (prompt("Clave:") === "juegos2026") {
                 await remove(refSala);
                 await remove(refIPs);
             }
