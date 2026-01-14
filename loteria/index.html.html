@@ -44,7 +44,7 @@
             object-fit: contain;
         }
 
-        /* LETRA ORIGINAL 11px */
+        /* TAMAÑO DE LETRA ORIGINAL 11px */
         .n-user { 
             font-size: 11px; 
             color: #000; 
@@ -52,6 +52,8 @@
             text-transform: uppercase; 
             text-align: center;
             margin-top: 4px;
+            display: block;
+            width: 100%;
         }
         
         .ocupado { background: #ffeb3b !important; border-color: #d32f2f; }
@@ -77,13 +79,10 @@
 
         const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
-        const refSala = ref(db, 'loteria_v_definitiva');
-        const refIPs = ref(db, 'ips_loteria_v_definitiva');
+        const refSala = ref(db, 'loteria_v_local_final');
+        const refIPs = ref(db, 'ips_v_local_final');
 
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
-
-        // Mapeo de links reales en xatimg para que no fallen
-        const getImg = (n) => `https://xatimg.com/image/loteria_mexicana_${n}.png`;
 
         function render(datos = {}) {
             const tab = document.getElementById('tablero');
@@ -95,8 +94,8 @@
                 div.className = `celda ${nick ? 'ocupado' : ''}`;
                 div.onclick = () => { if(!nick) anotar(nom); };
                 
-                // Servidor de imágenes estable
-                const imgUrl = `https://mexicali664.github.io/loteria/img/${num}.jpg`;
+                // RUTA A TUS IMÁGENES RECIÉN SUBIDAS
+                const imgUrl = `img/${num}.jpg`;
 
                 div.innerHTML = `
                     <img src="${imgUrl}" class="img-carta" alt="${nom}">
@@ -108,13 +107,13 @@
 
         window.anotar = async (nom) => {
             const miIP = await fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => d.ip.replace(/\./g, '_')).catch(() => "t"+Math.random());
-            const checkIP = await get(ref(db, 'ips_loteria_v_definitiva/' + miIP));
-            if (checkIP.exists()) return alert("Ya elegiste una carta.");
+            const checkIP = await get(ref(db, 'ips_v_local_final/' + miIP));
+            if (checkIP.exists()) return alert("🚫 Ya elegiste una carta.");
             
             const n = prompt("Carta: " + nom + "\nNick:");
             if (n && n.trim()) {
-                await set(ref(db, 'loteria_v_definitiva/' + nom), { nombre: n.trim().toUpperCase() });
-                await set(ref(db, 'ips_loteria_v_definitiva/' + miIP), true);
+                await set(ref(db, 'loteria_v_local_final/' + nom), { nombre: n.trim().toUpperCase() });
+                await set(ref(db, 'ips_v_local_final/' + miIP), true);
             }
         };
 
