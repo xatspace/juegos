@@ -8,13 +8,12 @@
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         .neon-title { color: #00e5ff; text-shadow: 0 0 15px #00e5ff; font-size: 28px; text-transform: uppercase; margin: 15px 0 5px 0; }
         
-        /* CONTADOR DE CARTAS */
         #contador { color: #ffeb3b; font-size: 14px; margin-bottom: 15px; letter-spacing: 1px; }
 
         #tablero { 
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
-            gap: 6px; 
+            gap: 8px; 
             width: 100%; 
             max-width: 1000px; 
             background: #111; 
@@ -26,42 +25,54 @@
 
         .celda { 
             aspect-ratio: 1 / 1.5; 
-            border: 1px solid #444; 
+            border: 2px solid #444; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: center; 
+            justify-content: space-between; 
             cursor: pointer; 
             border-radius: 6px; 
             background: #fff; 
             transition: 0.3s; 
             padding: 4px;
             overflow: hidden;
+            position: relative;
         }
         
-        .celda:hover { border-color: #00e5ff; background: #f0f0f0; }
+        .celda:hover { border-color: #00e5ff; transform: scale(1.02); }
         
         .img-carta {
-            width: 90%;
-            height: 75%;
+            width: 100%;
+            height: 80%;
             object-fit: contain;
+            display: block;
         }
 
-        /* TAMAÑO DE LETRA ORIGINAL 11px */
+        /* TAMAÑO DE LETRA 11px */
         .n-user { 
             font-size: 11px; 
             color: #000; 
             font-weight: bold; 
             text-transform: uppercase; 
             text-align: center;
-            margin-top: 4px;
-            display: block;
             width: 100%;
+            padding: 2px 0;
+            z-index: 2;
         }
         
-        .ocupado { background: #ffeb3b !important; border-color: #d32f2f; }
-        .ocupado .n-user { color: #d32f2f; }
-        .ocupado .img-carta { opacity: 0.3; filter: grayscale(1); }
+        /* ESTILO CUANDO ESTÁ OCUPADO (SIN TAPAR LA CARTA) */
+        .ocupado { 
+            border: 3px solid #ff0000 !important; 
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .ocupado .n-user { 
+            background: rgba(211, 47, 47, 0.9); /* Rojo semi-transparente */
+            color: #fff;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
 
         .btn-reset { margin-top: 30px; background: #000; color: #555; border: 1px dashed #444; padding: 10px; cursor: pointer; font-size: 10px; }
 
@@ -72,7 +83,7 @@
 <body>
 
     <div class="neon-title">LOTERÍA MEXICANA</div>
-    <div id="contador">CARGANDO DISPONIBLES...</div>
+    <div id="contador">CARTAS DISPONIBLES: 54 / 54</div>
     <div id="tablero"></div>
 
     <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO</button>
@@ -83,8 +94,8 @@
 
         const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
-        const refSala = ref(db, 'loteria_v_local_final');
-        const refIPs = ref(db, 'ips_v_local_final');
+        const refSala = ref(db, 'loteria_local_final');
+        const refIPs = ref(db, 'ips_local_final');
 
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
 
@@ -92,7 +103,6 @@
             const tab = document.getElementById('tablero');
             const contDisp = document.getElementById('contador');
             tab.innerHTML = "";
-            
             let ocupadas = 0;
 
             nombres.forEach((nom, index) => {
@@ -104,7 +114,6 @@
                 div.className = `celda ${nick ? 'ocupado' : ''}`;
                 div.onclick = () => { if(!nick) anotar(nom); };
                 
-                // RUTA A TUS IMÁGENES EN GITHUB
                 const imgUrl = `img/${num}.jpg`;
 
                 div.innerHTML = `
@@ -114,20 +123,19 @@
                 tab.appendChild(div);
             });
 
-            // Actualizar contador
             const libres = nombres.length - ocupadas;
             contDisp.innerText = `CARTAS DISPONIBLES: ${libres} / 54`;
         }
 
         window.anotar = async (nom) => {
             const miIP = await fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => d.ip.replace(/\./g, '_')).catch(() => "t"+Math.random());
-            const checkIP = await get(ref(db, 'ips_v_local_final/' + miIP));
+            const checkIP = await get(ref(db, 'ips_local_final/' + miIP));
             if (checkIP.exists()) return alert("🚫 Ya elegiste una carta.");
             
             const n = prompt("Carta: " + nom + "\nNick:");
             if (n && n.trim()) {
-                await set(ref(db, 'loteria_v_local_final/' + nom), { nombre: n.trim().toUpperCase() });
-                await set(ref(db, 'ips_v_local_final/' + miIP), true);
+                await set(ref(db, 'loteria_local_final/' + nom), { nombre: n.trim().toUpperCase() });
+                await set(ref(db, 'ips_local_final/' + miIP), true);
             }
         };
 
