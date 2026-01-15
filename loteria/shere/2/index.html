@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana - Shere 2 Cartas</title>
+    <title>Lotería Mexicana - Shere 2</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -60,6 +60,7 @@
             justify-content: center;
             text-transform: uppercase;
             border-top: 1px solid #eee;
+            z-index: 10;
         }
         
         .seleccionada { 
@@ -69,8 +70,16 @@
             z-index: 5;
         }
 
-        .ocupado .img-carta { opacity: 0.25 !important; filter: grayscale(100%) !important; }
-        .ocupado .n-user { background: #ff0000; color: #fff; border-top: none; }
+        /* OCUPADO SIN TAPAR: Quitamos el filtro oscuro y el grayscale agresivo */
+        .ocupado .img-carta { 
+            opacity: 0.5 !important; /* Baja un poco la intensidad pero se ve la carta perfecta */
+            filter: none !important; 
+        }
+        .ocupado .n-user { 
+            background: #ff0000; 
+            color: #fff; 
+            border-top: none; 
+        }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
@@ -92,7 +101,6 @@
     <div id="contador" style="color: #ffeb3b; font-size: 13px; margin-bottom: 10px;">CARGANDO...</div>
     <div id="tablero"></div>
     <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
-    
     <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO 2</button>
 
     <script>
