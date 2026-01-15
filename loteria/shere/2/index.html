@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana - Shere 2</title>
+    <title>Lotería Mexicana - Shere </title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -34,12 +34,12 @@
             cursor: pointer;
             border: 1px solid #333;
             box-sizing: border-box;
-            aspect-ratio: 2/3.2; /* Proporción ajustada para que el nombre quepa mejor */
+            aspect-ratio: 2/3.2; 
         }
         
         .img-carta { 
             width: 100%; 
-            height: 86%; /* Proporción exacta para que no se coma la imagen */
+            height: 86%; 
             object-fit: cover; 
             object-position: top;
             display: block;
@@ -69,7 +69,6 @@
             z-index: 5;
         }
 
-        /* OCUPADA: La imagen se apaga pero el nombre resalta */
         .ocupado .img-carta { opacity: 0.25 !important; filter: grayscale(100%) !important; }
         .ocupado .n-user { background: #ff0000; color: #fff; border-top: none; }
 
@@ -79,12 +78,12 @@
             border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
         }
 
-        /* RESPONSIVO */
+        .btn-reset { margin-top: 50px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; text-transform: uppercase; }
+
         @media (max-width: 900px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
         @media (max-width: 600px) { 
             #tablero { grid-template-columns: repeat(3, 1fr); gap: 8px; } 
             .n-user { font-size: 11px; }
-            .neon-title { font-size: 22px; }
         }
     </style>
 </head>
@@ -93,6 +92,8 @@
     <div id="contador" style="color: #ffeb3b; font-size: 13px; margin-bottom: 10px;">CARGANDO...</div>
     <div id="tablero"></div>
     <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
+    
+    <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO 2</button>
 
     <script>
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
@@ -132,10 +133,7 @@
                     }
                 };
 
-                div.innerHTML = `
-                    <img src="../../img/${i+1}.jpg" class="img-carta">
-                    <div class="n-user">${nick ? nick : nom.toUpperCase()}</div>
-                `;
+                div.innerHTML = `<img src="../../img/${i+1}.jpg" class="img-carta"><div class="n-user">${nick ? nick : nom.toUpperCase()}</div>`;
                 tab.appendChild(div);
             });
             document.getElementById('contador').innerText = "DISPONIBLES: " + (54 - ocupadas) + " / 54";
@@ -145,15 +143,12 @@
             fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => {
                 const limpiaIP = data.ip.replace(/\./g, '_');
                 refIPs.child(limpiaIP).once('value', snapshot => {
-                    if(snapshot.exists()) {
-                        // Eliminado el alert de IP, solo no deja hacer nada
-                    } else {
+                    if(!snapshot.exists()) {
                         const nick = prompt("Nick:");
                         if(nick && nick.trim()) {
                             const n = nick.trim().toUpperCase();
                             seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                             refIPs.child(limpiaIP).set(true);
-                            // ELIMINADO EL CARTEL DE ÉXITO
                             seleccionadas = [];
                             document.getElementById('btn-registrar').style.display = 'none';
                             pintar();
@@ -161,6 +156,12 @@
                     }
                 });
             });
+        };
+
+        window.resetJuego = function() {
+            if(prompt("Clave:") === "shere2026") {
+                refSala.remove(); refIPs.remove();
+            }
         };
 
         refSala.on('value', (snap) => { datosFirebase = snap.val() || {}; pintar(); });
