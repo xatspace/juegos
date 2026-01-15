@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana - Shere 2 Cartas </title>
+    <title>Lotería Mexicana - Shere 2</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; overflow-x: hidden; }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 15px 0 5px 0; text-align: center; }
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 15px 0 5px 0; }
         #contador { color: #ffeb3b; font-size: 13px; margin-bottom: 15px; }
 
-        /* EL TABLERO */
         #tablero { 
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
             gap: 6px; 
-            width: 98%; 
+            width: 100%; 
             max-width: 1000px; 
             background: #0a0a0a; 
             border: 3px solid #39ff14; 
@@ -37,13 +36,14 @@
             box-sizing: border-box;
         }
         
-        /* RESTAURANDO LA IMAGEN PERFECTA */
+        /* AJUSTE DE IMAGEN PARA QUE NO SE JODA EN MÓVIL */
         .img-carta { 
             width: 100%; 
-            height: 94%; 
-            object-fit: contain; /* REGRESAMOS A CONTAIN PARA NO DEFORMAR */
-            object-position: top; 
-            margin-top: 0; 
+            height: 100%; 
+            object-fit: contain; /* Mantiene la proporción original */
+            object-position: top center; /* Pegada arriba para que el blanco quede abajo */
+            transform: scale(1.08); /* Un pequeño zoom para matar bordes laterales */
+            margin-top: -2%; /* Sube un pelín para esconder el blanco de arriba */
             pointer-events: none; 
             display: block;
         }
@@ -71,7 +71,7 @@
         }
 
         .ocupado .img-carta { opacity: 0.3; filter: grayscale(100%); }
-        .ocupado .n-user { background: #ff0000; color: #fff; border-top: none; }
+        .ocupado .n-user { background: #ff0000; color: #fff; border: none; }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
@@ -79,15 +79,16 @@
             border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
         }
 
-        /* MEDIA QUERIES PARA CELULAR SIN ROMPER NADA */
+        /* MEDIA QUERIES PARA ADAPTAR EL TABLERO */
         @media (max-width: 850px) {
             #tablero { grid-template-columns: repeat(6, 1fr); }
         }
 
         @media (max-width: 500px) {
-            #tablero { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-            .n-user { font-size: 10px; padding: 3px 0; }
+            #tablero { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .n-user { font-size: 10px; padding: 4px 0; }
             .neon-title { font-size: 20px; }
+            .img-carta { transform: scale(1.12); margin-top: -4%; } /* Más zoom en móvil para compensar */
         }
 
         .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
@@ -95,7 +96,7 @@
 </head>
 <body>
 
-    <div class="neon-title">LOTERÍA MEXICANA 2 CARTAS | SHERE</div>
+    <div class="neon-title">LOTERÍA MEXICANA 2</div>
     <div id="contador">CARGANDO...</div>
     <div id="tablero"></div>
     <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
@@ -154,12 +155,12 @@
                         if(snapshot.exists()) {
                             alert("Ya registraste tus cartas.");
                         } else {
-                            const nick = prompt("Nick:");
+                            const nick = prompt("Escribe tu Nick:");
                             if(nick && nick.trim()) {
                                 const n = nick.trim().toUpperCase();
                                 seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                                 refIPs.child(limpiaIP).set(true);
-                                alert("¡Listo!");
+                                alert("¡Cartas enviadas!");
                                 seleccionadas = [];
                                 document.getElementById('btn-registrar').style.display = 'none';
                                 pintar();
