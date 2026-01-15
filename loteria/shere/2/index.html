@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2 Final</title>
+    <title>Lotería Mexicana - Shere 2 Cartas</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -13,54 +13,57 @@
         #contador { color: #ffeb3b; font-size: 14px; margin-bottom: 10px; }
 
         #tablero { 
-            display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; 
+            display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
             width: 100%; max-width: 1000px; background: #0a0a0a; 
-            border: 3px solid #39ff14; padding: 12px; border-radius: 12px; 
+            border: 3px solid #39ff14; padding: 10px; border-radius: 12px; 
         }
 
         .celda { 
             aspect-ratio: 1 / 1.5; 
             border: 2px solid #333; 
             display: flex; flex-direction: column; 
-            cursor: pointer; border-radius: 6px; 
+            cursor: pointer; border-radius: 4px; 
             background: #fff; padding: 0; 
             position: relative; overflow: hidden;
-            box-sizing: border-box;
         }
         
-        /* IMAGEN PEGADA ARRIBA Y SIN FILTROS */
+        /* ELIMINA MÁRGENES BLANCOS Y QUITA FILTROS */
         .img-carta { 
-            width: 100%; height: 100%; 
+            width: 110%; /* Un poco más ancha para comerse el borde blanco */
+            height: 95%; 
             object-fit: cover; 
-            object-position: top; /* Asegura que la imagen se pegue al borde superior */
-            pointer-events: none; display: block;
-            filter: none !important; /* Evita que cualquier efecto la oscurezca */
+            margin-top: -5px; /* Sube la foto para quitar el blanco de arriba */
+            margin-left: -5%; /* Centra el exceso de ancho */
+            pointer-events: none; 
+            display: block;
+            filter: none !important; /* ASEGURA COLOR ORIGINAL */
         }
 
         .n-user { 
             font-size: 10px; color: #000; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
-            width: 100%; background: rgba(255,255,255,0.9);
-            padding: 3px 0; position: absolute; bottom: 0; left: 0;
-            border-top: 1px solid #ccc;
+            width: 100%; background: #fff;
+            padding: 2px 0; position: absolute; bottom: 0; left: 0;
+            border-top: 1px solid #000;
         }
         
-        /* SELECCIONADA: BRILLANTE Y CLARA */
+        /* SELECCIONADA: SOLO BORDE VERDE Y COLOR ORIGINAL */
         .seleccionada { 
             border: 4px solid #39ff14 !important;
-            box-shadow: 0 0 25px #39ff14; 
+            box-shadow: 0 0 15px #39ff14; 
             z-index: 5;
-            opacity: 1 !important; /* Asegura que no se vea opaca */
         }
+        .seleccionada .img-carta { filter: none !important; opacity: 1 !important; }
 
-        /* OCUPADA: GRISÁCEA PARA DIFERENCIAR */
-        .ocupado { border-color: #ff0000 !important; opacity: 0.4; filter: grayscale(100%); }
+        /* OCUPADA: SOLO ROJO */
+        .ocupado { border-color: #ff0000 !important; }
         .ocupado .n-user { background: #ff0000; color: #fff; }
+        .ocupado .img-carta { opacity: 0.5; }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
             border: none; padding: 15px 40px; font-weight: bold; font-size: 18px; 
-            border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px #39ff14; 
+            border-radius: 50px; cursor: pointer; 
         }
 
         .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
@@ -128,16 +131,17 @@
                     const limpiaIP = data.ip.replace(/\./g, '_');
                     refIPs.child(limpiaIP).once('value', snapshot => {
                         if(snapshot.exists()) {
-                            alert("Ya registraste cartas en este tablero.");
+                            alert("Ya registraste cartas.");
                         } else {
-                            const nick = prompt("Ingresa tu Nick:");
+                            const nick = prompt("Nick:");
                             if(nick && nick.trim()) {
                                 const n = nick.trim().toUpperCase();
                                 seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                                 refIPs.child(limpiaIP).set(true);
-                                alert("¡Cartas registradas con éxito!");
+                                alert("Hecho!");
                                 seleccionadas = [];
                                 document.getElementById('btn-registrar').style.display = 'none';
+                                pintar();
                             }
                         }
                     });
@@ -145,10 +149,10 @@
         };
 
         window.resetJuego = function() {
-            if(prompt("Clave Maestra:") === "shere2026") {
+            if(prompt("Clave:") === "shere2026") {
                 refSala.remove();
                 refIPs.remove();
-                alert("Tablero 2 reiniciado.");
+                alert("Reset OK");
             }
         };
 
