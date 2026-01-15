@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invertidos - Manual</title>
+    <title>Invertidos | 1 al 90</title>
     <style>
         body { 
             background: #000; 
@@ -38,7 +38,7 @@
         }
 
         .celda { 
-            aspect-ratio: 1 / 1.1; /* Un poco más alta para que quepa el nombre */
+            aspect-ratio: 1 / 1.1;
             min-height: 70px;
             border: 1px solid #333; 
             display: flex; 
@@ -62,9 +62,8 @@
             line-height: 1;
         }
         
-        /* NOMBRE MÁS GRANDE */
         .n-user { 
-            font-size: clamp(10px, 2.8vw, 13px); /* Aumentado de 10px a 13px máximo */
+            font-size: clamp(10px, 2.8vw, 13px);
             font-weight: 900; 
             color: #fff; 
             text-transform: uppercase; 
@@ -72,17 +71,15 @@
             overflow: hidden; 
             text-overflow: ellipsis; 
             max-width: 95%; 
-            margin-top: 6px; /* Más espacio arriba */
+            margin-top: 6px;
             letter-spacing: 0.5px;
         }
         
         .ocupado { 
             background: #ffb6c1 !important; 
             border-color: #fff; 
-            cursor: not-allowed; 
         }
-        .ocupado .n-info { color: #000; }
-        .ocupado .n-user { color: #000; } /* Nombre en negro sobre fondo rosa */
+        .ocupado .n-info, .ocupado .n-user { color: #000; }
 
         .btn-reset { 
             margin-top: 40px; 
@@ -96,10 +93,8 @@
         }
 
         @media (max-width: 700px) {
-            #tablero { 
-                grid-template-columns: repeat(5, 1fr); 
-            }
-            .celda { min-height: 80px; } /* Más altura en móvil */
+            #tablero { grid-template-columns: repeat(5, 1fr); }
+            .celda { min-height: 80px; }
         }
     </style>
 </head>
@@ -114,10 +109,10 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // Configuración
         const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
         const refSala = ref(db, 'invertidos_juego');
-        const refIPs = ref(db, 'usuarios_ips');
         const claveAdmin = "juegos2026"; 
 
         const pares = [
@@ -125,7 +120,7 @@
             "06-60", "07-70", "08-80", "09-90", "11-22",
             "12-21", "13-31", "14-41", "15-51", "16-61",
             "17-71", "18-81", "19-29", "23-32", "24-42", 
-			"25-52", "26-62", "27-72", "28-82", "33-44",
+            "25-52", "26-62", "27-72", "28-82", "33-44",
             "34-43", "35-53", "36-63", "37-73", "38-83",
             "39-49", "45-54", "46-64", "47-74", "48-84",
             "55-66", "56-65", "57-75", "58-85", "59-69",
@@ -144,11 +139,23 @@
             const tab = document.getElementById('tablero');
             tab.innerHTML = "";
             pares.forEach(p => {
-                const nick = datos[p] ? datos[p].nombre : null;
+                const usuario = datos[p] ? datos[p] : null;
                 const div = document.createElement('div');
-                div.className = `celda ${nick ? 'ocupado' : ''}`;
-                div.onclick = () => { if(!nick) anotar(p); };
-                div.innerHTML = `<span class="n-info">${p}</span><span class="n-user">${nick ? nick : '---'}</span>`;
+                div.className = `celda ${usuario ? 'ocupado' : ''}`;
+                
+                // Si la celda está ocupada, al hacer clic llama a la función de borrado
+                div.onclick = () => { 
+                    if(!usuario) {
+                        anotar(p); 
+                    } else {
+                        borrarUsuarioIndividual(p, usuario.nombre);
+                    }
+                };
+
+                div.innerHTML = `
+                    <span class="n-info">${p}</span>
+                    <span class="n-user">${usuario ? usuario.nombre : '---'}</span>
+                `;
                 tab.appendChild(div);
             });
         }
@@ -156,25 +163,46 @@
         window.anotar = async (p) => {
             const miIP = await obtenerIP();
             if (!miIP) return alert("Error de conexión.");
-            const checkIP = await get(ref(db, 'usuarios_ips/' + miIP));
-            if (checkIP.exists()) {
+            
+            // Verificamos si la IP ya existe en los datos actuales
+            const snap = await get(refSala);
+            const datos = snap.val() || {};
+            const yaJugo = Object.values(datos).some(u => u.ip === miIP);
+
+            if (yaJugo) {
                 alert("🚫 Solo se permite un número por usuario.");
                 return;
             }
+
             const n = prompt("Número " + p + " - Tu Nick:");
             if (n && n.trim() !== "") {
                 const nickFinal = n.trim().toUpperCase();
-                await set(ref(db, 'invertidos_juego/' + p), { nombre: nickFinal });
-                await set(ref(db, 'usuarios_ips/' + miIP), true);
+                // Guardamos IP dentro de la celda
+                await set(ref(db, 'invertidos_juego/' + p), { 
+                    nombre: nickFinal,
+                    ip: miIP
+                });
+            }
+        };
+
+        // Nueva función para borrar un solo usuario
+        window.borrarUsuarioIndividual = async (p, nick) => {
+            const pass = prompt(`¿Deseas borrar a "${nick}" del número ${p}?\nEscribe la clave de admin:`);
+            if (pass === claveAdmin) {
+                if (confirm(`Confirmar: Borrar a ${nick}`)) {
+                    await remove(ref(db, 'invertidos_juego/' + p));
+                    alert("Espacio liberado.");
+                }
+            } else if (pass !== null) {
+                alert("Clave incorrecta.");
             }
         };
 
         window.resetJuego = async () => {
-            const pass = prompt("Clave:");
+            const pass = prompt("Clave de Admin para reiniciar TODO:");
             if (pass === claveAdmin) {
-                if (confirm("¿Reiniciar todo el tablero?")) {
+                if (confirm("¿Seguro que quieres limpiar todo el tablero?")) {
                     await remove(refSala);
-                    await remove(refIPs);
                 }
             }
         };
