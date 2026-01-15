@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mágica + Chat 50/50</title>
+    <title>Lotería Mexicana + Chat Xat</title>
     <style>
         * { box-sizing: border-box; }
         body { 
@@ -14,39 +14,40 @@
         
         .neon-title { 
             color: #ff00ff; text-shadow: 0 0 10px #ff00ff; 
-            font-size: 18px; text-transform: uppercase; 
-            text-align: center; padding: 5px; margin: 0; background: #0a0a0a;
+            font-size: clamp(14px, 2vw, 20px); text-transform: uppercase; 
+            text-align: center; padding: 8px; margin: 0; background: #050505;
+            border-bottom: 2px solid #333;
         }
 
-        /* CONTENEDOR DIVIDIDO */
+        /* CONTENEDOR 50/50 */
         .workspace { 
             display: flex; flex-direction: row; 
             flex: 1; width: 100%; height: 100%;
         }
 
-        /* LADO IZQUIERDO: JUEGO (50%) */
+        /* PANEL IZQUIERDO: JUEGO (50%) */
         .panel-juego { 
             width: 50%; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; padding: 10px; border-right: 2px solid #ff00ff;
-            background: #000;
+            justify-content: space-around; padding: 10px; border-right: 2px solid #ff00ff;
+            background: radial-gradient(circle, #111 0%, #000 100%);
         }
 
         .visor { 
-            width: 95%; max-width: 350px; height: 70%; background-color: #fff; 
+            width: 90%; max-width: 320px; height: 65vh; background-color: #fff; 
             border: 4px solid #ff00ff; border-radius: 12px; 
-            box-shadow: 0 0 20px rgba(255,0,255,0.3); 
+            box-shadow: 0 0 20px rgba(255,0,255,0.4); 
             display: flex; flex-direction: column; overflow: hidden;
         }
         #img-carta-grande { width: 100%; height: 85%; object-fit: contain; background: #fff; }
         .nombre-carta { 
             width: 100%; height: 15%; background: #fff; color: #000; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 22px; text-transform: uppercase; border-top: 2px solid #000; font-weight: bold;
+            font-size: clamp(16px, 3vw, 22px); text-transform: uppercase; border-top: 2px solid #000; font-weight: bold;
         }
 
         /* CONTROLES */
-        .area-controles { width: 100%; text-align: center; margin-top: 10px; }
-        .controles-btns { display: flex; gap: 5px; justify-content: center; margin-bottom: 8px; }
+        .area-controles { width: 100%; text-align: center; }
+        .controles-btns { display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
         
         button { 
             padding: 8px 12px; font-size: 11px; font-weight: bold; 
@@ -57,25 +58,24 @@
         .btn-reset { background: #ff0000; color: #fff; }
         
         #txt-copiar { 
-            width: 90%; background: #111; border: 2px solid #00e5ff; color: #00e5ff; 
+            width: 90%; background: #000; border: 2px solid #00e5ff; color: #00e5ff; 
             padding: 10px; text-align: center; border-radius: 5px; cursor: pointer;
-            font-weight: bold; font-size: 16px; margin: 5px 0;
+            font-weight: bold; font-size: 16px; margin-bottom: 10px;
         }
 
-        /* LADO DERECHO: CHAT (50%) */
+        /* PANEL DERECHO: CHAT (50%) */
         .panel-chat { width: 50%; background: #000; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* TABLERO MINI */
-        .mini-historial { height: 60px; width: 100%; overflow-x: auto; display: flex; gap: 5px; padding: 5px; background: #0a0a0a; }
-        .item-h { min-width: 35px; height: 50px; background: #fff; border-radius: 2px; }
+        /* MINI HISTORIAL */
+        .mini-hist { height: 60px; width: 100%; overflow-x: auto; display: flex; gap: 5px; padding: 5px; background: #111; }
+        .item-h { min-width: 40px; height: 50px; background: #fff; border-radius: 2px; }
         .item-h img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* RESPONSIVO */
         @media (max-width: 800px) {
             .workspace { flex-direction: column; overflow-y: auto; }
-            .panel-juego { width: 100%; height: 60vh; border-right: none; border-bottom: 2px solid #ff00ff; }
-            .panel-chat { width: 100%; height: 50vh; }
+            .panel-juego { width: 100%; height: auto; border-right: none; border-bottom: 2px solid #ff00ff; }
+            .panel-chat { width: 100%; height: 500px; }
         }
     </style>
 </head>
@@ -87,7 +87,7 @@
         
         <div class="panel-juego">
             
-            <div id="contador" style="color:#ffeb3b; font-size:14px; margin-bottom: 5px;">SALIDAS: 0 / 54</div>
+            <div id="contador" style="color:#ffeb3b; font-size:14px;">CARTAS: 0 / 54</div>
 
             <div class="visor">
                 <img src="" id="img-carta-grande" style="display: none;">
@@ -105,13 +105,13 @@
 
                 <input type="text" id="txt-copiar" readonly placeholder="Click para copiar" onclick="copiarManual()">
 
-                <div style="margin-top:5px;">
-                    <label style="font-size:10px; color:#aaa;">SEG: <span id="val-vel">4</span></label>
-                    <input type="range" min="2" max="8" step="1" value="4" oninput="cambiarVelocidad(this.value)" style="width:100px; accent-color:#39ff14;">
+                <div>
+                    <label style="font-size:10px; color:#aaa;">VELOCIDAD: <span id="val-vel">4</span>s</label><br>
+                    <input type="range" min="2" max="8" step="1" value="4" oninput="cambiarVelocidad(this.value)" style="width:120px; accent-color:#39ff14;">
                 </div>
             </div>
 
-            <div class="mini-historial" id="mini-historial"></div>
+            <div class="mini-hist" id="mini-historial"></div>
         </div>
 
         <div class="panel-chat">
@@ -128,8 +128,8 @@
     </div>
 
     <script>
-        // RUTA DE IMÁGENES ACTUALIZADA
-        const RUTA_IMG = "loteria/shere/lm/img/"; 
+        // RUTA DE GITHUB RECIÉN PROPORCIONADA
+        const RUTA_IMG = "https://xatspace.github.io/juegos/loteria/mexicana/img/"; 
         
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
         
@@ -194,18 +194,13 @@
             document.getElementById('img-carta-grande').src = fullPath;
             document.getElementById('img-carta-grande').style.display = "block";
             document.getElementById('nombre-visor').innerText = carta.nombre;
-            document.getElementById('contador').innerText = `SALIDAS: ${indiceActual + 1}/54`;
+            document.getElementById('contador').innerText = `CARTAS: ${indiceActual + 1}/54`;
             
             const textoFinal = "☆ " + carta.nombre.toUpperCase() + " ☆";
             document.getElementById('txt-copiar').value = textoFinal;
             
-            // Auto-copia silenciosa
-            const temp = document.createElement('textarea');
-            temp.value = textoFinal;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            document.body.removeChild(temp);
+            // Intento de autocopia
+            navigator.clipboard.writeText(textoFinal).catch(()=>{});
 
             cantar(carta.nombre);
 
@@ -232,7 +227,7 @@
         function cerrarModal() { document.getElementById('modal-lista').style.display = "none"; }
 
         function reiniciar() {
-            if(!confirm("¿Deseas reiniciar?")) return;
+            if(!confirm("¿Reiniciar juego?")) return;
             window.speechSynthesis.cancel();
             pausar();
             mazo = []; indiceActual = 0; cartasSalidas = [];
@@ -240,7 +235,7 @@
             document.getElementById('nombre-visor').innerText = "---";
             document.getElementById('txt-copiar').value = "";
             document.getElementById('mini-historial').innerHTML = "";
-            document.getElementById('contador').innerText = "SALIDAS: 0/54";
+            document.getElementById('contador').innerText = "CARTAS: 0 / 54";
         }
     </script>
 </body>
