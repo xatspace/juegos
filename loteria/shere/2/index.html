@@ -3,104 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana - Shere 2</title>
+    <title>Lotería Mexicana - Shere </title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; overflow-x: hidden; }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 15px 0 5px 0; }
-        #contador { color: #ffeb3b; font-size: 13px; margin-bottom: 15px; }
-
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 15px 0 10px 0; }
+        
         #tablero { 
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
-            gap: 6px; 
-            width: 100%; 
+            gap: 5px; 
+            width: 98%; 
             max-width: 1000px; 
             background: #0a0a0a; 
             border: 3px solid #39ff14; 
-            padding: 10px; 
-            border-radius: 12px; 
+            padding: 8px; 
+            border-radius: 10px; 
             box-sizing: border-box;
         }
 
         .celda { 
-            aspect-ratio: 1 / 1.5; 
-            border: 1px solid #333; 
-            display: flex; flex-direction: column; 
-            cursor: pointer; border-radius: 4px; 
             background: #fff; 
+            border-radius: 4px; 
             position: relative; 
+            display: flex; 
+            flex-direction: column; 
             overflow: hidden; 
+            cursor: pointer;
+            border: 1px solid #333;
             box-sizing: border-box;
+            aspect-ratio: 2/3; /* Proporción clásica de carta */
         }
         
-        /* AJUSTE DE IMAGEN PARA QUE NO SE JODA EN MÓVIL */
+        /* IMAGEN: Pegada arriba y centrada, sin filtros */
         .img-carta { 
             width: 100%; 
-            height: 100%; 
-            object-fit: contain; /* Mantiene la proporción original */
-            object-position: top center; /* Pegada arriba para que el blanco quede abajo */
-            transform: scale(1.08); /* Un pequeño zoom para matar bordes laterales */
-            margin-top: -2%; /* Sube un pelín para esconder el blanco de arriba */
-            pointer-events: none; 
+            height: 88%; /* Deja espacio exacto para el nombre abajo */
+            object-fit: cover; 
+            object-position: top;
             display: block;
+            filter: none !important;
+            opacity: 1 !important;
         }
 
+        /* BARRA DE NOMBRE: Fondo blanco, texto verde */
         .n-user { 
-            font-size: 8px; 
-            color: #2ecc71; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            text-align: center; 
-            width: 100%; 
-            background: #fff; 
-            padding: 2px 0; 
-            position: absolute; 
-            bottom: 0; 
-            left: 0;
-            z-index: 5;
-            border-top: 1px solid #eee;
+            width: 100%;
+            height: 12%; 
+            background: #fff;
+            color: #2ecc71;
+            font-size: 8px;
+            font-weight: bold;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            border-top: 1px solid #f0f0f0;
         }
         
+        /* SELECCIÓN: Marco neón */
         .seleccionada { 
-            border: 5px solid #39ff14 !important;
-            box-shadow: 0 0 20px #39ff14; 
-            z-index: 10;
+            outline: 4px solid #39ff14; 
+            outline-offset: -4px;
+            box-shadow: 0 0 15px #39ff14; 
+            z-index: 5;
         }
 
-        .ocupado .img-carta { opacity: 0.3; filter: grayscale(100%); }
-        .ocupado .n-user { background: #ff0000; color: #fff; border: none; }
+        /* OCUPADA */
+        .ocupado .img-carta { opacity: 0.3 !important; filter: grayscale(100%) !important; }
+        .ocupado .n-user { background: #ff0000; color: #fff; }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
             border: none; padding: 15px 40px; font-weight: bold; font-size: 18px; 
-            border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
+            border-radius: 50px; cursor: pointer;
         }
 
-        /* MEDIA QUERIES PARA ADAPTAR EL TABLERO */
-        @media (max-width: 850px) {
-            #tablero { grid-template-columns: repeat(6, 1fr); }
+        /* RESPONSIVO PARA CELULAR */
+        @media (max-width: 800px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
+        @media (max-width: 500px) { 
+            #tablero { grid-template-columns: repeat(3, 1fr); gap: 6px; } 
+            .n-user { font-size: 10px; }
         }
-
-        @media (max-width: 500px) {
-            #tablero { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .n-user { font-size: 10px; padding: 4px 0; }
-            .neon-title { font-size: 20px; }
-            .img-carta { transform: scale(1.12); margin-top: -4%; } /* Más zoom en móvil para compensar */
-        }
-
-        .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
     </style>
 </head>
 <body>
-
     <div class="neon-title">LOTERÍA MEXICANA 2</div>
-    <div id="contador">CARGANDO...</div>
+    <div id="contador" style="color: #ffeb3b; font-size: 13px; margin-bottom: 10px;">CARGANDO...</div>
     <div id="tablero"></div>
     <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
-    <button class="btn-reset" onclick="resetJuego()">🔄 RESET SALA 2</button>
 
     <script>
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
@@ -140,46 +134,36 @@
                     }
                 };
 
-                div.innerHTML = `<img src="../../img/${i+1}.jpg" class="img-carta"><span class="n-user">${nick ? nick : nom.toUpperCase()}</span>`;
+                div.innerHTML = `
+                    <img src="../../img/${i+1}.jpg" class="img-carta">
+                    <div class="n-user">${nick ? nick : nom.toUpperCase()}</div>
+                `;
                 tab.appendChild(div);
             });
             document.getElementById('contador').innerText = "DISPONIBLES: " + (54 - ocupadas) + " / 54";
         }
 
         window.registrarSeleccion = function() {
-            fetch('https://api.ipify.org?format=json')
-                .then(res => res.json())
-                .then(data => {
-                    const limpiaIP = data.ip.replace(/\./g, '_');
-                    refIPs.child(limpiaIP).once('value', snapshot => {
-                        if(snapshot.exists()) {
-                            alert("Ya registraste tus cartas.");
-                        } else {
-                            const nick = prompt("Escribe tu Nick:");
-                            if(nick && nick.trim()) {
-                                const n = nick.trim().toUpperCase();
-                                seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
-                                refIPs.child(limpiaIP).set(true);
-                                alert("¡Cartas enviadas!");
-                                seleccionadas = [];
-                                document.getElementById('btn-registrar').style.display = 'none';
-                                pintar();
-                            }
+            fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => {
+                const limpiaIP = data.ip.replace(/\./g, '_');
+                refIPs.child(limpiaIP).once('value', snapshot => {
+                    if(snapshot.exists()) { alert("Ya registraste tus cartas."); } else {
+                        const nick = prompt("Nick:");
+                        if(nick && nick.trim()) {
+                            const n = nick.trim().toUpperCase();
+                            seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
+                            refIPs.child(limpiaIP).set(true);
+                            alert("¡Listo!");
+                            seleccionadas = [];
+                            document.getElementById('btn-registrar').style.display = 'none';
+                            pintar();
                         }
-                    });
+                    }
                 });
+            });
         };
 
-        window.resetJuego = function() {
-            if(prompt("Clave:") === "shere2026") {
-                refSala.remove(); refIPs.remove(); alert("Reset OK");
-            }
-        };
-
-        refSala.on('value', (snap) => {
-            datosFirebase = snap.val() || {};
-            pintar();
-        });
+        refSala.on('value', (snap) => { datosFirebase = snap.val() || {}; pintar(); });
     </script>
 </body>
 </html>
