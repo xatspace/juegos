@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Lotería Pro</title>
+    <title>Sorteador Lotería Pro + Chat</title>
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 5px; margin: 0; overflow: hidden; }
         .neon-title { color: #ff00ff; text-shadow: 0 0 10px #ff00ff; font-size: 20px; text-transform: uppercase; margin: 5px 0; }
@@ -37,35 +37,42 @@
             background: none; border: 2px solid #555; border-radius: 50%;
             width: 40px; height: 40px; color: #fff; font-size: 18px;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; margin-left: 10px; transition: 0.3s;
+            cursor: pointer; margin-left: 10px;
         }
         .volumen-toggle.on { border-color: #39ff14; color: #39ff14; }
         .volumen-toggle.off { border-color: #ff0000; color: #ff0000; }
 
-        /* HISTORIAL */
-        .historial-container { display: flex; flex-direction: column; width: 200px; }
-        .historial { height: 360px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 8px; overflow-y: auto; }
-        .item-historial { display: flex; align-items: center; gap: 8px; background: #222; padding: 4px; border-radius: 6px; margin-bottom: 6px; height: 55px; border: 1px solid #444; }
-        .img-mini { width: 32px; height: 45px; object-fit: contain; background: #fff; border-radius: 2px; }
-
-        /* MODAL 9x6 SIN SCROLL */
-        #modal-lista { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
-        .modal-contenido { 
-            background: #111; width: 98%; max-width: 950px; max-height: 98vh; 
-            border: 2px solid #00e5ff; border-radius: 10px; padding: 10px; 
-            display: flex; flex-direction: column; position: relative; 
+        /* CAJA PARA COPIAR AL CHAT */
+        .chat-tools {
+            margin-top: 15px; width: 100%; background: #222; 
+            padding: 10px; border-radius: 8px; border: 1px solid #00e5ff;
+            display: flex; flex-direction: column; gap: 8px;
         }
-        .cerrar-modal { position: absolute; top: 0px; right: 10px; color: #ff0000; font-size: 35px; cursor: pointer; z-index: 10; }
-        
-        #lista-completa-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin-top: 10px; padding: 5px; }
+        .copy-row { display: flex; gap: 5px; }
+        #txt-copiar { 
+            flex-grow: 1; background: #000; border: 1px solid #444; color: #00e5ff; 
+            padding: 5px; border-radius: 4px; font-size: 14px; text-align: center;
+        }
+        .btn-copy { background: #00e5ff; color: #000; padding: 5px 10px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; }
+        .btn-copy.success { background: #39ff14; }
+
+        /* HISTORIAL */
+        .historial-container { display: flex; flex-direction: column; width: 220px; }
+        .historial { height: 320px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 8px; overflow-y: auto; }
+        .item-historial { display: flex; align-items: center; gap: 8px; background: #222; padding: 4px; border-radius: 6px; margin-bottom: 6px; height: 50px; border: 1px solid #444; }
+        .img-mini { width: 30px; height: 42px; object-fit: contain; background: #fff; border-radius: 2px; }
+
+        /* MODAL 9x6 */
+        #modal-lista { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
+        .modal-contenido { background: #111; width: 98%; max-width: 950px; border: 2px solid #00e5ff; border-radius: 10px; padding: 10px; position: relative; }
+        .cerrar-modal { position: absolute; top: 0px; right: 10px; color: #ff0000; font-size: 35px; cursor: pointer; }
+        #lista-completa-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; padding: 5px; }
         .item-completo { background: #fff; color: #000; padding: 2px; border-radius: 3px; text-align: center; border: 1px solid #ff00ff; }
-        .item-completo img { width: 100%; height: auto; max-height: 11vh; object-fit: contain; display: block; }
-        .num-mini { color: #ff00ff; font-size: 9px; font-weight: bold; line-height: 1; }
+        .item-completo img { width: 100%; max-height: 11vh; object-fit: contain; display: block; }
 
         @media (max-width: 600px) {
-            .main-container { flex-direction: column; align-items: center; overflow-y: auto; height: 90vh; }
-            #lista-completa-grid { grid-template-columns: repeat(6, 1fr); }
-            .item-completo img { max-height: 8vh; }
+            .main-container { flex-direction: column; align-items: center; overflow-y: auto; height: 95vh; }
+            .historial { height: 200px; }
         }
     </style>
 </head>
@@ -96,7 +103,16 @@
             <div class="historial">
                 <div class="lista-historial" id="lista-historial"></div>
             </div>
+            
             <button class="btn-lista" onclick="abrirModal()">📋 TABLERO DE SALIDA</button>
+
+            <div class="chat-tools">
+                <span style="font-size: 10px; color: #aaa; text-align: center;">COPIAR PARA XAT.COM:</span>
+                <div class="copy-row">
+                    <input type="text" id="txt-copiar" readonly placeholder="Carta actual...">
+                    <button class="btn-copy" id="btn-copy" onclick="copiarAlChat()">COPIAR</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -120,23 +136,34 @@
         function toggleAudio() {
             audioActivado = !audioActivado;
             const btn = document.getElementById('btn-audio');
-            if (audioActivado) {
-                btn.innerText = "🔊";
-                btn.className = "volumen-toggle on";
-            } else {
-                btn.innerText = "🔇";
-                btn.className = "volumen-toggle off";
-                window.speechSynthesis.cancel();
-            }
+            btn.innerText = audioActivado ? "🔊" : "🔇";
+            btn.className = audioActivado ? "volumen-toggle on" : "volumen-toggle off";
+            if(!audioActivado) window.speechSynthesis.cancel();
         }
 
         function cantarCarta(texto) {
             if (!audioActivado) return;
-            window.speechSynthesis.cancel(); // Corta el audio anterior para no encimarse
+            window.speechSynthesis.cancel();
             const mensaje = new SpeechSynthesisUtterance(texto);
             mensaje.lang = 'es-MX';
-            mensaje.rate = 1; 
             window.speechSynthesis.speak(mensaje);
+        }
+
+        function copiarAlChat() {
+            const input = document.getElementById('txt-copiar');
+            const btn = document.getElementById('btn-copy');
+            if(input.value === "") return;
+
+            input.select();
+            input.setSelectionRange(0, 99999); 
+            navigator.clipboard.writeText(input.value);
+
+            btn.innerText = "¡LISTO!";
+            btn.classList.add('success');
+            setTimeout(() => {
+                btn.innerText = "COPIAR";
+                btn.classList.remove('success');
+            }, 1000);
         }
 
         function prepararMazo() {
@@ -169,17 +196,19 @@
             const fullPath = RUTA_IMG + carta.id + ".jpg";
             cartasSalidas.push(carta);
             
-            const imgGrande = document.getElementById('img-carta-grande');
-            imgGrande.src = fullPath;
-            imgGrande.style.display = "block";
+            document.getElementById('img-carta-grande').src = fullPath;
+            document.getElementById('img-carta-grande').style.display = "block";
             document.getElementById('nombre-visor').innerText = carta.nombre;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 54`;
+
+            // Actualizar cuadro de copia
+            document.getElementById('txt-copiar').value = "¡" + carta.nombre.toUpperCase() + "!";
 
             cantarCarta(carta.nombre);
 
             const item = document.createElement('div');
             item.className = 'item-historial';
-            item.innerHTML = `<img class="img-mini" src="${fullPath}"><span><b>#${indiceActual + 1}</b> <small style="font-size:10px">${carta.nombre.toUpperCase()}</small></span>`;
+            item.innerHTML = `<img class="img-mini" src="${fullPath}"><span><small>#${indiceActual + 1}</small> <b>${carta.nombre}</b></span>`;
             document.getElementById('lista-historial').prepend(item);
             indiceActual++;
         }
@@ -190,7 +219,7 @@
             cartasSalidas.forEach((c, i) => {
                 const item = document.createElement('div');
                 item.className = 'item-completo';
-                item.innerHTML = `<div class="num-mini">#${i+1}</div><img src="${RUTA_IMG}${c.id}.jpg">`;
+                item.innerHTML = `<div style="font-size:8px; color:#f0f">#${i+1}</div><img src="${RUTA_IMG}${c.id}.jpg">`;
                 grid.appendChild(item);
             });
             document.getElementById('modal-lista').style.display = "flex";
@@ -205,6 +234,7 @@
             mazo = []; indiceActual = 0; cartasSalidas = [];
             document.getElementById('img-carta-grande').style.display = "none";
             document.getElementById('nombre-visor').innerText = "---";
+            document.getElementById('txt-copiar').value = "";
             document.getElementById('lista-historial').innerHTML = "";
             document.getElementById('contador-cartas').innerText = "SALIERON: 0 / 54";
         }
