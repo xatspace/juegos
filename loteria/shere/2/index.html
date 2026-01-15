@@ -9,25 +9,79 @@
     
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14, 0 0 30px #1a661a; font-size: 28px; text-transform: uppercase; margin: 15px 0 5px 0; }
+        
+        .neon-title { 
+            color: #39ff14; 
+            text-shadow: 0 0 15px #39ff14, 0 0 30px #1a661a; 
+            font-size: 28px; 
+            text-transform: uppercase; 
+            margin: 15px 0 5px 0; 
+        }
+
         #contador { color: #ffeb3b; font-size: 14px; margin-bottom: 10px; }
+
         #tablero { 
-            display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; 
-            width: 100%; max-width: 1000px; background: #0a0a0a; 
-            border: 3px solid #39ff14; padding: 12px; border-radius: 12px; box-sizing: border-box;
+            display: grid; 
+            grid-template-columns: repeat(9, 1fr); 
+            gap: 8px; 
+            width: 100%; 
+            max-width: 1000px; 
+            background: #0a0a0a; 
+            border: 3px solid #39ff14; 
+            padding: 12px; 
+            border-radius: 12px; 
         }
+
         .celda { 
-            aspect-ratio: 1 / 1.5; border: 2px solid #333; display: flex; 
-            flex-direction: column; align-items: center; justify-content: space-between; 
-            cursor: pointer; border-radius: 6px; background: #fff; padding: 4px; position: relative;
+            aspect-ratio: 1 / 1.5; 
+            border: 2px solid #333; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            background: #fff; 
+            padding: 4px; 
+            position: relative;
+            transition: 0.2s;
         }
+        
         .img-carta { width: 100%; height: 80%; object-fit: contain; pointer-events: none; }
         .n-user { font-size: 11px; color: #000; font-weight: bold; text-transform: uppercase; text-align: center; width: 100%; }
-        .seleccionada { border: 4px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14; transform: scale(1.05); }
-        .ocupado { border: 3px solid #ff0000 !important; cursor: not-allowed; opacity: 0.7; }
-        .ocupado .n-user { background: rgba(211, 47, 47, 0.9); color: #fff; position: absolute; bottom: 0; left: 0; }
-        #btn-registrar { display: none; margin-top: 20px; background: #39ff14; color: #000; border: none; padding: 15px 30px; font-weight: bold; font-size: 18px; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px #39ff14; }
-        .btn-reset { margin-top: 30px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
+        
+        /* SELECCIONADA: BIEN VISIBLE CON VERDE NEÓN */
+        .seleccionada { 
+            border: 5px solid #39ff14 !important; 
+            box-shadow: 0 0 20px #39ff14; 
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        /* OCUPADA: ROJO CLÁSICO */
+        .ocupado { 
+            border: 3px solid #ff0000 !important; 
+            cursor: not-allowed; 
+            opacity: 0.5; 
+        }
+        .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; left: 0; }
+
+        #btn-registrar { 
+            display: none; 
+            margin-top: 20px; 
+            background: #39ff14; 
+            color: #000; 
+            border: none; 
+            padding: 15px 40px; 
+            font-weight: bold; 
+            font-size: 18px; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            box-shadow: 0 0 20px #39ff14; 
+        }
+
+        .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
+
         @media (max-width: 800px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
         @media (max-width: 500px) { #tablero { grid-template-columns: repeat(3, 1fr); } }
     </style>
@@ -41,12 +95,9 @@
     <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO 2</button>
 
     <script>
-        // Configuración
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
-        // Referencias independientes para el Tablero 2
         const refSala = db.ref('loteria_shere_2');
         const refIPs = db.ref('ips_shere_2');
 
@@ -94,16 +145,14 @@
                     const limpiaIP = data.ip.replace(/\./g, '_');
                     refIPs.child(limpiaIP).once('value', snapshot => {
                         if(snapshot.exists()) {
-                            alert("🚫 Ya participaste en este tablero.");
+                            alert("Ya registraste cartas.");
                         } else {
-                            const nick = prompt("Ingresa tu Nick:");
+                            const nick = prompt("Nick:");
                             if(nick && nick.trim()) {
                                 const n = nick.trim().toUpperCase();
-                                seleccionadas.forEach(s => {
-                                    refSala.child(s).set({ nombre: n });
-                                });
+                                seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                                 refIPs.child(limpiaIP).set(true);
-                                alert("¡Guardado!");
+                                alert("Hecho!");
                                 seleccionadas = [];
                                 document.getElementById('btn-registrar').style.display = 'none';
                             }
@@ -113,12 +162,10 @@
         };
 
         window.resetJuego = function() {
-            if(prompt("Clave Maestra:") === "shere2026") {
+            if(prompt("Clave:") === "shere2026") {
                 refSala.remove();
                 refIPs.remove();
-                alert("Tablero 2 Reiniciado.");
-            } else {
-                alert("Clave incorrecta.");
+                alert("Reset OK");
             }
         };
 
