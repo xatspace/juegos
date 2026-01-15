@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Lotería Pro + Chat</title>
+    <title>Sorteador Lotería Pro + Chat Speed</title>
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 5px; margin: 0; overflow: hidden; }
         .neon-title { color: #ff00ff; text-shadow: 0 0 10px #ff00ff; font-size: 20px; text-transform: uppercase; margin: 5px 0; }
@@ -25,12 +25,17 @@
         }
 
         /* CONTROLES */
-        .controles { margin-top: 10px; display: flex; gap: 8px; }
+        .controles { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
         button { padding: 10px 15px; font-size: 12px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
         .btn-play { background: #39ff14; color: #000; }
         .btn-pause { background: #ffeb3b; color: #000; }
         .btn-reset { background: #ff0000; color: #fff; }
         .btn-lista { background: #00e5ff; color: #000; margin-top: 10px; width: 100%; }
+
+        /* CONTROL DE VELOCIDAD */
+        .speed-control { width: 100%; margin-top: 15px; text-align: center; background: #111; padding: 8px; border-radius: 8px; border: 1px solid #333; }
+        .speed-control label { font-size: 11px; color: #ffeb3b; display: block; margin-bottom: 5px; }
+        .slider { width: 90%; cursor: pointer; accent-color: #39ff14; }
 
         /* ICONO VOLUMEN */
         .volumen-toggle {
@@ -42,37 +47,29 @@
         .volumen-toggle.on { border-color: #39ff14; color: #39ff14; }
         .volumen-toggle.off { border-color: #ff0000; color: #ff0000; }
 
-        /* CAJA PARA COPIAR AL CHAT */
+        /* CAJA COPIAR CHAT */
         .chat-tools {
-            margin-top: 15px; width: 100%; background: #222; 
-            padding: 10px; border-radius: 8px; border: 1px solid #00e5ff;
-            display: flex; flex-direction: column; gap: 8px;
+            margin-top: 12px; width: 100%; background: #222; 
+            padding: 8px; border-radius: 8px; border: 1px solid #00e5ff;
+            display: flex; flex-direction: column; gap: 5px;
         }
         .copy-row { display: flex; gap: 5px; }
         #txt-copiar { 
             flex-grow: 1; background: #000; border: 1px solid #444; color: #00e5ff; 
-            padding: 5px; border-radius: 4px; font-size: 14px; text-align: center;
+            padding: 5px; border-radius: 4px; font-size: 13px; text-align: center; font-weight: bold;
         }
-        .btn-copy { background: #00e5ff; color: #000; padding: 5px 10px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; }
+        .btn-copy { background: #00e5ff; color: #000; padding: 5px 8px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
         .btn-copy.success { background: #39ff14; }
 
         /* HISTORIAL */
         .historial-container { display: flex; flex-direction: column; width: 220px; }
-        .historial { height: 320px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 8px; overflow-y: auto; }
-        .item-historial { display: flex; align-items: center; gap: 8px; background: #222; padding: 4px; border-radius: 6px; margin-bottom: 6px; height: 50px; border: 1px solid #444; }
-        .img-mini { width: 30px; height: 42px; object-fit: contain; background: #fff; border-radius: 2px; }
-
-        /* MODAL 9x6 */
-        #modal-lista { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
-        .modal-contenido { background: #111; width: 98%; max-width: 950px; border: 2px solid #00e5ff; border-radius: 10px; padding: 10px; position: relative; }
-        .cerrar-modal { position: absolute; top: 0px; right: 10px; color: #ff0000; font-size: 35px; cursor: pointer; }
-        #lista-completa-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; padding: 5px; }
-        .item-completo { background: #fff; color: #000; padding: 2px; border-radius: 3px; text-align: center; border: 1px solid #ff00ff; }
-        .item-completo img { width: 100%; max-height: 11vh; object-fit: contain; display: block; }
+        .historial { height: 280px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 8px; overflow-y: auto; }
+        .item-historial { display: flex; align-items: center; gap: 8px; background: #222; padding: 4px; border-radius: 6px; margin-bottom: 6px; height: 45px; border: 1px solid #444; }
+        .img-mini { width: 28px; height: 38px; object-fit: contain; background: #fff; border-radius: 2px; }
 
         @media (max-width: 600px) {
             .main-container { flex-direction: column; align-items: center; overflow-y: auto; height: 95vh; }
-            .historial { height: 200px; }
+            .historial { height: 180px; }
         }
     </style>
 </head>
@@ -87,8 +84,8 @@
                 <div class="nombre-carta" id="nombre-visor">---</div>
             </div>
             
-            <div style="display:flex; align-items:center; margin-top:10px;">
-                <p id="contador-cartas" style="color:#ffeb3b; margin:0; font-size: 16px;">SALIERON: 0 / 54</p>
+            <div style="display:flex; align-items:center; margin-top:8px;">
+                <p id="contador-cartas" style="color:#ffeb3b; margin:0; font-size: 15px;">SALIERON: 0 / 54</p>
                 <button id="btn-audio" class="volumen-toggle on" onclick="toggleAudio()">🔊</button>
             </div>
 
@@ -96,6 +93,11 @@
                 <button class="btn-play" id="btn-play" onclick="comenzar()">▶ Play</button>
                 <button class="btn-pause" id="btn-pause" onclick="pausar()" disabled>⏸ Pausa</button>
                 <button class="btn-reset" onclick="reiniciar()">🔄 Reset</button>
+            </div>
+
+            <div class="speed-control">
+                <label>VELOCIDAD: <span id="val-velocidad">4.0</span>s</label>
+                <input type="range" min="2" max="8" step="0.5" value="4" class="slider" id="speed-slider" oninput="cambiarVelocidad(this.value)">
             </div>
         </div>
 
@@ -107,19 +109,19 @@
             <button class="btn-lista" onclick="abrirModal()">📋 TABLERO DE SALIDA</button>
 
             <div class="chat-tools">
-                <span style="font-size: 10px; color: #aaa; text-align: center;">COPIAR PARA XAT.COM:</span>
+                <span style="font-size: 9px; color: #aaa; text-align: center;">MENSAJE PARA CHAT:</span>
                 <div class="copy-row">
-                    <input type="text" id="txt-copiar" readonly placeholder="Carta actual...">
+                    <input type="text" id="txt-copiar" readonly placeholder="Esperando carta...">
                     <button class="btn-copy" id="btn-copy" onclick="copiarAlChat()">COPIAR</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="modal-lista">
-        <div class="modal-contenido">
-            <span class="cerrar-modal" onclick="cerrarModal()">&times;</span>
-            <div id="lista-completa-grid"></div>
+    <div id="modal-lista" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:100; justify-content:center; align-items:center;">
+        <div style="background:#111; width:98%; max-width:950px; border:2px solid #00e5ff; border-radius:10px; padding:10px; position:relative;">
+            <span onclick="cerrarModal()" style="position:absolute; top:0px; right:10px; color:#ff0000; font-size:35px; cursor:pointer;">&times;</span>
+            <div id="lista-completa-grid" style="display:grid; grid-template-columns:repeat(9, 1fr); gap:4px; padding:5px;"></div>
         </div>
     </div>
 
@@ -132,6 +134,17 @@
         let intervalo = null;
         let cartasSalidas = [];
         let audioActivado = true;
+        let velocidadS = 4; // Velocidad inicial en segundos
+
+        function cambiarVelocidad(val) {
+            velocidadS = val;
+            document.getElementById('val-velocidad').innerText = val;
+            // Si está corriendo, reiniciamos el intervalo para aplicar el cambio
+            if (intervalo) {
+                pausar();
+                comenzar();
+            }
+        }
 
         function toggleAudio() {
             audioActivado = !audioActivado;
@@ -153,17 +166,10 @@
             const input = document.getElementById('txt-copiar');
             const btn = document.getElementById('btn-copy');
             if(input.value === "") return;
-
-            input.select();
-            input.setSelectionRange(0, 99999); 
             navigator.clipboard.writeText(input.value);
-
-            btn.innerText = "¡LISTO!";
+            btn.innerText = "¡OK!";
             btn.classList.add('success');
-            setTimeout(() => {
-                btn.innerText = "COPIAR";
-                btn.classList.remove('success');
-            }, 1000);
+            setTimeout(() => { btn.innerText = "COPIAR"; btn.classList.remove('success'); }, 800);
         }
 
         function prepararMazo() {
@@ -182,11 +188,12 @@
             intervalo = setInterval(() => {
                 if (indiceActual < mazo.length) sacarCarta();
                 else pausar();
-            }, 3500); 
+            }, velocidadS * 1000); 
         }
 
         function pausar() {
             clearInterval(intervalo);
+            intervalo = null;
             document.getElementById('btn-play').disabled = false;
             document.getElementById('btn-pause').disabled = true;
         }
@@ -201,8 +208,8 @@
             document.getElementById('nombre-visor').innerText = carta.nombre;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 54`;
 
-            // Actualizar cuadro de copia
-            document.getElementById('txt-copiar').value = "¡" + carta.nombre.toUpperCase() + "!";
+            // Formato pedido: ╰☆╮ NOMBRE ╰☆╮
+            document.getElementById('txt-copiar').value = "╰☆╮ " + carta.nombre.toUpperCase() + " ╰☆╮";
 
             cantarCarta(carta.nombre);
 
@@ -218,8 +225,8 @@
             grid.innerHTML = "";
             cartasSalidas.forEach((c, i) => {
                 const item = document.createElement('div');
-                item.className = 'item-completo';
-                item.innerHTML = `<div style="font-size:8px; color:#f0f">#${i+1}</div><img src="${RUTA_IMG}${c.id}.jpg">`;
+                item.style = "background:#fff; color:#000; padding:2px; border-radius:3px; text-align:center; border:1px solid #ff00ff;";
+                item.innerHTML = `<div style="font-size:8px; color:#f0f">#${i+1}</div><img src="${RUTA_IMG}${c.id}.jpg" style="width:100%; max-height:11vh; object-fit:contain; display:block;">`;
                 grid.appendChild(item);
             });
             document.getElementById('modal-lista').style.display = "flex";
