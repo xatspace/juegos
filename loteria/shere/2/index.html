@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2</title>
+    <title>Lotería Mexicana - Shere </title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -23,38 +23,37 @@
             border: 2px solid #333; 
             display: flex; flex-direction: column; 
             cursor: pointer; border-radius: 4px; 
-            background: #000; /* FONDO NEGRO PARA CAMUFLAR BORDES */
+            background: #fff; /* Regresamos a fondo blanco para que combine con la carta */
             padding: 0; 
             position: relative; overflow: hidden;
             box-sizing: border-box;
         }
         
+        /* AJUSTE MANUAL: ESTIRA UN POCO Y SUBE PARA OCULTAR EL MARGEN SUPERIOR */
         .img-carta { 
-            width: 112%; /* Zoom lateral */
-            height: 112%; /* Zoom vertical */
-            object-fit: cover; 
-            object-position: center 80%; /* Enfoca la imagen un poco más abajo del centro */
-            margin-top: -10px; /* Elimina el blanco superior */
-            margin-left: -6%; /* Centra el zoom lateral */
+            width: 100%;
+            height: 110%; /* La hacemos un poco más alta */
+            object-fit: fill; /* La obliga a ocupar todo el ancho */
+            margin-top: -12px; /* LA SUBE para que el borde blanco de arriba se salga del cuadro */
             pointer-events: none; 
             display: block;
             filter: none !important;
             opacity: 1 !important;
         }
 
-        /* NICK ESTILO NEÓN SOBRE LA FOTO */
+        /* NOMBRE DEL USUARIO: Lo hice más pequeño para que no tape el texto de la foto */
         .n-user { 
-            font-size: 9px; color: #39ff14; font-weight: bold; 
+            font-size: 8px; color: #fff; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
-            width: 100%; background: rgba(0, 0, 0, 0.7); /* Fondo oscuro traslúcido */
-            padding: 3px 0; position: absolute; bottom: 0; left: 0;
+            width: 100%; background: rgba(0, 0, 0, 0.6); /* Fondo oscuro pero muy traslúcido */
+            padding: 2px 0; position: absolute; bottom: 0; left: 0;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;  
             box-sizing: border-box;
             z-index: 5;
         }
         
         .seleccionada { 
-            border: 4px solid #39ff14 !important;
+            border: 5px solid #39ff14 !important;
             box-shadow: 0 0 20px #39ff14; 
             z-index: 10;
         }
