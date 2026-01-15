@@ -61,14 +61,15 @@
             <div class="historial"><div class="lista-historial" id="lista-historial"></div></div>
             <button class="btn-lista" onclick="abrirModal()">📋 TABLERO DE SALIDA</button>
             <div class="chat-tools">
-                <span style="font-size: 9px; color: #aaa; text-align: center;">COPIADO AUTOMÁTICO:</span>
+                <span style="font-size: 9px; color: #aaa; text-align: center;">AUTO-COPIANDO AL PORTAPAPELES...</span>
                 <div class="copy-row">
                     <input type="text" id="txt-copiar" readonly placeholder="Esperando carta...">
-                    <button class="btn-copy" id="btn-copy" onclick="copiarAlChat()">COPIAR</button>
+                    <button class="btn-copy" id="btn-copy" onclick="copiarManual()">COPIAR</button>
                 </div>
             </div>
         </div>
     </div>
+
     <div id="modal-lista" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:100; justify-content:center; align-items:center;">
         <div style="background:#111; width:98%; max-width:950px; border:2px solid #00e5ff; border-radius:10px; padding:10px; position:relative;">
             <span onclick="cerrarModal()" style="position:absolute; top:0px; right:10px; color:#ff0000; font-size:35px; cursor:pointer;">&times;</span>
@@ -103,22 +104,29 @@
             window.speechSynthesis.speak(mensaje);
         }
 
-        function copiarAlChat() {
-            const input = document.getElementById('txt-copiar');
+        // FUNCIÓN CLAVE PARA LA COPIA AUTOMÁTICA
+        async function autoCopiar(texto) {
             const btn = document.getElementById('btn-copy');
-            if(input.value === "") return;
-            
-            // Método de respaldo más compatible
-            input.select();
-            input.setSelectionRange(0, 99999); 
             try {
-                document.execCommand('copy');
+                // Intentamos usar la API moderna
+                await navigator.clipboard.writeText(texto);
                 btn.innerText = "¡OK!";
                 btn.classList.add('success');
-                setTimeout(() => { btn.innerText = "COPIAR"; btn.classList.remove('success'); }, 800);
+                setTimeout(() => { btn.innerText = "COPIAR"; btn.classList.remove('success'); }, 500);
             } catch (err) {
-                console.error('Error al copiar', err);
+                // Si falla la API (por seguridad), usamos el método de fallback
+                const tempInput = document.createElement("input");
+                tempInput.value = texto;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
             }
+        }
+
+        function copiarManual() {
+            const texto = document.getElementById('txt-copiar').value;
+            if(texto) autoCopiar(texto);
         }
 
         function prepararMazo() {
@@ -156,10 +164,11 @@
             document.getElementById('nombre-visor').innerText = carta.nombre;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 54`;
             
-            document.getElementById('txt-copiar').value = "☆ " + carta.nombre.toUpperCase() + " ☆";
+            const textoFinal = "☆ " + carta.nombre.toUpperCase() + " ☆";
+            document.getElementById('txt-copiar').value = textoFinal;
             
-            // EJECUTA LA FUNCIÓN DE COPIAR AUTOMÁTICAMENTE
-            copiarAlChat();
+            // LLAMADA A LA COPIA AUTOMÁTICA
+            autoCopiar(textoFinal);
 
             cantarCarta(carta.nombre);
 
