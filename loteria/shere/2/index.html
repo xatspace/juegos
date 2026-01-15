@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2 Fix</title>
+    <title>Lotería Mexicana - Shere 2</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -27,51 +27,56 @@
             position: relative; 
             overflow: hidden; 
             box-sizing: border-box;
+            transition: transform 0.2s;
         }
         
         .img-carta { 
-            width: 115%; 
-            height: 115%; 
-            object-fit: contain; 
-            /* SUBIMOS MÁS LA IMAGEN AQUÍ */
-            margin-top: -15%; 
-            margin-left: -7.5%; 
+            width: 110%; 
+            height: 110%; 
+            object-fit: cover; 
+            /* SUBIDA DE IMAGEN AL LÍMITE */
+            margin-top: -12%; 
+            margin-left: -5%; 
             pointer-events: none; 
             display: block;
             filter: none !important;
-            opacity: 1 !important; /* COLOR SIEMPRE AL 100% */
+            opacity: 1 !important;
         }
 
         .n-user { 
             font-size: 8px; color: #39ff14; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
-            width: 100%; background: rgba(0, 0, 0, 0.8); 
+            width: 100%; background: rgba(0, 0, 0, 0.85); 
             padding: 3px 0; position: absolute; bottom: 0; left: 0;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;  
             z-index: 5;
             border-top: 1px solid #39ff14;
         }
         
-        /* SELECCIONADA: SIN OPACIDAD, SOLO VERDE NEÓN */
+        /* EL REMARCADO VERDE NEÓN FUERTE */
         .seleccionada { 
             border: 5px solid #39ff14 !important;
-            box-shadow: 0 0 25px #39ff14; 
+            /* Brillo exterior e interior para que resalte */
+            box-shadow: 0 0 15px #39ff14, inset 0 0 10px #39ff14; 
             z-index: 10;
-            opacity: 1 !important;
-        }
-        .seleccionada .img-carta { 
-            opacity: 1 !important; 
-            filter: none !important; 
+            transform: scale(1.05); /* Efecto de aumento al seleccionar */
         }
 
-        .ocupado { border-color: #ff0000 !important; }
+        /* ASEGURAMOS QUE LA IMAGEN NO SE OPACA NADA AL SELECCIONAR */
+        .seleccionada .img-carta { 
+            opacity: 1 !important; 
+            filter: brightness(1.1) !important; /* Un pelín más de luz para que destaque */
+        }
+
+        /* ESTILO PARA CARTAS OCUPADAS (YA ELEGIDAS POR OTROS) */
+        .ocupado { border-color: #ff0000 !important; cursor: not-allowed; }
         .ocupado .n-user { background: #ff0000; color: #fff; border-top: 1px solid #fff; }
-        .ocupado .img-carta { opacity: 0.4; filter: grayscale(100%); }
+        .ocupado .img-carta { opacity: 0.3; filter: grayscale(100%); }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
             border: none; padding: 15px 40px; font-weight: bold; font-size: 18px; 
-            border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
+            border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px #39ff14;
         }
 
         .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
