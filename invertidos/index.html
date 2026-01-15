@@ -20,10 +20,18 @@
             text-shadow: 0 0 15px #ffb6c1; 
             font-size: clamp(22px, 6vw, 32px); 
             text-transform: uppercase; 
-            margin: 20px 0; 
+            margin: 10px 0 5px 0; 
             text-align: center;
         }
         
+        /* Estilo del Contador */
+        #contador-libre {
+            color: #39ff14;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #39ff14;
+        }
+
         #tablero { 
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
@@ -82,11 +90,11 @@
         .ocupado .n-info, .ocupado .n-user { color: #000; }
 
         .btn-reset { 
-            margin-top: 40px; 
+            margin-top: 30px; 
             background: #000; 
             color: #444; 
             border: 1px dashed #444; 
-            padding: 12px 24px; 
+            padding: 10px 20px; 
             cursor: pointer; 
             border-radius: 5px; 
             font-size: 11px;
@@ -101,6 +109,8 @@
 <body>
 
     <div class="neon-title">TABLA INVERTIDOS</div>
+    <div id="contador-libre">Cargando espacios...</div>
+    
     <div id="tablero"></div>
 
     <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TODO EL JUEGO</button>
@@ -109,7 +119,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Configuración
         const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
         const refSala = ref(db, 'invertidos_juego');
@@ -137,13 +146,18 @@
 
         function render(datos = {}) {
             const tab = document.getElementById('tablero');
+            const cont = document.getElementById('contador-libre');
             tab.innerHTML = "";
+            
+            let ocupados = 0;
+
             pares.forEach(p => {
                 const usuario = datos[p] ? datos[p] : null;
+                if(usuario) ocupados++;
+
                 const div = document.createElement('div');
                 div.className = `celda ${usuario ? 'ocupado' : ''}`;
                 
-                // Si la celda está ocupada, al hacer clic llama a la función de borrado
                 div.onclick = () => { 
                     if(!usuario) {
                         anotar(p); 
@@ -158,13 +172,16 @@
                 `;
                 tab.appendChild(div);
             });
+
+            // Actualizar contador
+            const libres = pares.length - ocupados;
+            cont.innerText = `ESPACIOS LIBRES: ${libres} / ${pares.length}`;
         }
 
         window.anotar = async (p) => {
             const miIP = await obtenerIP();
             if (!miIP) return alert("Error de conexión.");
             
-            // Verificamos si la IP ya existe en los datos actuales
             const snap = await get(refSala);
             const datos = snap.val() || {};
             const yaJugo = Object.values(datos).some(u => u.ip === miIP);
@@ -177,7 +194,6 @@
             const n = prompt("Número " + p + " - Tu Nick:");
             if (n && n.trim() !== "") {
                 const nickFinal = n.trim().toUpperCase();
-                // Guardamos IP dentro de la celda
                 await set(ref(db, 'invertidos_juego/' + p), { 
                     nombre: nickFinal,
                     ip: miIP
@@ -185,13 +201,11 @@
             }
         };
 
-        // Nueva función para borrar un solo usuario
         window.borrarUsuarioIndividual = async (p, nick) => {
-            const pass = prompt(`¿Deseas borrar a "${nick}" del número ${p}?\nEscribe la clave de admin:`);
+            const pass = prompt(`¿Deseas borrar a "${nick}" del número ${p}?\nClave de admin:`);
             if (pass === claveAdmin) {
-                if (confirm(`Confirmar: Borrar a ${nick}`)) {
+                if (confirm(`¿Confirmas borrar a ${nick}?`)) {
                     await remove(ref(db, 'invertidos_juego/' + p));
-                    alert("Espacio liberado.");
                 }
             } else if (pass !== null) {
                 alert("Clave incorrecta.");
@@ -199,9 +213,9 @@
         };
 
         window.resetJuego = async () => {
-            const pass = prompt("Clave de Admin para reiniciar TODO:");
+            const pass = prompt("Clave para REINICIAR TODO:");
             if (pass === claveAdmin) {
-                if (confirm("¿Seguro que quieres limpiar todo el tablero?")) {
+                if (confirm("¿Limpiar todo el tablero?")) {
                     await remove(refSala);
                 }
             }
