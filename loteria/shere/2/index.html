@@ -3,101 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2 Cartas</title>
+    <title>Lotería Mexicana - Shere 2 Fix</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        
-        .neon-title { 
-            color: #39ff14; 
-            text-shadow: 0 0 15px #39ff14; 
-            font-size: 28px; 
-            text-transform: uppercase; 
-            margin: 15px 0 5px 0; 
-        }
-
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0 5px 0; }
         #contador { color: #ffeb3b; font-size: 14px; margin-bottom: 10px; }
 
         #tablero { 
-            display: grid; 
-            grid-template-columns: repeat(9, 1fr); 
-            gap: 8px; 
-            width: 100%; 
-            max-width: 1000px; 
-            background: #0a0a0a; 
-            border: 3px solid #39ff14; 
-            padding: 12px; 
-            border-radius: 12px; 
+            display: grid; grid-template-columns: repeat(9, 1fr); gap: 8px; 
+            width: 100%; max-width: 1000px; background: #0a0a0a; 
+            border: 3px solid #39ff14; padding: 12px; border-radius: 12px; 
         }
 
         .celda { 
             aspect-ratio: 1 / 1.5; 
-            /* El borde es siempre de 4px para que nada se mueva */
-            border: 4px solid #333; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            border-radius: 8px; 
-            background: #fff; 
-            padding: 0; 
-            position: relative;
-            overflow: hidden;
-            box-sizing: border-box; 
+            border: 2px solid #333; 
+            display: flex; flex-direction: column; 
+            cursor: pointer; border-radius: 6px; 
+            background: #fff; padding: 0; 
+            position: relative; overflow: hidden;
+            box-sizing: border-box;
         }
         
+        /* LA IMAGEN AHORA LLENA TODO EL ESPACIO DESDE ARRIBA */
         .img-carta { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
-            pointer-events: none; 
-            display: block;
+            width: 100%; height: 100%; 
+            object-fit: cover; /* Cambiado a cover para que no deje bordes blancos */
+            pointer-events: none; display: block;
         }
 
+        /* EL NOMBRE FLOTA SOBRE LA IMAGEN PARA NO EMPUJARLA */
         .n-user { 
-            font-size: 10px; 
-            color: #000; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            text-align: center; 
-            width: 100%; 
-            background: rgba(255,255,255,0.9);
-            padding: 2px 0;
-            position: absolute;
-            bottom: 0;
-            left: 0;
+            font-size: 10px; color: #000; font-weight: bold; 
+            text-transform: uppercase; text-align: center; 
+            width: 100%; background: rgba(255,255,255,0.85);
+            padding: 3px 0; position: absolute; bottom: 0; left: 0;
         }
         
-        /* SELECCIONADA: Solo cambia el color y agrega brillo, no el grosor */
+        /* SELECCIONADA: SOLO BRILLO EXTERNO PARA QUE NO HAYA SALTOS */
         .seleccionada { 
             border-color: #39ff14 !important;
-            box-shadow: 0 0 15px #39ff14; 
-            z-index: 2;
+            box-shadow: 0 0 20px #39ff14; 
+            transform: scale(1.02); /* Un toque mínimo para que se note */
+            z-index: 5;
         }
 
-        /* OCUPADA: Mismo grosor de borde */
-        .ocupado { 
-            border-color: #ff0000 !important; 
-            cursor: not-allowed; 
-            opacity: 0.5; 
-        }
-        .ocupado .n-user { background: #ff0000; color: #fff; }
+        .ocupado { border-color: #ff0000 !important; opacity: 0.4; filter: grayscale(100%); }
+        .ocupado .n-user { background: #ff0000; color: #fff; opacity: 1; }
 
         #btn-registrar { 
-            display: none; 
-            margin-top: 20px; 
-            background: #39ff14; 
-            color: #000; 
-            border: none; 
-            padding: 15px 40px; 
-            font-weight: bold; 
-            font-size: 18px; 
-            border-radius: 50px; 
-            cursor: pointer; 
-            box-shadow: 0 0 20px #39ff14; 
+            display: none; margin-top: 20px; background: #39ff14; color: #000; 
+            border: none; padding: 15px 40px; font-weight: bold; font-size: 18px; 
+            border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px #39ff14; 
         }
 
         .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
