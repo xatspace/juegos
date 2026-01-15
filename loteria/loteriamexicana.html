@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Lotería Mexicana</title>
+    <title>Sorteador Lotería</title>
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         .neon-title { color: #ff00ff; text-shadow: 0 0 15px #ff00ff; font-size: 24px; text-transform: uppercase; margin: 15px 0; }
@@ -35,7 +35,7 @@
         .btn-reset { background: #ff0000; color: #fff; }
         .btn-lista { background: #00e5ff; color: #000; margin-top: 10px; width: 100%; font-size: 12px; }
 
-        /* HISTORIAL LATERAL CORREGIDO */
+        /* HISTORIAL LATERAL */
         .historial-container { display: flex; flex-direction: column; width: 230px; }
         .historial { 
             height: 400px; background: #111; border: 2px solid #333; 
@@ -44,10 +44,10 @@
         .item-historial { 
             display: flex; align-items: center; gap: 12px; background: #222; 
             padding: 8px; border-radius: 8px; font-size: 13px; margin-bottom: 10px; 
-            border: 1px solid #444; height: 65px; /* Altura fija para que no se tape */
+            border: 1px solid #444; height: 75px; /* Altura aumentada para que no tape nada */
         }
         .img-mini { 
-            width: 45px; height: 100%; /* Ocupa el alto del contenedor */
+            width: 45px; height: 100%; 
             background-color: #fff; background-size: contain; 
             background-repeat: no-repeat; background-position: center; 
             border-radius: 4px; flex-shrink: 0;
@@ -113,7 +113,8 @@
     </div>
 
     <script>
-        const RUTA_IMG = "img/"; 
+        // RUTA ACTUALIZADA A mexicana/img/
+        const RUTA_IMG = "mexicana/img/"; 
 
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
         
@@ -158,7 +159,8 @@
 
             const item = document.createElement('div');
             item.className = 'item-historial';
-            item.innerHTML = `<div class="img-mini" style="background-image: url('${fullPath}')"></div><span><b>#${indiceActual + 1}</b><br>${carta.nombre.toUpperCase()}</span>`;
+            // Se agregó un estilo para que el texto se vea bien y no se corte
+            item.innerHTML = `<div class="img-mini" style="background-image: url('${fullPath}')"></div><span style="line-height:1.2;"><b>#${indiceActual + 1}</b><br><small>${carta.nombre.toUpperCase()}</small></span>`;
             document.getElementById('lista-historial').prepend(item);
 
             indiceActual++;
