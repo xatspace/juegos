@@ -27,56 +27,51 @@
             position: relative; 
             overflow: hidden; 
             box-sizing: border-box;
-            transition: transform 0.2s;
         }
         
+        /* AJUSTE EQUILIBRADO: QUITA BLANCO ARRIBA, MUESTRA NOMBRE ABAJO */
         .img-carta { 
-            width: 110%; 
-            height: 110%; 
+            width: 100%; 
+            height: 108%; /* Un poco más alta para tener margen de maniobra */
             object-fit: cover; 
-            /* SUBIDA DE IMAGEN AL LÍMITE */
-            margin-top: -12%; 
-            margin-left: -5%; 
+            object-position: center bottom; /* PRIORIZA LA PARTE DE ABAJO DE LA FOTO */
+            margin-top: -8%; /* SUBE LO JUSTO PARA ESCONDER EL BLANCO SUPERIOR */
             pointer-events: none; 
             display: block;
             filter: none !important;
             opacity: 1 !important;
         }
 
+        /* NICK DEL USUARIO: Ultra delgado para no tapar el nombre de la carta */
         .n-user { 
             font-size: 8px; color: #39ff14; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
-            width: 100%; background: rgba(0, 0, 0, 0.85); 
-            padding: 3px 0; position: absolute; bottom: 0; left: 0;
+            width: 100%; background: rgba(0, 0, 0, 0.8); 
+            padding: 2px 0; position: absolute; bottom: 0; left: 0;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;  
             z-index: 5;
             border-top: 1px solid #39ff14;
         }
         
-        /* EL REMARCADO VERDE NEÓN FUERTE */
         .seleccionada { 
             border: 5px solid #39ff14 !important;
-            /* Brillo exterior e interior para que resalte */
-            box-shadow: 0 0 15px #39ff14, inset 0 0 10px #39ff14; 
+            box-shadow: 0 0 20px #39ff14; 
             z-index: 10;
-            transform: scale(1.05); /* Efecto de aumento al seleccionar */
         }
 
-        /* ASEGURAMOS QUE LA IMAGEN NO SE OPACA NADA AL SELECCIONAR */
         .seleccionada .img-carta { 
             opacity: 1 !important; 
-            filter: brightness(1.1) !important; /* Un pelín más de luz para que destaque */
+            filter: brightness(1.1) !important; 
         }
 
-        /* ESTILO PARA CARTAS OCUPADAS (YA ELEGIDAS POR OTROS) */
-        .ocupado { border-color: #ff0000 !important; cursor: not-allowed; }
+        .ocupado { border-color: #ff0000 !important; }
         .ocupado .n-user { background: #ff0000; color: #fff; border-top: 1px solid #fff; }
         .ocupado .img-carta { opacity: 0.3; filter: grayscale(100%); }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
             border: none; padding: 15px 40px; font-weight: bold; font-size: 18px; 
-            border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px #39ff14;
+            border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
         }
 
         .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
@@ -94,6 +89,7 @@
     <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO 2</button>
 
     <script>
+        // Configuración y lógica de Firebase (se mantiene igual)
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
