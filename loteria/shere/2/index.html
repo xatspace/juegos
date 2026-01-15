@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2</title>
+    <title>Lotería Mexicana - Shere 2 Cartas </title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -28,37 +28,35 @@
             box-sizing: border-box;
         }
         
-        /* COLOR ORIGINAL GARANTIZADO */
+        /* SOLUCIÓN DEFINITIVA: FILL PARA ELIMINAR BLANCO ARRIBA */
         .img-carta { 
             width: 100%;
             height: 100%; 
-            object-fit: cover; 
-            object-position: top;
+            object-fit: fill; /* Estira la imagen para que no deje huecos */
             pointer-events: none; 
             display: block;
             filter: none !important;
             opacity: 1 !important;
         }
 
-        /* TEXTO QUE NO SE SALE DEL CUADRO */
         .n-user { 
             font-size: 9px; color: #000; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
             width: 100%; background: #fff;
             padding: 3px 0; position: absolute; bottom: 0; left: 0;
             border-top: 1px solid #000;
-            white-space: nowrap;      /* No salta de línea */
-            overflow: hidden;         /* Esconde lo que sobra */
-            text-overflow: ellipsis;  /* Pone "..." si es muy largo */
+            white-space: nowrap;      
+            overflow: hidden;         
+            text-overflow: ellipsis;  
             box-sizing: border-box;
+            z-index: 2;
         }
         
-        /* SELECCIONADA: MARCO VERDE NEÓN ELÉCTRICO */
+        /* SELECCIONADA: VERDE NEÓN MÁS INTENSO */
         .seleccionada { 
-            border: 4px solid #39ff14 !important;
-            box-shadow: 0 0 20px #39ff14, 0 0 40px rgba(57, 255, 20, 0.6); 
+            border: 5px solid #39ff14 !important;
+            box-shadow: 0 0 25px #39ff14, inset 0 0 10px #39ff14; 
             z-index: 10;
-            transform: scale(1.02);
         }
         .seleccionada .img-carta { opacity: 1 !important; filter: none !important; }
 
