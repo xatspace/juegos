@@ -2,31 +2,39 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lotería Mexicana - Shere 2 Cartas</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <style>
-        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0 5px 0; }
-        #contador { color: #ffeb3b; font-size: 14px; margin-bottom: 10px; }
+        /* Ajuste general para móviles */
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; overflow-x: hidden; }
+        
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 24px; text-transform: uppercase; margin: 15px 0 5px 0; text-align: center; }
+        #contador { color: #ffeb3b; font-size: 13px; margin-bottom: 10px; }
 
+        /* GRID RESPONSIVO */
         #tablero { 
-            display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
-            width: 100%; max-width: 1000px; background: #0a0a0a; 
-            border: 3px solid #39ff14; padding: 10px; border-radius: 12px; 
+            display: grid; 
+            grid-template-columns: repeat(9, 1fr); /* PC por defecto */
+            gap: 5px; 
+            width: 95%; 
+            max-width: 1000px; 
+            background: #0a0a0a; 
+            border: 3px solid #39ff14; 
+            padding: 8px; 
+            border-radius: 12px; 
         }
 
         .celda { 
             aspect-ratio: 1 / 1.5; 
-            border: 2px solid #333; 
+            border: 1px solid #333; 
             display: flex; flex-direction: column; 
             cursor: pointer; border-radius: 4px; 
             background: #fff; 
             position: relative; 
             overflow: hidden; 
-            box-sizing: border-box;
         }
         
         .img-carta { 
@@ -34,55 +42,58 @@
             height: 94%; 
             object-fit: cover; 
             object-position: top; 
-            margin-top: 0; 
             pointer-events: none; 
             display: block;
-            filter: none !important;
-            opacity: 1 !important;
         }
 
-        /* BARRA DE NOMBRE CON FONDO BLANCO Y LETRAS VERDES */
         .n-user { 
-            font-size: 8px; 
-            color: #2ecc71; /* Verde fuerte para que sea legible en blanco */
+            font-size: 7px; /* Letra pequeña para que quepa el nombre */
+            color: #2ecc71; 
             font-weight: bold; 
             text-transform: uppercase; 
             text-align: center; 
             width: 100%; 
-            background: #fff; /* FONDO BLANCO */
-            padding: 3px 0; 
+            background: #fff; 
+            padding: 2px 0; 
             position: absolute; 
             bottom: 0; 
             left: 0;
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis;  
             z-index: 5;
             border-top: 1px solid #eee;
         }
         
-        /* SELECCIONADA: EL REMARCO NEÓN */
         .seleccionada { 
-            border: 5px solid #39ff14 !important;
-            box-shadow: 0 0 20px #39ff14; 
+            border: 4px solid #39ff14 !important;
+            box-shadow: 0 0 15px #39ff14; 
             z-index: 10;
         }
 
-        /* OCUPADA: GRISÁCEA CON NOMBRE ROJO */
-        .ocupado { border-color: #ff0000 !important; }
-        .ocupado .n-user { background: #ff0000; color: #fff; border-top: 1px solid #fff; }
-        .ocupado .img-carta { opacity: 0.4; filter: grayscale(100%); }
+        .ocupado .img-carta { opacity: 0.3; filter: grayscale(100%); }
+        .ocupado .n-user { background: #ff0000; color: #fff; }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
-            border: none; padding: 15px 40px; font-weight: bold; font-size: 18px; 
-            border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
+            border: none; padding: 15px 30px; font-weight: bold; font-size: 16px; 
+            border-radius: 50px; cursor: pointer; width: 80%; max-width: 300px;
         }
 
-        .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
+        /* MEDIA QUERIES PARA MÓVILES */
+        @media (max-width: 850px) {
+            #tablero { grid-template-columns: repeat(6, 1fr); } /* Tablets */
+            .neon-title { font-size: 20px; }
+        }
 
-        @media (max-width: 800px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 500px) {
+            #tablero { 
+                grid-template-columns: repeat(3, 1fr); /* Celulares: 3 cartas por fila */
+                gap: 8px; 
+                padding: 10px;
+            }
+            .n-user { font-size: 9px; padding: 4px 0; } /* Nombre un poco más grande en celular */
+            .neon-title { font-size: 18px; }
+        }
+
+        .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 8px; cursor: pointer; font-size: 9px; }
     </style>
 </head>
 <body>
@@ -91,9 +102,10 @@
     <div id="contador">CARGANDO...</div>
     <div id="tablero"></div>
     <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
-    <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO 2</button>
+    <button class="btn-reset" onclick="resetJuego()">🔄 RESET SALA 2</button>
 
     <script>
+        // ... (El script de Firebase se mantiene exactamente igual al anterior) ...
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -146,12 +158,12 @@
                         if(snapshot.exists()) {
                             alert("Ya registraste tus cartas.");
                         } else {
-                            const nick = prompt("Nick:");
+                            const nick = prompt("Escribe tu Nick:");
                             if(nick && nick.trim()) {
                                 const n = nick.trim().toUpperCase();
                                 seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                                 refIPs.child(limpiaIP).set(true);
-                                alert("¡Listo!");
+                                alert("¡Cartas enviadas!");
                                 seleccionadas = [];
                                 document.getElementById('btn-registrar').style.display = 'none';
                                 pintar();
@@ -163,7 +175,7 @@
 
         window.resetJuego = function() {
             if(prompt("Clave:") === "shere2026") {
-                refSala.remove(); refIPs.remove(); alert("Reset OK");
+                refSala.remove(); refIPs.remove(); alert("Reseteado");
             }
         };
 
