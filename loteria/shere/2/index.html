@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana - Shere </title>
+    <title>Lotería Mexicana - Shere 2</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -15,8 +15,8 @@
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
             gap: 5px; 
-            width: 98%; 
-            max-width: 1000px; 
+            width: 100%; 
+            max-width: 1100px; 
             background: #0a0a0a; 
             border: 3px solid #39ff14; 
             padding: 8px; 
@@ -34,13 +34,12 @@
             cursor: pointer;
             border: 1px solid #333;
             box-sizing: border-box;
-            aspect-ratio: 2/3; /* Proporción clásica de carta */
+            aspect-ratio: 2/3.2; /* Proporción ajustada para que el nombre quepa mejor */
         }
         
-        /* IMAGEN: Pegada arriba y centrada, sin filtros */
         .img-carta { 
             width: 100%; 
-            height: 88%; /* Deja espacio exacto para el nombre abajo */
+            height: 86%; /* Proporción exacta para que no se coma la imagen */
             object-fit: cover; 
             object-position: top;
             display: block;
@@ -48,45 +47,44 @@
             opacity: 1 !important;
         }
 
-        /* BARRA DE NOMBRE: Fondo blanco, texto verde */
         .n-user { 
             width: 100%;
-            height: 12%; 
+            height: 14%; 
             background: #fff;
             color: #2ecc71;
-            font-size: 8px;
+            font-size: 9px;
             font-weight: bold;
             text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
             text-transform: uppercase;
-            border-top: 1px solid #f0f0f0;
+            border-top: 1px solid #eee;
         }
         
-        /* SELECCIÓN: Marco neón */
         .seleccionada { 
-            outline: 4px solid #39ff14; 
-            outline-offset: -4px;
-            box-shadow: 0 0 15px #39ff14; 
+            outline: 5px solid #39ff14; 
+            outline-offset: -5px;
+            box-shadow: 0 0 20px #39ff14; 
             z-index: 5;
         }
 
-        /* OCUPADA */
-        .ocupado .img-carta { opacity: 0.3 !important; filter: grayscale(100%) !important; }
-        .ocupado .n-user { background: #ff0000; color: #fff; }
+        /* OCUPADA: La imagen se apaga pero el nombre resalta */
+        .ocupado .img-carta { opacity: 0.25 !important; filter: grayscale(100%) !important; }
+        .ocupado .n-user { background: #ff0000; color: #fff; border-top: none; }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
-            border: none; padding: 15px 40px; font-weight: bold; font-size: 18px; 
-            border-radius: 50px; cursor: pointer;
+            border: none; padding: 15px 45px; font-weight: bold; font-size: 20px; 
+            border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
         }
 
-        /* RESPONSIVO PARA CELULAR */
-        @media (max-width: 800px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 500px) { 
-            #tablero { grid-template-columns: repeat(3, 1fr); gap: 6px; } 
-            .n-user { font-size: 10px; }
+        /* RESPONSIVO */
+        @media (max-width: 900px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
+        @media (max-width: 600px) { 
+            #tablero { grid-template-columns: repeat(3, 1fr); gap: 8px; } 
+            .n-user { font-size: 11px; }
+            .neon-title { font-size: 22px; }
         }
     </style>
 </head>
@@ -147,13 +145,15 @@
             fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => {
                 const limpiaIP = data.ip.replace(/\./g, '_');
                 refIPs.child(limpiaIP).once('value', snapshot => {
-                    if(snapshot.exists()) { alert("Ya registraste tus cartas."); } else {
+                    if(snapshot.exists()) {
+                        // Eliminado el alert de IP, solo no deja hacer nada
+                    } else {
                         const nick = prompt("Nick:");
                         if(nick && nick.trim()) {
                             const n = nick.trim().toUpperCase();
                             seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                             refIPs.child(limpiaIP).set(true);
-                            alert("¡Listo!");
+                            // ELIMINADO EL CARTEL DE ÉXITO
                             seleccionadas = [];
                             document.getElementById('btn-registrar').style.display = 'none';
                             pintar();
