@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2 Cartas</title>
+    <title>Lotería Mexicana - Shere 2</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -25,45 +25,52 @@
             cursor: pointer; border-radius: 4px; 
             background: #fff; padding: 0; 
             position: relative; overflow: hidden;
+            box-sizing: border-box;
         }
         
-        /* ELIMINA MÁRGENES BLANCOS Y QUITA FILTROS */
+        /* COLOR ORIGINAL GARANTIZADO */
         .img-carta { 
-            width: 110%; /* Un poco más ancha para comerse el borde blanco */
-            height: 95%; 
+            width: 100%;
+            height: 100%; 
             object-fit: cover; 
-            margin-top: -5px; /* Sube la foto para quitar el blanco de arriba */
-            margin-left: -5%; /* Centra el exceso de ancho */
+            object-position: top;
             pointer-events: none; 
             display: block;
-            filter: none !important; /* ASEGURA COLOR ORIGINAL */
+            filter: none !important;
+            opacity: 1 !important;
         }
 
+        /* TEXTO QUE NO SE SALE DEL CUADRO */
         .n-user { 
-            font-size: 10px; color: #000; font-weight: bold; 
+            font-size: 9px; color: #000; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
             width: 100%; background: #fff;
-            padding: 2px 0; position: absolute; bottom: 0; left: 0;
+            padding: 3px 0; position: absolute; bottom: 0; left: 0;
             border-top: 1px solid #000;
+            white-space: nowrap;      /* No salta de línea */
+            overflow: hidden;         /* Esconde lo que sobra */
+            text-overflow: ellipsis;  /* Pone "..." si es muy largo */
+            box-sizing: border-box;
         }
         
-        /* SELECCIONADA: SOLO BORDE VERDE Y COLOR ORIGINAL */
+        /* SELECCIONADA: MARCO VERDE NEÓN ELÉCTRICO */
         .seleccionada { 
             border: 4px solid #39ff14 !important;
-            box-shadow: 0 0 15px #39ff14; 
-            z-index: 5;
+            box-shadow: 0 0 20px #39ff14, 0 0 40px rgba(57, 255, 20, 0.6); 
+            z-index: 10;
+            transform: scale(1.02);
         }
-        .seleccionada .img-carta { filter: none !important; opacity: 1 !important; }
+        .seleccionada .img-carta { opacity: 1 !important; filter: none !important; }
 
-        /* OCUPADA: SOLO ROJO */
+        /* OCUPADA: ROJO */
         .ocupado { border-color: #ff0000 !important; }
         .ocupado .n-user { background: #ff0000; color: #fff; }
-        .ocupado .img-carta { opacity: 0.5; }
+        .ocupado .img-carta { opacity: 0.4; filter: grayscale(100%); }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
             border: none; padding: 15px 40px; font-weight: bold; font-size: 18px; 
-            border-radius: 50px; cursor: pointer; 
+            border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
         }
 
         .btn-reset { margin-top: 40px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; }
@@ -131,14 +138,14 @@
                     const limpiaIP = data.ip.replace(/\./g, '_');
                     refIPs.child(limpiaIP).once('value', snapshot => {
                         if(snapshot.exists()) {
-                            alert("Ya registraste cartas.");
+                            alert("Ya registraste cartas en este tablero.");
                         } else {
-                            const nick = prompt("Nick:");
+                            const nick = prompt("Tu Nick:");
                             if(nick && nick.trim()) {
                                 const n = nick.trim().toUpperCase();
                                 seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                                 refIPs.child(limpiaIP).set(true);
-                                alert("Hecho!");
+                                alert("¡Listo!");
                                 seleccionadas = [];
                                 document.getElementById('btn-registrar').style.display = 'none';
                                 pintar();
@@ -152,7 +159,7 @@
             if(prompt("Clave:") === "shere2026") {
                 refSala.remove();
                 refIPs.remove();
-                alert("Reset OK");
+                alert("Tablero Limpio");
             }
         };
 
