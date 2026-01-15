@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana | Shere</title>
+    <title>Lotería Mexicana - Shere</title>
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         .neon-title { color: #00e5ff; text-shadow: 0 0 15px #00e5ff; font-size: 28px; text-transform: uppercase; margin: 15px 0 5px 0; }
@@ -90,7 +90,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIGURACIÓN ACTUALIZADA A TU NUEVA BASE DE DATOS
+        // CONFIGURACIÓN DE TU BASE DE DATOS
         const app = initializeApp({ databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
         const refSala = ref(db, 'loteria_local_final');
@@ -113,6 +113,7 @@
                 div.className = `celda ${nick ? 'ocupado' : ''}`;
                 div.onclick = () => { if(!nick) anotar(nom); };
                 
+                // RUTA AJUSTADA PARA LA CARPETA SHERE
                 const imgUrl = `img/${num}.jpg`;
 
                 div.innerHTML = `
@@ -148,5 +149,4 @@
         onValue(refSala, (snap) => render(snap.val() || {}));
     </script>
 </body>
-
 </html>
