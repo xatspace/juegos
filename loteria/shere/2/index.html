@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2 Fix</title>
+    <title>Lotería Mexicana - Shere 2 Final</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -28,31 +28,34 @@
             box-sizing: border-box;
         }
         
-        /* LA IMAGEN AHORA LLENA TODO EL ESPACIO DESDE ARRIBA */
+        /* IMAGEN PEGADA ARRIBA Y SIN FILTROS */
         .img-carta { 
             width: 100%; height: 100%; 
-            object-fit: cover; /* Cambiado a cover para que no deje bordes blancos */
+            object-fit: cover; 
+            object-position: top; /* Asegura que la imagen se pegue al borde superior */
             pointer-events: none; display: block;
+            filter: none !important; /* Evita que cualquier efecto la oscurezca */
         }
 
-        /* EL NOMBRE FLOTA SOBRE LA IMAGEN PARA NO EMPUJARLA */
         .n-user { 
             font-size: 10px; color: #000; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
-            width: 100%; background: rgba(255,255,255,0.85);
+            width: 100%; background: rgba(255,255,255,0.9);
             padding: 3px 0; position: absolute; bottom: 0; left: 0;
+            border-top: 1px solid #ccc;
         }
         
-        /* SELECCIONADA: SOLO BRILLO EXTERNO PARA QUE NO HAYA SALTOS */
+        /* SELECCIONADA: BRILLANTE Y CLARA */
         .seleccionada { 
-            border-color: #39ff14 !important;
-            box-shadow: 0 0 20px #39ff14; 
-            transform: scale(1.02); /* Un toque mínimo para que se note */
+            border: 4px solid #39ff14 !important;
+            box-shadow: 0 0 25px #39ff14; 
             z-index: 5;
+            opacity: 1 !important; /* Asegura que no se vea opaca */
         }
 
+        /* OCUPADA: GRISÁCEA PARA DIFERENCIAR */
         .ocupado { border-color: #ff0000 !important; opacity: 0.4; filter: grayscale(100%); }
-        .ocupado .n-user { background: #ff0000; color: #fff; opacity: 1; }
+        .ocupado .n-user { background: #ff0000; color: #fff; }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
@@ -125,14 +128,14 @@
                     const limpiaIP = data.ip.replace(/\./g, '_');
                     refIPs.child(limpiaIP).once('value', snapshot => {
                         if(snapshot.exists()) {
-                            alert("Ya registraste cartas.");
+                            alert("Ya registraste cartas en este tablero.");
                         } else {
-                            const nick = prompt("Nick:");
+                            const nick = prompt("Ingresa tu Nick:");
                             if(nick && nick.trim()) {
                                 const n = nick.trim().toUpperCase();
                                 seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                                 refIPs.child(limpiaIP).set(true);
-                                alert("Hecho!");
+                                alert("¡Cartas registradas con éxito!");
                                 seleccionadas = [];
                                 document.getElementById('btn-registrar').style.display = 'none';
                             }
@@ -142,10 +145,10 @@
         };
 
         window.resetJuego = function() {
-            if(prompt("Clave:") === "shere2026") {
+            if(prompt("Clave Maestra:") === "shere2026") {
                 refSala.remove();
                 refIPs.remove();
-                alert("Reset OK");
+                alert("Tablero 2 reiniciado.");
             }
         };
 
