@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2 Cartas</title>
+    <title>Lotería Mexicana - Shere 2</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -19,47 +19,49 @@
         }
 
         .celda { 
-            aspect-ratio: 1 / 1.4; 
+            aspect-ratio: 1 / 1.5; 
             border: 2px solid #333; 
             display: flex; flex-direction: column; 
             cursor: pointer; border-radius: 4px; 
             background: #fff; padding: 0; 
-            position: relative; overflow: hidden; /* Esto es clave para esconder el blanco */
+            position: relative; overflow: hidden;
             box-sizing: border-box;
         }
         
-        /* ZOOM PARA COMERSE EL MARCO BLANCO DE LA FOTO */
+        /* AJUSTE PARA QUITAR BLANCO ARRIBA PERO MOSTRAR NOMBRE ABAJO */
         .img-carta { 
-            width: 100%;
-            height: 100%; 
+            width: 105%; /* Un poquito más ancha para quitar bordes laterales */
+            height: 110%; /* Más alta para que el borde blanco de arriba se salga */
             object-fit: cover; 
-            transform: scale(1.15); /* Agrandamos la foto para que el blanco quede afuera */
+            object-position: bottom; /* Prioriza que se vea la parte de abajo (donde está el nombre) */
+            margin-top: -8px; /* Empuja el borde blanco de arriba fuera del cuadro */
+            margin-left: -2.5%;
             pointer-events: none; 
             display: block;
             filter: none !important;
             opacity: 1 !important;
         }
 
+        /* NICK DEL USUARIO: Más pequeño y abajo del todo para no tapar el nombre de la carta */
         .n-user { 
-            font-size: 9px; color: #000; font-weight: bold; 
+            font-size: 8px; color: #000; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
-            width: 100%; background: #fff;
-            padding: 3px 0; position: absolute; bottom: 0; left: 0;
-            border-top: 1px solid #000;
+            width: 100%; background: rgba(255,255,255,0.8);
+            padding: 1px 0; position: absolute; bottom: 0; left: 0;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;  
             box-sizing: border-box;
             z-index: 5;
+            border-top: 1px solid #ddd;
         }
         
-        /* SELECCIONADA: MARCO VERDE NEÓN FUERTE */
         .seleccionada { 
             border: 5px solid #39ff14 !important;
-            box-shadow: 0 0 20px #39ff14; 
+            box-shadow: 0 0 25px #39ff14; 
             z-index: 10;
+            transform: scale(1.03); /* Resalta más al elegirla */
         }
-        .seleccionada .img-carta { opacity: 1 !important; filter: none !important; }
+        .seleccionada .img-carta { opacity: 1 !important; }
 
-        /* OCUPADA: GRIS */
         .ocupado { border-color: #ff0000 !important; }
         .ocupado .n-user { background: #ff0000; color: #fff; }
         .ocupado .img-carta { opacity: 0.3; filter: grayscale(100%); }
@@ -135,14 +137,14 @@
                     const limpiaIP = data.ip.replace(/\./g, '_');
                     refIPs.child(limpiaIP).once('value', snapshot => {
                         if(snapshot.exists()) {
-                            alert("Ya participaste.");
+                            alert("Ya registraste cartas.");
                         } else {
-                            const nick = prompt("Tu Nick:");
+                            const nick = prompt("Nick:");
                             if(nick && nick.trim()) {
                                 const n = nick.trim().toUpperCase();
                                 seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                                 refIPs.child(limpiaIP).set(true);
-                                alert("¡Listo!");
+                                alert("Hecho!");
                                 seleccionadas = [];
                                 document.getElementById('btn-registrar').style.display = 'none';
                                 pintar();
