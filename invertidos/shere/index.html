@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invertidos - Manual</title>
+    <title>Invertidos - Shere</title>
     <style>
         body { 
             background: #000; 
@@ -38,7 +38,7 @@
         }
 
         .celda { 
-            aspect-ratio: 1 / 1.1; /* Un poco más alta para que quepa el nombre */
+            aspect-ratio: 1 / 1.1; 
             min-height: 70px;
             border: 1px solid #333; 
             display: flex; 
@@ -62,9 +62,8 @@
             line-height: 1;
         }
         
-        /* NOMBRE MÁS GRANDE */
         .n-user { 
-            font-size: clamp(10px, 2.8vw, 13px); /* Aumentado de 10px a 13px máximo */
+            font-size: clamp(10px, 2.8vw, 13px); 
             font-weight: 900; 
             color: #fff; 
             text-transform: uppercase; 
@@ -72,7 +71,7 @@
             overflow: hidden; 
             text-overflow: ellipsis; 
             max-width: 95%; 
-            margin-top: 6px; /* Más espacio arriba */
+            margin-top: 6px; 
             letter-spacing: 0.5px;
         }
         
@@ -82,7 +81,7 @@
             cursor: not-allowed; 
         }
         .ocupado .n-info { color: #000; }
-        .ocupado .n-user { color: #000; } /* Nombre en negro sobre fondo rosa */
+        .ocupado .n-user { color: #000; } 
 
         .btn-reset { 
             margin-top: 40px; 
@@ -99,13 +98,13 @@
             #tablero { 
                 grid-template-columns: repeat(5, 1fr); 
             }
-            .celda { min-height: 80px; } /* Más altura en móvil */
+            .celda { min-height: 80px; } 
         }
     </style>
 </head>
 <body>
 
-    <div class="neon-title">TABLA INVERTIDOS</div>
+    <div class="neon-title">TABLA INVERTIDOS SHERE</div>
     <div id="tablero"></div>
 
     <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TODO EL JUEGO</button>
@@ -114,7 +113,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
+        // CONFIGURACIÓN ACTUALIZADA
+        const app = initializeApp({ databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
         const refSala = ref(db, 'invertidos_juego');
         const refIPs = ref(db, 'usuarios_ips');
