@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Lotería Pro + Chat Speed</title>
+    <title>Sorteador Lotería Mexicana ☆</title>
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 5px; margin: 0; overflow: hidden; }
         .neon-title { color: #ff00ff; text-shadow: 0 0 10px #ff00ff; font-size: 20px; text-transform: uppercase; margin: 5px 0; }
@@ -33,7 +33,7 @@
         .btn-lista { background: #00e5ff; color: #000; margin-top: 10px; width: 100%; }
 
         /* CONTROL DE VELOCIDAD */
-        .speed-control { width: 100%; margin-top: 15px; text-align: center; background: #111; padding: 8px; border-radius: 8px; border: 1px solid #333; }
+        .speed-control { width: 100%; margin-top: 12px; text-align: center; background: #111; padding: 8px; border-radius: 8px; border: 1px solid #333; }
         .speed-control label { font-size: 11px; color: #ffeb3b; display: block; margin-bottom: 5px; }
         .slider { width: 90%; cursor: pointer; accent-color: #39ff14; }
 
@@ -49,7 +49,7 @@
 
         /* CAJA COPIAR CHAT */
         .chat-tools {
-            margin-top: 12px; width: 100%; background: #222; 
+            margin-top: 10px; width: 100%; background: #222; 
             padding: 8px; border-radius: 8px; border: 1px solid #00e5ff;
             display: flex; flex-direction: column; gap: 5px;
         }
@@ -63,19 +63,19 @@
 
         /* HISTORIAL */
         .historial-container { display: flex; flex-direction: column; width: 220px; }
-        .historial { height: 280px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 8px; overflow-y: auto; }
+        .historial { height: 260px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 8px; overflow-y: auto; }
         .item-historial { display: flex; align-items: center; gap: 8px; background: #222; padding: 4px; border-radius: 6px; margin-bottom: 6px; height: 45px; border: 1px solid #444; }
         .img-mini { width: 28px; height: 38px; object-fit: contain; background: #fff; border-radius: 2px; }
 
         @media (max-width: 600px) {
             .main-container { flex-direction: column; align-items: center; overflow-y: auto; height: 95vh; }
-            .historial { height: 180px; }
+            .historial { height: 160px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="neon-title">SORTEADOR DE LOTERÍA</div>
+    <div class="neon-title">SORTEADOR DE LOTERÍA MEXICANA</div>
 
     <div class="main-container">
         <div style="display:flex; flex-direction:column; align-items:center;">
@@ -134,16 +134,12 @@
         let intervalo = null;
         let cartasSalidas = [];
         let audioActivado = true;
-        let velocidadS = 4; // Velocidad inicial en segundos
+        let velocidadS = 4;
 
         function cambiarVelocidad(val) {
             velocidadS = val;
             document.getElementById('val-velocidad').innerText = val;
-            // Si está corriendo, reiniciamos el intervalo para aplicar el cambio
-            if (intervalo) {
-                pausar();
-                comenzar();
-            }
+            if (intervalo) { pausar(); comenzar(); }
         }
 
         function toggleAudio() {
@@ -208,8 +204,8 @@
             document.getElementById('nombre-visor').innerText = carta.nombre;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 54`;
 
-            // Formato pedido: ╰☆╮ NOMBRE ╰☆╮
-            document.getElementById('txt-copiar').value = "╰☆╮ " + carta.nombre.toUpperCase() + " ╰☆╮";
+            // Formato con una sola estrella: ☆ NOMBRE ☆
+            document.getElementById('txt-copiar').value = "☆ " + carta.nombre.toUpperCase() + " ☆";
 
             cantarCarta(carta.nombre);
 
