@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invertidos - Shere</title>
+    <title>Invertidos - Shere con Contador</title>
     <style>
         body { 
             background: #000; 
@@ -78,13 +78,20 @@
         .ocupado { 
             background: #ffb6c1 !important; 
             border-color: #fff; 
-            cursor: not-allowed; 
         }
-        .ocupado .n-info { color: #000; }
-        .ocupado .n-user { color: #000; } 
+        .ocupado .n-info, .ocupado .n-user { color: #000; }
+
+        /* Estilo del Contador Abajo */
+        #contador-libre {
+            color: #39ff14;
+            font-size: 14px;
+            margin-top: 20px;
+            text-shadow: 0 0 5px #39ff14;
+            text-transform: uppercase;
+        }
 
         .btn-reset { 
-            margin-top: 40px; 
+            margin-top: 20px; 
             background: #000; 
             color: #444; 
             border: 1px dashed #444; 
@@ -95,9 +102,7 @@
         }
 
         @media (max-width: 700px) {
-            #tablero { 
-                grid-template-columns: repeat(5, 1fr); 
-            }
+            #tablero { grid-template-columns: repeat(5, 1fr); }
             .celda { min-height: 80px; } 
         }
     </style>
@@ -105,7 +110,10 @@
 <body>
 
     <div class="neon-title">TABLA INVERTIDOS SHERE</div>
+    
     <div id="tablero"></div>
+
+    <div id="contador-libre">Espacios Libres: -- / --</div>
 
     <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TODO EL JUEGO</button>
 
@@ -113,11 +121,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIGURACIÓN ACTUALIZADA
         const app = initializeApp({ databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
         const refSala = ref(db, 'invertidos_juego');
-        const refIPs = ref(db, 'usuarios_ips');
         const claveAdmin = "shere2026"; 
 
         const pares = [
@@ -125,7 +131,7 @@
             "06-60", "07-70", "08-80", "09-90", "11-22",
             "12-21", "13-31", "14-41", "15-51", "16-61",
             "17-71", "18-81", "19-29", "23-32", "24-42", 
-			"25-52", "26-62", "27-72", "28-82", "33-44",
+            "25-52", "26-62", "27-72", "28-82", "33-44",
             "34-43", "35-53", "36-63", "37-73", "38-83",
             "39-49", "45-54", "46-64", "47-74", "48-84",
             "55-66", "56-65", "57-75", "58-85", "59-69",
@@ -142,30 +148,65 @@
 
         function render(datos = {}) {
             const tab = document.getElementById('tablero');
+            const cont = document.getElementById('contador-libre');
             tab.innerHTML = "";
+            
+            let ocupados = 0;
+
             pares.forEach(p => {
-                const nick = datos[p] ? datos[p].nombre : null;
+                const usuario = datos[p] ? datos[p] : null;
+                if(usuario) ocupados++;
+
                 const div = document.createElement('div');
-                div.className = `celda ${nick ? 'ocupado' : ''}`;
-                div.onclick = () => { if(!nick) anotar(p); };
-                div.innerHTML = `<span class="n-info">${p}</span><span class="n-user">${nick ? nick : '---'}</span>`;
+                div.className = `celda ${usuario ? 'ocupado' : ''}`;
+                
+                div.onclick = () => { 
+                    if(!usuario) {
+                        anotar(p); 
+                    } else {
+                        borrarUsuarioIndividual(p, usuario.nombre);
+                    }
+                };
+
+                div.innerHTML = `<span class="n-info">${p}</span><span class="n-user">${usuario ? usuario.nombre : '---'}</span>`;
                 tab.appendChild(div);
             });
+
+            const libres = pares.length - ocupados;
+            cont.innerText = `Espacios Libres: ${libres} / ${pares.length}`;
         }
 
         window.anotar = async (p) => {
             const miIP = await obtenerIP();
             if (!miIP) return alert("Error de conexión.");
-            const checkIP = await get(ref(db, 'usuarios_ips/' + miIP));
-            if (checkIP.exists()) {
+            
+            const snap = await get(refSala);
+            const datos = snap.val() || {};
+            const yaJugo = Object.values(datos).some(u => u.ip === miIP);
+
+            if (yaJugo) {
                 alert("🚫 Solo se permite un número por usuario.");
                 return;
             }
+
             const n = prompt("Número " + p + " - Tu Nick:");
             if (n && n.trim() !== "") {
                 const nickFinal = n.trim().toUpperCase();
-                await set(ref(db, 'invertidos_juego/' + p), { nombre: nickFinal });
-                await set(ref(db, 'usuarios_ips/' + miIP), true);
+                await set(ref(db, 'invertidos_juego/' + p), { 
+                    nombre: nickFinal,
+                    ip: miIP
+                });
+            }
+        };
+
+        window.borrarUsuarioIndividual = async (p, nick) => {
+            const pass = prompt(`¿Deseas borrar a "${nick}" del número ${p}?\nClave Admin:`);
+            if (pass === claveAdmin) {
+                if (confirm(`¿Eliminar a ${nick}?`)) {
+                    await remove(ref(db, 'invertidos_juego/' + p));
+                }
+            } else if (pass !== null) {
+                alert("Clave incorrecta.");
             }
         };
 
@@ -174,7 +215,6 @@
             if (pass === claveAdmin) {
                 if (confirm("¿Reiniciar todo el tablero?")) {
                     await remove(refSala);
-                    await remove(refIPs);
                 }
             }
         };
