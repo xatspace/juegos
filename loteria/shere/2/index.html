@@ -3,14 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana - Shere 2 Cartas </title>
+    <title>Loteria Mexicana 2 Cartas - Shere Admin</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <style>
-        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; overflow-x: hidden; }
+        body { 
+            background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 10px; margin: 0; overflow-x: hidden;
+            user-select: none; /* Evita que copien textos */
+        }
         .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 15px 0 10px 0; }
         
+        #estado-tabla { font-size: 14px; margin-bottom: 10px; font-weight: bold; }
+        .abierta { color: #39ff14; }
+        .cerrada { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+
         #tablero { 
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
@@ -37,54 +46,18 @@
             aspect-ratio: 2/3.2; 
         }
         
-        /* CARTA SIEMPRE NÍTIDA */
-        .img-carta { 
-            width: 100%; 
-            height: 86%; 
-            object-fit: cover; 
-            object-position: top;
-            display: block;
-            filter: none !important;
-            -webkit-filter: none !important;
-            opacity: 1 !important;
-        }
+        .img-carta { width: 100%; height: 86%; object-fit: cover; object-position: top; display: block; opacity: 1 !important; }
 
         .n-user { 
-            width: 100%;
-            height: 14%; 
-            background: #fff;
-            color: #2ecc71;
-            font-size: 9px;
-            font-weight: bold;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-transform: uppercase;
-            border-top: 1px solid #eee;
-            z-index: 10;
+            width: 100%; height: 14%; background: #fff; color: #2ecc71;
+            font-size: 9px; font-weight: bold; text-align: center;
+            display: flex; align-items: center; justify-content: center;
+            text-transform: uppercase; border-top: 1px solid #eee; z-index: 10;
         }
         
-        .seleccionada { 
-            outline: 5px solid #39ff14; 
-            outline-offset: -5px;
-            box-shadow: 0 0 20px #39ff14; 
-            z-index: 5;
-        }
+        .seleccionada { outline: 5px solid #39ff14; outline-offset: -5px; box-shadow: 0 0 20px #39ff14; z-index: 5; }
 
-        /* OCUPADO: CERO FILTROS EN LA IMAGEN */
-        .ocupado .img-carta { 
-            opacity: 1 !important; /* Imagen al 100% de brillo */
-            filter: none !important; 
-            -webkit-filter: none !important;
-        }
-        
-        /* Solo cambia el color del nombre para marcar ocupado */
-        .ocupado .n-user { 
-            background: #ff0000 !important; 
-            color: #fff !important; 
-            border-top: none; 
-        }
+        .ocupado .n-user { background: #ff0000 !important; color: #fff !important; border-top: none; }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
@@ -92,38 +65,60 @@
             border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
         }
 
-        .btn-reset { margin-top: 50px; background: none; color: #333; border: 1px dashed #333; padding: 10px; cursor: pointer; font-size: 10px; text-transform: uppercase; }
+        .admin-panel { display: flex; gap: 10px; margin-top: 40px; flex-wrap: wrap; justify-content: center; }
+        .btn-admin { background: none; color: #444; border: 1px dashed #444; padding: 10px; cursor: pointer; font-size: 10px; text-transform: uppercase; }
+        .btn-admin:hover { color: #39ff14; border-color: #39ff14; }
 
         @media (max-width: 900px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 600px) { 
-            #tablero { grid-template-columns: repeat(3, 1fr); gap: 8px; } 
-            .n-user { font-size: 11px; }
-        }
+        @media (max-width: 600px) { #tablero { grid-template-columns: repeat(3, 1fr); gap: 8px; } }
     </style>
 </head>
-<body>
-    <div class="neon-title">LOTERÍA MEXICANA 2 CARTAS | SHERE</div>
-    <div id="contador" style="color: #ffeb3b; font-size: 13px; margin-bottom: 10px;">CARGANDO...</div>
+<body oncontextmenu="return false;"> <div class="neon-title">LOTER脥A MEXICANA 2 CARTAS | SHERE</div>
+    <div id="contador" style="color: #ffeb3b; font-size: 13px; margin-bottom: 5px;">CARGANDO...</div>
+    <div id="estado-tabla" class="abierta">TABLA ABIERTA</div>
+
     <div id="tablero"></div>
+
     <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
-    <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO 2</button>
+
+    <div class="admin-panel">
+        <button class="btn-admin" onclick="toggleTabla()">馃敁 ABRIR/CERRAR TABLA</button>
+        <button class="btn-admin" onclick="resetJuego()">馃攧 REINICIAR TODO</button>
+    </div>
 
     <script>
+        // SEGURIDAD: Bloqueo de teclas de inspecci贸n
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false; // F12
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
+        };
+
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        
         const refSala = db.ref('loteria_shere_2');
         const refIPs = db.ref('ips_shere_2');
+        const refConfig = db.ref('config_shere_2');
+        const CLAVE = "shere2026";
 
-        const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
+        const nombres = ["Gallo", "Diablito", "Dama", "Catr铆n", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "脕rbol", "Mel贸n", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandol贸n", "Violoncello", "Garza", "P谩jaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Coraz贸n", "Sand铆a", "Tambor", "Camar贸n", "Jaras", "M煤sico", "Ara帽a", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacr谩n", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
 
         let seleccionadas = [];
         let datosFirebase = {};
+        let tablaAbierta = true;
 
         function pintar() {
             const tab = document.getElementById('tablero');
+            const estTxt = document.getElementById('estado-tabla');
             tab.innerHTML = "";
             let ocupadas = 0;
+
+            estTxt.innerText = tablaAbierta ? "TABLA ABIERTA" : "TABLA CERRADA";
+            estTxt.className = tablaAbierta ? "abierta" : "cerrada";
 
             nombres.forEach((nom, i) => {
                 const nick = datosFirebase[nom] ? datosFirebase[nom].nombre : null;
@@ -136,6 +131,8 @@
                 
                 div.onclick = function() {
                     if(!nick) {
+                        // L贸gica de selecci贸n de usuario
+                        if(!tablaAbierta) return alert("La tabla est谩 cerrada.");
                         if(seleccionadas.includes(nom)) {
                             seleccionadas = seleccionadas.filter(a => a !== nom);
                         } else if(seleccionadas.length < 2) {
@@ -143,6 +140,9 @@
                         }
                         document.getElementById('btn-registrar').style.display = (seleccionadas.length === 2) ? 'block' : 'none';
                         pintar();
+                    } else {
+                        // L贸gica de borrado para Admin
+                        borrarUsuario(nick);
                     }
                 };
 
@@ -152,33 +152,70 @@
             document.getElementById('contador').innerText = "DISPONIBLES: " + (54 - ocupadas) + " / 54";
         }
 
+        // Funci贸n para borrar las 2 cartas de un mismo usuario
+        async function borrarUsuario(nickABorrar) {
+            const pass = prompt(`驴Borrar las 2 cartas de "${nickABorrar}"?\nEscribe la clave:`);
+            if (pass === CLAVE) {
+                // Buscamos todas las cartas que pertenezcan a ese nick y su IP
+                let ipEncontrada = null;
+                Object.keys(datosFirebase).forEach(key => {
+                    if (datosFirebase[key].nombre === nickABorrar) {
+                        ipEncontrada = datosFirebase[key].ip;
+                        refSala.child(key).remove();
+                    }
+                });
+                if (ipEncontrada) refIPs.child(ipEncontrada).remove();
+                alert("Cartas de " + nickABorrar + " borradas.");
+            }
+        }
+
+        window.toggleTabla = function() {
+            if(prompt("Clave Admin:") === CLAVE) {
+                refConfig.child('abierta').set(!tablaAbierta);
+            }
+        };
+
         window.registrarSeleccion = function() {
+            if(!tablaAbierta) return alert("Tabla cerrada.");
             fetch('https://api.ipify.org?format=json').then(res => res.json()).then(data => {
                 const limpiaIP = data.ip.replace(/\./g, '_');
                 refIPs.child(limpiaIP).once('value', snapshot => {
                     if(!snapshot.exists()) {
-                        const nick = prompt("Nick:");
+                        const nick = prompt("Tu Nick para las 2 cartas:");
                         if(nick && nick.trim()) {
                             const n = nick.trim().toUpperCase();
-                            seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
+                            seleccionadas.forEach(s => { 
+                                refSala.child(s).set({ nombre: n, ip: limpiaIP }); 
+                            });
                             refIPs.child(limpiaIP).set(true);
                             seleccionadas = [];
                             document.getElementById('btn-registrar').style.display = 'none';
                             pintar();
                         }
+                    } else {
+                        alert("Ya has enviado tus cartas anteriormente.");
                     }
                 });
             });
         };
 
         window.resetJuego = function() {
-            if(prompt("Clave:") === "shere2026") {
+            if(prompt("Clave Maestra:") === CLAVE) {
                 refSala.remove(); refIPs.remove();
             }
         };
 
-        refSala.on('value', (snap) => { datosFirebase = snap.val() || {}; pintar(); });
+        // Escuchar datos de las cartas
+        refSala.on('value', (snap) => { 
+            datosFirebase = snap.val() || {}; 
+            pintar(); 
+        });
+
+        // Escuchar estado de la tabla (abierta/cerrada)
+        refConfig.child('abierta').on('value', (snap) => {
+            tablaAbierta = (snap.val() !== false); // Si no existe o es true, est谩 abierta
+            pintar();
+        });
     </script>
 </body>
 </html>
-
