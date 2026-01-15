@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2</title>
+    <title>Lotería Mexicana - Shere 2 Fix</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -25,37 +25,43 @@
             cursor: pointer; border-radius: 4px; 
             background: #fff; 
             position: relative; 
-            overflow: hidden; /* ESTO ES LO QUE ESCONDE LO BLANCO */
+            overflow: hidden; 
             box-sizing: border-box;
         }
         
-        /* ZOOM Y POSICIONAMIENTO PARA QUITAR BORDES ORIGINALES */
         .img-carta { 
-            width: 110%; /* Aumentamos ancho para quitar blanco lateral */
-            height: 110%; /* Aumentamos alto para quitar blanco superior */
+            width: 115%; 
+            height: 115%; 
             object-fit: contain; 
-            margin-top: -8%; /* SUBE LA IMAGEN PARA ESCONDER EL BLANCO DE ARRIBA */
-            margin-left: -5%; /* CENTRA LA IMAGEN */
+            /* SUBIMOS MÁS LA IMAGEN AQUÍ */
+            margin-top: -15%; 
+            margin-left: -7.5%; 
             pointer-events: none; 
             display: block;
             filter: none !important;
+            opacity: 1 !important; /* COLOR SIEMPRE AL 100% */
         }
 
-        /* NICK DEL USUARIO: Estilo discreto para no tapar el nombre de la carta */
         .n-user { 
             font-size: 8px; color: #39ff14; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
-            width: 100%; background: rgba(0, 0, 0, 0.75); 
-            padding: 2px 0; position: absolute; bottom: 0; left: 0;
+            width: 100%; background: rgba(0, 0, 0, 0.8); 
+            padding: 3px 0; position: absolute; bottom: 0; left: 0;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;  
             z-index: 5;
             border-top: 1px solid #39ff14;
         }
         
+        /* SELECCIONADA: SIN OPACIDAD, SOLO VERDE NEÓN */
         .seleccionada { 
             border: 5px solid #39ff14 !important;
-            box-shadow: 0 0 20px #39ff14; 
+            box-shadow: 0 0 25px #39ff14; 
             z-index: 10;
+            opacity: 1 !important;
+        }
+        .seleccionada .img-carta { 
+            opacity: 1 !important; 
+            filter: none !important; 
         }
 
         .ocupado { border-color: #ff0000 !important; }
@@ -120,7 +126,7 @@
                     }
                 };
 
-                div.innerHTML = '<img src="../../img/' + (i+1) + '.jpg" class="img-carta"><span class="n-user">' + (nick ? nick : nom.toUpperCase()) + '</span>';
+                div.innerHTML = `<img src="../../img/${i+1}.jpg" class="img-carta"><span class="n-user">${nick ? nick : nom.toUpperCase()}</span>`;
                 tab.appendChild(div);
             });
             document.getElementById('contador').innerText = "DISPONIBLES: " + (54 - ocupadas) + " / 54";
@@ -135,7 +141,7 @@
                         if(snapshot.exists()) {
                             alert("Ya registraste tus cartas.");
                         } else {
-                            const nick = prompt("Escribe tu Nick:");
+                            const nick = prompt("Nick:");
                             if(nick && nick.trim()) {
                                 const n = nick.trim().toUpperCase();
                                 seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
@@ -152,7 +158,7 @@
 
         window.resetJuego = function() {
             if(prompt("Clave:") === "shere2026") {
-                refSala.remove(); refIPs.remove(); alert("Tablero reiniciado.");
+                refSala.remove(); refIPs.remove(); alert("Reset OK");
             }
         };
 
