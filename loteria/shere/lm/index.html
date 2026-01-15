@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorteador Lotería Shere</title>
+    <title>Lotería Mágica + Chat 50/50</title>
     <style>
-        /* Reset y Base */
         * { box-sizing: border-box; }
         body { 
             background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
@@ -15,27 +14,25 @@
         
         .neon-title { 
             color: #ff00ff; text-shadow: 0 0 10px #ff00ff; 
-            font-size: clamp(14px, 2vw, 22px); text-transform: uppercase; 
-            text-align: center; padding: 10px 0; margin: 0; background: #050505;
+            font-size: 18px; text-transform: uppercase; 
+            text-align: center; padding: 5px; margin: 0; background: #0a0a0a;
         }
 
-        /* CONTENEDOR FLEXIBLE PRINCIPAL */
+        /* CONTENEDOR DIVIDIDO */
         .workspace { 
             display: flex; flex-direction: row; 
             flex: 1; width: 100%; height: 100%;
-            border-top: 1px solid #333;
         }
 
-        /* PANEL IZQUIERDO: JUEGO (50%) */
+        /* LADO IZQUIERDO: JUEGO (50%) */
         .panel-juego { 
-            flex: 1; display: flex; flex-direction: column; align-items: center;
+            width: 50%; display: flex; flex-direction: column; align-items: center;
             justify-content: center; padding: 10px; border-right: 2px solid #ff00ff;
-            background: radial-gradient(circle, #111 0%, #000 100%);
-            min-width: 300px;
+            background: #000;
         }
 
         .visor { 
-            width: min(240px, 40vw); height: min(360px, 60vh); background-color: #fff; 
+            width: 95%; max-width: 350px; height: 70%; background-color: #fff; 
             border: 4px solid #ff00ff; border-radius: 12px; 
             box-shadow: 0 0 20px rgba(255,0,255,0.3); 
             display: flex; flex-direction: column; overflow: hidden;
@@ -44,12 +41,12 @@
         .nombre-carta { 
             width: 100%; height: 15%; background: #fff; color: #000; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: clamp(12px, 2vw, 18px); text-transform: uppercase; border-top: 2px solid #000; font-weight: bold;
+            font-size: 22px; text-transform: uppercase; border-top: 2px solid #000; font-weight: bold;
         }
 
-        /* CONTROLES ABAJO DEL VISOR */
-        .area-controles { width: 100%; max-width: 400px; margin-top: 15px; }
-        .controles-btns { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
+        /* CONTROLES */
+        .area-controles { width: 100%; text-align: center; margin-top: 10px; }
+        .controles-btns { display: flex; gap: 5px; justify-content: center; margin-bottom: 8px; }
         
         button { 
             padding: 8px 12px; font-size: 11px; font-weight: bold; 
@@ -59,22 +56,26 @@
         .btn-pause { background: #ffeb3b; color: #000; }
         .btn-reset { background: #ff0000; color: #fff; }
         
-        .info-row { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; width: 100%; padding: 0 20px; }
+        #txt-copiar { 
+            width: 90%; background: #111; border: 2px solid #00e5ff; color: #00e5ff; 
+            padding: 10px; text-align: center; border-radius: 5px; cursor: pointer;
+            font-weight: bold; font-size: 16px; margin: 5px 0;
+        }
 
-        /* PANEL DERECHO: CHAT (50%) */
-        .panel-chat { flex: 1; background: #000; display: flex; flex-direction: column; }
+        /* LADO DERECHO: CHAT (50%) */
+        .panel-chat { width: 50%; background: #000; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* TABLERO / HISTORIAL FLOTANTE O MINI */
-        .mini-historial { height: 80px; width: 100%; overflow-x: auto; display: flex; gap: 5px; padding: 5px; background: #111; border-top: 1px solid #333; }
-        .item-h { min-width: 40px; height: 60px; background: #fff; border-radius: 3px; overflow: hidden; }
+        /* TABLERO MINI */
+        .mini-historial { height: 60px; width: 100%; overflow-x: auto; display: flex; gap: 5px; padding: 5px; background: #0a0a0a; }
+        .item-h { min-width: 35px; height: 50px; background: #fff; border-radius: 2px; }
         .item-h img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* MODO MÓVIL (PANTALLA VERTICAL) */
-        @media (max-width: 768px) {
+        /* RESPONSIVO */
+        @media (max-width: 800px) {
             .workspace { flex-direction: column; overflow-y: auto; }
-            .panel-juego { height: 60vh; border-right: none; border-bottom: 2px solid #ff00ff; }
-            .panel-chat { height: 50vh; }
+            .panel-juego { width: 100%; height: 60vh; border-right: none; border-bottom: 2px solid #ff00ff; }
+            .panel-chat { width: 100%; height: 50vh; }
         }
     </style>
 </head>
@@ -86,33 +87,27 @@
         
         <div class="panel-juego">
             
+            <div id="contador" style="color:#ffeb3b; font-size:14px; margin-bottom: 5px;">SALIDAS: 0 / 54</div>
+
             <div class="visor">
                 <img src="" id="img-carta-grande" style="display: none;">
                 <div class="nombre-carta" id="nombre-visor">---</div>
             </div>
 
             <div class="area-controles">
-                <div class="info-row">
-                    <span id="contador" style="color:#ffeb3b; font-size:14px;">SALIDAS: 0/54</span>
-                    <button id="btn-audio" style="background:#222; color:#fff; border:1px solid #555;" onclick="toggleAudio()">🔊</button>
-                </div>
-
                 <div class="controles-btns">
-                    <button class="btn-play" id="btn-play" onclick="comenzar()">▶ PLAY</button>
-                    <button class="btn-pause" id="btn-pause" onclick="pausar()" disabled>⏸ PAUSA</button>
-                    <button class="btn-reset" onclick="reiniciar()">🔄 RESET</button>
-                    <button style="background:#00e5ff;" onclick="abrirModal()">📋 TABLERO</button>
+                    <button class="btn-play" id="btn-play" onclick="comenzar()">▶ Play</button>
+                    <button class="btn-pause" id="btn-pause" onclick="pausar()" disabled>⏸ Pausa</button>
+                    <button class="btn-reset" onclick="reiniciar()">🔄</button>
+                    <button style="background:#00e5ff;" onclick="abrirModal()">📋 Tablero</button>
+                    <button id="btn-audio" style="background:#222; color:#fff;" onclick="toggleAudio()">🔊</button>
                 </div>
 
-                <div style="text-align:center; margin-top:10px;">
-                    <input type="text" id="txt-copiar" readonly placeholder="Click para copiar" 
-                           onclick="copiarManual()" 
-                           style="width:80%; background:#000; border:1px solid #00e5ff; color:#00e5ff; padding:8px; text-align:center; border-radius:5px; cursor:pointer;">
-                </div>
+                <input type="text" id="txt-copiar" readonly placeholder="Click para copiar" onclick="copiarManual()">
 
-                <div style="text-align:center; margin-top:10px;">
-                    <label style="font-size:10px; color:#aaa;">VELOCIDAD: <span id="val-vel">4</span>s</label><br>
-                    <input type="range" min="2" max="8" step="1" value="4" oninput="cambiarVelocidad(this.value)" style="width:150px; accent-color:#39ff14;">
+                <div style="margin-top:5px;">
+                    <label style="font-size:10px; color:#aaa;">SEG: <span id="val-vel">4</span></label>
+                    <input type="range" min="2" max="8" step="1" value="4" oninput="cambiarVelocidad(this.value)" style="width:100px; accent-color:#39ff14;">
                 </div>
             </div>
 
@@ -125,16 +120,16 @@
 
     </div>
 
-    <div id="modal-lista" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center;">
-        <div style="background:#111; width:90%; max-width:800px; border:2px solid #00e5ff; border-radius:10px; padding:20px; position:relative;">
-            <span onclick="cerrarModal()" style="position:absolute; top:5px; right:15px; color:#ff0000; font-size:40px; cursor:pointer;">&times;</span>
-            <div id="grid-tablero" style="display:grid; grid-template-columns:repeat(9, 1fr); gap:5px; max-height:70vh; overflow-y:auto;"></div>
+    <div id="modal-lista" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:#111; width:95%; max-width:850px; border:2px solid #00e5ff; border-radius:10px; padding:15px; position:relative;">
+            <span onclick="cerrarModal()" style="position:absolute; top:-5px; right:15px; color:#ff0000; font-size:40px; cursor:pointer;">&times;</span>
+            <div id="grid-tablero" style="display:grid; grid-template-columns:repeat(9, 1fr); gap:5px; max-height:80vh; overflow-y:auto; padding:10px;"></div>
         </div>
     </div>
 
     <script>
-        // RUTA CORREGIDA SEGÚN TU SOLICITUD
-        const RUTA_IMG = "loteria/shere/lm/"; 
+        // RUTA DE IMÁGENES ACTUALIZADA
+        const RUTA_IMG = "loteria/shere/lm/img/"; 
         
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
         
@@ -167,7 +162,7 @@
             document.execCommand('copy');
             const originalVal = el.value;
             el.value = "¡COPIADO!";
-            setTimeout(() => el.value = originalVal, 1000);
+            setTimeout(() => el.value = originalVal, 800);
         }
 
         function prepararMazo() {
@@ -192,7 +187,6 @@
 
         function sacarCarta() {
             if (indiceActual >= mazo.length) { pausar(); return; }
-            
             const carta = mazo[indiceActual];
             const fullPath = RUTA_IMG + carta.id + ".jpg";
             cartasSalidas.push(carta);
@@ -202,20 +196,24 @@
             document.getElementById('nombre-visor').innerText = carta.nombre;
             document.getElementById('contador').innerText = `SALIDAS: ${indiceActual + 1}/54`;
             
-            const txt = "☆ " + carta.nombre.toUpperCase() + " ☆";
-            document.getElementById('txt-copiar').value = txt;
+            const textoFinal = "☆ " + carta.nombre.toUpperCase() + " ☆";
+            document.getElementById('txt-copiar').value = textoFinal;
             
-            // Intento de auto-copia
-            navigator.clipboard.writeText(txt).catch(() => {});
+            // Auto-copia silenciosa
+            const temp = document.createElement('textarea');
+            temp.value = textoFinal;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
 
             cantar(carta.nombre);
 
-            // Historial horizontal
             const item = document.createElement('div');
             item.className = 'item-h';
-            item.innerHTML = `<img src="${fullPath}" title="${carta.nombre}">`;
+            item.innerHTML = `<img src="${fullPath}">`;
             document.getElementById('mini-historial').prepend(item);
-
+            
             indiceActual++;
         }
 
@@ -223,10 +221,10 @@
             const grid = document.getElementById('grid-tablero');
             grid.innerHTML = "";
             cartasSalidas.forEach(c => {
-                const div = document.createElement('div');
-                div.style = "background:#fff; padding:2px; border-radius:3px;";
-                div.innerHTML = `<img src="${RUTA_IMG}${c.id}.jpg" style="width:100%;">`;
-                grid.appendChild(div);
+                const d = document.createElement('div');
+                d.style = "background:#fff; padding:2px; border-radius:3px;";
+                d.innerHTML = `<img src="${RUTA_IMG}${c.id}.jpg" style="width:100%;">`;
+                grid.appendChild(d);
             });
             document.getElementById('modal-lista').style.display = "flex";
         }
@@ -234,7 +232,7 @@
         function cerrarModal() { document.getElementById('modal-lista').style.display = "none"; }
 
         function reiniciar() {
-            if(!confirm("¿Reiniciar?")) return;
+            if(!confirm("¿Deseas reiniciar?")) return;
             window.speechSynthesis.cancel();
             pausar();
             mazo = []; indiceActual = 0; cartasSalidas = [];
