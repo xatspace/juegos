@@ -31,10 +31,8 @@
         
         .img-carta { 
             width: 100%; 
-            /* ACHICAMOS LA ALTURA PARA QUE EL NOMBRE DE LA CARTA SUBA */
             height: 94%; 
             object-fit: cover; 
-            /* LA PEGAMOS ARRIBA */
             object-position: top; 
             margin-top: 0; 
             pointer-events: none; 
@@ -43,23 +41,34 @@
             opacity: 1 !important;
         }
 
-        /* NICK DEL USUARIO: Súper fino abajo */
+        /* BARRA DE NOMBRE CON FONDO BLANCO Y LETRAS VERDES */
         .n-user { 
-            font-size: 8px; color: #39ff14; font-weight: bold; 
-            text-transform: uppercase; text-align: center; 
-            width: 100%; background: rgba(0, 0, 0, 0.8); 
-            padding: 2px 0; position: absolute; bottom: 0; left: 0;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;  
+            font-size: 8px; 
+            color: #2ecc71; /* Verde fuerte para que sea legible en blanco */
+            font-weight: bold; 
+            text-transform: uppercase; 
+            text-align: center; 
+            width: 100%; 
+            background: #fff; /* FONDO BLANCO */
+            padding: 3px 0; 
+            position: absolute; 
+            bottom: 0; 
+            left: 0;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;  
             z-index: 5;
-            border-top: 1px solid #39ff14;
+            border-top: 1px solid #eee;
         }
         
+        /* SELECCIONADA: EL REMARCO NEÓN */
         .seleccionada { 
             border: 5px solid #39ff14 !important;
             box-shadow: 0 0 20px #39ff14; 
             z-index: 10;
         }
 
+        /* OCUPADA: GRISÁCEA CON NOMBRE ROJO */
         .ocupado { border-color: #ff0000 !important; }
         .ocupado .n-user { background: #ff0000; color: #fff; border-top: 1px solid #fff; }
         .ocupado .img-carta { opacity: 0.4; filter: grayscale(100%); }
@@ -78,7 +87,7 @@
 </head>
 <body>
 
-    <div class="neon-title">LOTERÍA MEXICANA 2</div>
+    <div class="neon-title">LOTERÍA MEXICANA 2 CARTAS | SHERE</div>
     <div id="contador">CARGANDO...</div>
     <div id="tablero"></div>
     <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
