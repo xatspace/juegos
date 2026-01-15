@@ -3,113 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Lotería ☆ </title>
+    <title>Sorteador Lotería ☆ Shere</title>
     <style>
-        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 5px; margin: 0; overflow-x: hidden; }
-        .neon-title { color: #ff00ff; text-shadow: 0 0 10px #ff00ff; font-size: 22px; text-transform: uppercase; margin: 10px 0; }
+        body { 
+            background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 5px; margin: 0; overflow-x: hidden; 
+        }
+        .neon-title { 
+            color: #ff00ff; text-shadow: 0 0 10px #ff00ff; 
+            font-size: clamp(18px, 5vw, 24px); text-transform: uppercase; margin: 10px 0; 
+        }
 
-        /* CONTENEDOR PRINCIPAL JUEGO */
-        .main-container { display: flex; flex-direction: row; gap: 20px; width: 98%; max-width: 1000px; justify-content: center; align-items: flex-start; margin-bottom: 20px; }
+        /* CONTENEDOR PRINCIPAL DUAL */
+        .layout-horizontal {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Divide la pantalla en dos mitades exactas */
+            width: 100vw;
+            height: 90vh;
+            gap: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        /* SECCIÓN IZQUIERDA: LOTERÍA */
+        .loteria-section {
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
 
         /* VISOR PRINCIPAL */
         .visor { 
-            width: 240px; height: 360px; background-color: #fff; 
+            width: 220px; height: 330px; background-color: #fff; 
             border: 4px solid #ff00ff; border-radius: 12px; 
             box-shadow: 0 0 20px rgba(255, 0, 255, 0.4); 
             display: flex; flex-direction: column; align-items: center; overflow: hidden;
         }
-        #img-carta-grande { width: 100%; height: 310px; object-fit: contain; background: #fff; }
+        #img-carta-grande { width: 100%; height: 280px; object-fit: contain; background: #fff; }
         .nombre-carta { 
             width: 100%; height: 50px; background: #fff; color: #000; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 20px; text-transform: uppercase; border-top: 2px solid #000; font-weight: bold;
+            font-size: 18px; text-transform: uppercase; border-top: 2px solid #000; font-weight: bold;
         }
 
         /* CONTROLES */
-        .controles { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-        button { padding: 10px 15px; font-size: 12px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
+        .controles { margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+        button { padding: 8px 12px; font-size: 10px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
         .btn-play { background: #39ff14; color: #000; }
         .btn-pause { background: #ffeb3b; color: #000; }
         .btn-reset { background: #ff0000; color: #fff; }
         .btn-lista { background: #00e5ff; color: #000; margin-top: 10px; width: 100%; }
 
-        /* CONTROL DE VELOCIDAD */
-        .speed-control { width: 100%; margin-top: 12px; text-align: center; background: #111; padding: 8px; border-radius: 8px; border: 1px solid #333; }
-        .speed-control label { font-size: 11px; color: #ffeb3b; display: block; margin-bottom: 5px; }
-        .slider { width: 90%; cursor: pointer; accent-color: #39ff14; }
-
         /* HISTORIAL */
-        .historial-container { display: flex; flex-direction: column; width: 220px; }
-        .historial { height: 260px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 8px; overflow-y: auto; }
-        .item-historial { display: flex; align-items: center; gap: 8px; background: #222; padding: 4px; border-radius: 6px; margin-bottom: 6px; height: 45px; border: 1px solid #444; }
-        .img-mini { width: 28px; height: 38px; object-fit: contain; background: #fff; border-radius: 2px; }
+        .historial-container { display: flex; flex-direction: column; width: 160px; }
+        .historial { height: 220px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 8px; overflow-y: auto; }
+        .item-historial { display: flex; align-items: center; gap: 5px; background: #222; padding: 4px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #444; font-size: 11px; }
+        .img-mini { width: 25px; height: 35px; object-fit: contain; background: #fff; border-radius: 2px; }
+
+        /* SECCIÓN DERECHA: CHAT */
+        .chat-section {
+            width: 100%;
+            height: 100%;
+            background: #111;
+            border: 2px solid #ff00ff;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .chat-section iframe { width: 100%; height: 100%; border: none; }
 
         /* CAJA COPIAR */
-        .chat-tools { margin-top: 15px; width: 100%; background: #222; padding: 8px; border-radius: 8px; border: 1px solid #00e5ff; display: flex; flex-direction: column; gap: 5px; }
-        #txt-copiar { background: #000; border: 1px solid #444; color: #00e5ff; padding: 8px; border-radius: 4px; font-size: 14px; text-align: center; font-weight: bold; width: 90%; align-self: center; }
+        .chat-tools { margin-top: 10px; width: 100%; background: #222; padding: 5px; border-radius: 8px; border: 1px solid #00e5ff; display: flex; flex-direction: column; gap: 5px; }
+        #txt-copiar { background: #000; border: 1px solid #444; color: #00e5ff; padding: 5px; border-radius: 4px; font-size: 12px; text-align: center; font-weight: bold; width: 90%; align-self: center; }
 
-        /* CONTENEDOR XAT */
-        .xat-section { width: 100%; display: flex; justify-content: center; background: #111; padding: 15px 0; border-top: 2px solid #333; }
-
-        @media (max-width: 600px) {
-            .main-container { flex-direction: column; align-items: center; }
-            iframe { width: 95vw !important; }
+        /* MÓVILES */
+        @media (max-width: 900px) {
+            .layout-horizontal { grid-template-columns: 1fr; height: auto; }
+            .chat-section { height: 500px; }
+            .loteria-section { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
+    <div class="layout-horizontal">
+        
+        <div class="loteria-section">
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <div class="visor" id="visor">
+                    <img src="" id="img-carta-grande" style="display: none;">
+                    <div class="nombre-carta" id="nombre-visor">---</div>
+                </div>
+                
+                <div style="display:flex; align-items:center; margin-top:10px; gap: 10px;">
+                    <p id="contador-cartas" style="color:#ffeb3b; margin:0; font-size: 14px;">SALIERON: 0 / 54</p>
+                    <button id="btn-audio" style="background:none; border:2px solid #555; border-radius:50%; width:35px; height:35px; color:#fff; cursor:pointer;" onclick="toggleAudio()">🔊</button>
+                </div>
 
-    <div class="main-container">
-        <div style="display:flex; flex-direction:column; align-items:center;">
-            <div class="visor" id="visor">
-                <img src="" id="img-carta-grande" style="display: none;">
-                <div class="nombre-carta" id="nombre-visor">---</div>
-            </div>
-            
-            <div style="display:flex; align-items:center; margin-top:10px; gap: 15px;">
-                <p id="contador-cartas" style="color:#ffeb3b; margin:0; font-size: 16px;">SALIERON: 0 / 54</p>
-                <button id="btn-audio" style="background:none; border:2px solid #555; border-radius:50%; width:40px; height:40px; color:#fff; cursor:pointer;" onclick="toggleAudio()">🔊</button>
+                <div class="controles">
+                    <button class="btn-play" id="btn-play" onclick="comenzar()">▶ Play</button>
+                    <button class="btn-pause" id="btn-pause" onclick="pausar()" disabled>⏸ Pausa</button>
+                    <button class="btn-reset" onclick="reiniciar()">🔄 Reset</button>
+                </div>
+
+                <div style="width:100%; margin-top:10px; text-align:center;">
+                    <label style="font-size:10px;">VELOCIDAD: <span id="val-velocidad">4.0</span>s</label><br>
+                    <input type="range" min="2" max="8" step="0.5" value="4" style="width:90%;" oninput="cambiarVelocidad(this.value)">
+                </div>
             </div>
 
-            <div class="controles">
-                <button class="btn-play" id="btn-play" onclick="comenzar()">▶ Play</button>
-                <button class="btn-pause" id="btn-pause" onclick="pausar()" disabled>⏸ Pausa</button>
-                <button class="btn-reset" onclick="reiniciar()">🔄 Reset</button>
-            </div>
-
-            <div class="speed-control">
-                <label>VELOCIDAD: <span id="val-velocidad">4.0</span>s</label>
-                <input type="range" min="2" max="8" step="0.5" value="4" class="slider" id="speed-slider" oninput="cambiarVelocidad(this.value)">
+            <div class="historial-container">
+                <div class="historial" id="lista-historial"></div>
+                <button class="btn-lista" onclick="abrirModal()">📋 TABLERO</button>
+                <div class="chat-tools">
+                    <input type="text" id="txt-copiar" readonly placeholder="Esperando...">
+                    <button class="btn-play" style="width:100%; font-size:9px; background:#00e5ff;" onclick="copiarManual()">COPIAR</button>
+                </div>
             </div>
         </div>
 
-        <div class="historial-container">
-            <div class="historial" id="lista-historial"></div>
-            
-            <button class="btn-lista" onclick="abrirModal()">📋 TABLERO DE SALIDA</button>
-
-            <div class="chat-tools">
-                <span style="font-size: 10px; color: #aaa; text-align: center;">AUTO-COPIA ACTIVA:</span>
-                <input type="text" id="txt-copiar" readonly placeholder="Esperando...">
-                <button class="btn-play" style="width:100%; font-size:10px; background:#00e5ff;" onclick="copiarManual()">COPIAR MANUAL</button>
-            </div>
+        <div class="chat-section">
+            <iframe src="https://xat.com/embed/chat.php#id=220526680&gn=RINCONCITO_MAGICO_MUSICAL" allow="clipboard-write" frameborder="0" scrolling="no"></iframe>
         </div>
-    </div>
 
-    <div class="xat-section">
-        <iframe src="https://xat.com/embed/chat.php#id=220526680&gn=RINCONCITO_MAGICO_MUSICAL" allow="clipboard-write" width="650" height="486" frameborder="0" scrolling="no"></iframe>
     </div>
 
     <div id="modal-lista" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:1000; justify-content:center; align-items:center;">
-        <div style="background:#111; width:95%; max-width:900px; border:2px solid #00e5ff; border-radius:10px; padding:15px; position:relative;">
+        <div style="background:#111; width:95%; max-width:800px; border:2px solid #00e5ff; border-radius:10px; padding:15px; position:relative;">
             <span onclick="cerrarModal()" style="position:absolute; top:0px; right:15px; color:#ff0000; font-size:40px; cursor:pointer;">&times;</span>
-            <div id="lista-completa-grid" style="display:grid; grid-template-columns:repeat(9, 1fr); gap:5px; max-height:80vh; overflow-y:auto; padding:10px;"></div>
+            <div id="lista-completa-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(60px, 1fr)); gap:5px; max-height:80vh; overflow-y:auto; padding:10px;"></div>
         </div>
     </div>
 
     <script>
-        const RUTA_IMG = "mexicana/img/"; 
+        // RUTA CORREGIDA
+        const RUTA_IMG = "loteria/mexicana/img/"; 
+        
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
         
         let mazo = [], indiceActual = 0, intervalo = null, cartasSalidas = [], audioActivado = true, velocidadS = 4;
@@ -123,7 +159,6 @@
         function toggleAudio() {
             audioActivado = !audioActivado;
             document.getElementById('btn-audio').innerText = audioActivado ? "🔊" : "🔇";
-            if(!audioActivado) window.speechSynthesis.cancel();
         }
 
         function cantarCarta(texto) {
@@ -136,21 +171,18 @@
 
         function copiarManual() {
             const input = document.getElementById('txt-copiar');
-            if(!input.value) return;
             input.select();
             document.execCommand('copy');
         }
 
-        function prepararMazo() {
-            mazo = nombres.map((nom, i) => ({ id: i + 1, nombre: nom }));
-            mazo.sort(() => Math.random() - 0.5);
-        }
-
         function comenzar() {
-            if (mazo.length === 0) prepararMazo();
+            if (mazo.length === 0) {
+                mazo = nombres.map((nom, i) => ({ id: i + 1, nombre: nom }));
+                mazo.sort(() => Math.random() - 0.5);
+            }
             document.getElementById('btn-play').disabled = true;
             document.getElementById('btn-pause').disabled = false;
-            if(indiceActual === 0) sacarCarta();
+            sacarCarta();
             intervalo = setInterval(() => {
                 if (indiceActual < mazo.length) sacarCarta();
                 else pausar();
@@ -165,6 +197,7 @@
         }
 
         function sacarCarta() {
+            if (indiceActual >= mazo.length) return;
             const carta = mazo[indiceActual];
             const fullPath = RUTA_IMG + carta.id + ".jpg";
             cartasSalidas.push(carta);
@@ -177,20 +210,11 @@
             const textoFinal = "☆ " + carta.nombre.toUpperCase() + " ☆";
             document.getElementById('txt-copiar').value = textoFinal;
             
-            // COPIA AUTOMÁTICA REFORZADA
-            const temp = document.createElement('textarea');
-            temp.value = textoFinal;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            document.body.removeChild(temp);
-
             cantarCarta(carta.nombre);
 
-            // Historial
             const item = document.createElement('div');
             item.className = 'item-historial';
-            item.innerHTML = `<img class="img-mini" src="${fullPath}"><span><small>#${indiceActual + 1}</small> <b>${carta.nombre}</b></span>`;
+            item.innerHTML = `<img class="img-mini" src="${fullPath}"><span><b>${carta.nombre}</b></span>`;
             document.getElementById('lista-historial').prepend(item);
             
             indiceActual++;
@@ -199,10 +223,10 @@
         function abrirModal() {
             const grid = document.getElementById('lista-completa-grid');
             grid.innerHTML = "";
-            cartasSalidas.forEach((c, i) => {
+            cartasSalidas.forEach((c) => {
                 const item = document.createElement('div');
                 item.style = "background:#fff; color:#000; padding:2px; border-radius:3px; text-align:center; border:1px solid #ff00ff;";
-                item.innerHTML = `<div style="font-size:9px; color:#f0f">#${i+1}</div><img src="${RUTA_IMG}${c.id}.jpg" style="width:100%; display:block;">`;
+                item.innerHTML = `<img src="${RUTA_IMG}${c.id}.jpg" style="width:100%; display:block;">`;
                 grid.appendChild(item);
             });
             document.getElementById('modal-lista').style.display = "flex";
@@ -211,8 +235,7 @@
         function cerrarModal() { document.getElementById('modal-lista').style.display = "none"; }
 
         function reiniciar() {
-            if(!confirm("¿Deseas reiniciar el sorteador?")) return;
-            window.speechSynthesis.cancel();
+            if(!confirm("¿Reiniciar?")) return;
             pausar();
             mazo = []; indiceActual = 0; cartasSalidas = [];
             document.getElementById('img-carta-grande').style.display = "none";
@@ -224,5 +247,3 @@
     </script>
 </body>
 </html>
-
-
