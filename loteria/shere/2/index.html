@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere 2</title>
+    <title>Lotería Mexicana - Shere 2 Cartas</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -29,20 +29,21 @@
             box-sizing: border-box;
         }
         
-        /* AJUSTE EQUILIBRADO: QUITA BLANCO ARRIBA, MUESTRA NOMBRE ABAJO */
         .img-carta { 
             width: 100%; 
-            height: 108%; /* Un poco más alta para tener margen de maniobra */
+            /* ACHICAMOS LA ALTURA PARA QUE EL NOMBRE DE LA CARTA SUBA */
+            height: 94%; 
             object-fit: cover; 
-            object-position: center bottom; /* PRIORIZA LA PARTE DE ABAJO DE LA FOTO */
-            margin-top: -8%; /* SUBE LO JUSTO PARA ESCONDER EL BLANCO SUPERIOR */
+            /* LA PEGAMOS ARRIBA */
+            object-position: top; 
+            margin-top: 0; 
             pointer-events: none; 
             display: block;
             filter: none !important;
             opacity: 1 !important;
         }
 
-        /* NICK DEL USUARIO: Ultra delgado para no tapar el nombre de la carta */
+        /* NICK DEL USUARIO: Súper fino abajo */
         .n-user { 
             font-size: 8px; color: #39ff14; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
@@ -59,14 +60,9 @@
             z-index: 10;
         }
 
-        .seleccionada .img-carta { 
-            opacity: 1 !important; 
-            filter: brightness(1.1) !important; 
-        }
-
         .ocupado { border-color: #ff0000 !important; }
         .ocupado .n-user { background: #ff0000; color: #fff; border-top: 1px solid #fff; }
-        .ocupado .img-carta { opacity: 0.3; filter: grayscale(100%); }
+        .ocupado .img-carta { opacity: 0.4; filter: grayscale(100%); }
 
         #btn-registrar { 
             display: none; margin-top: 20px; background: #39ff14; color: #000; 
@@ -89,7 +85,6 @@
     <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO 2</button>
 
     <script>
-        // Configuración y lógica de Firebase (se mantiene igual)
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -147,7 +142,7 @@
                                 const n = nick.trim().toUpperCase();
                                 seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                                 refIPs.child(limpiaIP).set(true);
-                                alert("¡Cartas enviadas!");
+                                alert("¡Listo!");
                                 seleccionadas = [];
                                 document.getElementById('btn-registrar').style.display = 'none';
                                 pintar();
