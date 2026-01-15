@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotería Mexicana - Shere</title>
+    <style>
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        .neon-title { color: #00e5ff; text-shadow: 0 0 15px #00e5ff; font-size: 28px; text-transform: uppercase; margin: 15px 0 5px 0; }
+        
+        #contador { color: #ffeb3b; font-size: 14px; margin-bottom: 10px; letter-spacing: 1px; }
+
+        #tablero { 
+            display: grid; 
+            grid-template-columns: repeat(9, 1fr); 
+            gap: 8px; 
+            width: 100%; 
+            max-width: 1000px; 
+            background: #111; 
+            border: 3px solid #00e5ff; 
+            padding: 12px; 
+            border-radius: 12px; 
+            box-sizing: border-box;
+        }
+
+        .celda { 
+            aspect-ratio: 1 / 1.5; 
+            border: 2px solid #444; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            background: #fff; 
+            transition: 0.3s; 
+            padding: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .img-carta { width: 100%; height: 80%; object-fit: contain; display: block; pointer-events: none; }
+
+        .n-user { font-size: 11px; color: #000; font-weight: bold; text-transform: uppercase; text-align: center; width: 100%; padding: 2px 0; z-index: 2; pointer-events: none; }
+        
+        .seleccionada { border: 4px solid #00e5ff !important; box-shadow: 0 0 15px #00e5ff; transform: scale(1.05); }
+
+        .ocupado { border: 3px solid #ff0000 !important; cursor: not-allowed; opacity: 0.8; }
+        .ocupado .n-user { background: rgba(211, 47, 47, 0.9); color: #fff; position: absolute; bottom: 0; left: 0; }
+
+        #btn-registrar {
+            display: none;
+            margin-top: 20px;
+            background: #00e5ff;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-weight: bold;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px #00e5ff;
+        }
+
+        .btn-reset { margin-top: 30px; background: #000; color: #555; border: 1px dashed #444; padding: 10px; cursor: pointer; font-size: 10px; }
+
+        @media (max-width: 800px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
+        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(3, 1fr); } }
+    </style>
+</head>
+<body>
+
+    <div class="neon-title">LOTERÍA MEXICANA SHERE</div>
+    <div id="contador">CARTAS DISPONIBLES: 54 / 54</div>
+    
+    <div id="tablero"></div>
+
+    <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
+
+    <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TABLERO</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const app = initializeApp({ databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" });
+        const db = getDatabase(app);
+        const refSala = ref(db, 'loteria_local_final');
+        const refIPs = ref(db, 'ips_local_final');
+
+        const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
+
+        let seleccionadas = [];
+
+        function render(datos = {}) {
+            const tab = document.getElementById('tablero');
+            const contDisp = document.getElementById('contador');
+            tab.innerHTML = "";
+            let ocupadasCount = 0;
+
+            nombres.forEach((nom, index) => {
+                const num = index + 1;
+                const nick = datos[nom] ? datos[nom].nombre : null;
+                if(nick) ocupadasCount++;
+
+                const div = document.createElement('div');
+                div.className = `celda ${nick ? 'ocupado' : ''}`;
+                
+                if (seleccionadas.includes(nom)) div.classList.add('seleccionada');
+
+                div.onclick = () => { if(!nick) toggleCarta(nom, div); };
+                
+                // RUTA CORREGIDA: Sube dos niveles para salir de /shere/2/
+                const imgUrl = `../../img/${num}.jpg`;
+
+                div.innerHTML = `
+                    <img src="${imgUrl}" class="img-carta" alt="${nom}">
+                    <span class="n-user">${nick ? nick : nom.toUpperCase()}</span>
+                `;
+                tab.appendChild(div);
+            });
+
+            contDisp.innerText = `CARTAS DISPONIBLES: ${nombres.length - ocupadasCount} / 54`;
+        }
+
+        function toggleCarta(nom, el) {
+            if (seleccionadas.includes(nom)) {
+                seleccionadas = seleccionadas.filter(item => item !== nom);
+                el.classList.remove('seleccionada');
+            } else {
+                if (seleccionadas.length < 2) {
+                    seleccionadas.push(nom);
+                    el.classList.add('seleccionada');
+                } else {
+                    alert("Solo puedes elegir 2 cartas.");
+                }
+            }
+            document.getElementById('btn-registrar').style.display = (seleccionadas.length === 2) ? 'block' : 'none';
+        }
+
+        window.registrarSeleccion = async () => {
+            const miIP = await fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => d.ip.replace(/\./g, '_')).catch(() => "t"+Math.random());
+            
+            const checkIP = await get(ref(db, 'ips_local_final/' + miIP));
+            if (checkIP.exists()) return alert("🚫 Esta IP ya registró sus cartas.");
+
+            const nick = prompt("Ingresa tu Nick para las 2 cartas:");
+            if (nick && nick.trim()) {
+                const nickFinal = nick.trim().toUpperCase();
+                
+                for (let nom of seleccionadas) {
+                    await set(ref(db, 'loteria_local_final/' + nom), { nombre: nickFinal });
+                }
+                
+                await set(ref(db, 'ips_local_final/' + miIP), true);
+                
+                alert("¡Cartas registradas con éxito!");
+                seleccionadas = [];
+                document.getElementById('btn-registrar').style.display = 'none';
+            }
+        };
+
+        window.resetJuego = async () => {
+            if (prompt("Clave:") === "shere2026") {
+                await remove(refSala);
+                await remove(refIPs);
+            }
+        };
+
+        onValue(refSala, (snap) => render(snap.val() || {}));
+    </script>
+</body>
+</html>
