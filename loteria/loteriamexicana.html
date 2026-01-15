@@ -3,57 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Lotería Mexicana</title>
+    <title>Sorteador Lotería</title>
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         .neon-title { color: #ff00ff; text-shadow: 0 0 15px #ff00ff; font-size: 24px; text-transform: uppercase; margin: 15px 0; }
 
-        .main-container { display: flex; flex-direction: row; gap: 20px; width: 95%; max-width: 900px; justify-content: center; }
+        .main-container { display: flex; flex-direction: row; gap: 20px; width: 95%; max-width: 1100px; justify-content: center; }
 
-        /* VISOR CON MEDIDA EXACTA */
+        /* VISOR PRINCIPAL - MEDIDAS FIJAS */
         .visor { 
-            width: 280px; /* Ancho fijo */
-            height: 420px; /* Alto fijo (Proporción exacta 2:3) */
-            background-color: #fff; 
-            border: 5px solid #ff00ff; 
-            border-radius: 15px; 
+            width: 280px; height: 420px; background-color: #fff; 
+            border: 5px solid #ff00ff; border-radius: 15px; 
             box-shadow: 0 0 25px rgba(255, 0, 255, 0.5); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
-            justify-content: flex-start; 
-            overflow: hidden;
-            position: relative;
+            display: flex; flex-direction: column; align-items: center; overflow: hidden;
         }
 
-        /* LA IMAGEN AHORA ES UN ELEMENTO REAL */
-        #img-carta-grande {
-            width: 100%;
-            height: 360px; /* Espacio exacto para la imagen */
-            object-fit: contain; /* Obliga a que se vea entera sin estirar */
-            display: block;
-            margin: 0 auto;
-            background: #fff;
-        }
+        #img-carta-grande { width: 100%; height: 360px; object-fit: contain; background: #fff; }
         
         .nombre-carta { 
-            width: 100%;
-            height: 60px; /* Espacio para el nombre */
-            background: #fff; 
-            color: #000; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 24px; 
-            text-transform: uppercase; 
-            border-top: 2px solid #000; 
-            font-weight: bold;
-            margin: 0;
+            width: 100%; height: 60px; background: #fff; color: #000; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 24px; text-transform: uppercase; border-top: 2px solid #000; font-weight: bold;
         }
 
-        .controles { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .controles { margin-top: 20px; display: flex; gap: 10px; }
         button { padding: 12px 20px; font-size: 14px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
-        
         .btn-play { background: #39ff14; color: #000; }
         .btn-pause { background: #ffeb3b; color: #000; }
         .btn-reset { background: #ff0000; color: #fff; }
@@ -62,27 +36,30 @@
         /* HISTORIAL */
         .historial-container { display: flex; flex-direction: column; width: 230px; }
         .historial { height: 420px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 10px; overflow-y: auto; }
-        .item-historial { 
-            display: flex; align-items: center; gap: 10px; background: #222; 
-            padding: 8px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; height: 75px;
-        }
+        .item-historial { display: flex; align-items: center; gap: 10px; background: #222; padding: 8px; border-radius: 8px; margin-bottom: 10px; height: 75px; }
         .img-mini { width: 45px; height: 60px; object-fit: contain; background: #fff; border-radius: 4px; }
 
-        /* MODAL */
-        #modal-lista { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; }
-        .modal-contenido { background: #111; width: 90%; max-width: 600px; height: 85%; border: 2px solid #00e5ff; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; position: relative; }
-        .cerrar-modal { position: absolute; top: 10px; right: 15px; color: #ff0000; font-size: 35px; cursor: pointer; }
-        #lista-completa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; overflow-y: auto; margin-top: 25px; }
-        .item-completo { background: #fff; color: #000; padding: 8px; border-radius: 8px; text-align: center; font-size: 11px; font-weight: bold; }
-        .item-completo img { width: 100%; height: 120px; object-fit: contain; }
+        /* MODAL - DISEÑO 9x6 */
+        #modal-lista { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
+        .modal-contenido { 
+            background: #111; width: 95%; max-width: 1000px; height: 90%; 
+            border: 2px solid #00e5ff; border-radius: 15px; padding: 20px; 
+            display: flex; flex-direction: column; position: relative; 
+        }
+        .cerrar-modal { position: absolute; top: 5px; right: 15px; color: #ff0000; font-size: 40px; cursor: pointer; }
+        
+        #lista-completa-grid { 
+            display: grid; 
+            grid-template-columns: repeat(9, 1fr); /* 9 COLUMNAS */
+            gap: 5px; 
+            margin-top: 20px; 
+        }
+        .item-completo { background: #fff; color: #000; padding: 3px; border-radius: 4px; text-align: center; font-size: 9px; font-weight: bold; border: 1px solid #ff00ff; }
+        .item-completo img { width: 100%; aspect-ratio: 2/3; object-fit: contain; }
 
-        @media (max-width: 600px) {
+        @media (max-width: 800px) {
+            #lista-completa-grid { grid-template-columns: repeat(6, 1fr); } /* En móviles baja a 6 para que no sea tan minúsculo */
             .main-container { flex-direction: column; align-items: center; }
-            .visor { width: 260px; height: 390px; }
-            #img-carta-grande { height: 335px; }
-            .nombre-carta { height: 55px; font-size: 20px; }
-            .historial-container { width: 100%; }
-            .historial { height: 200px; }
         }
     </style>
 </head>
@@ -116,14 +93,13 @@
     <div id="modal-lista">
         <div class="modal-contenido">
             <span class="cerrar-modal" onclick="cerrarModal()">&times;</span>
-            <h2 style="color:#00e5ff; text-align:center; margin:0;">ORDEN DE SALIDA</h2>
+            <h2 style="color:#00e5ff; text-align:center; margin:0; font-size: 18px;">TABLERO DE SALIDA (9x6)</h2>
             <div id="lista-completa-grid"></div>
         </div>
     </div>
 
     <script>
         const RUTA_IMG = "mexicana/img/"; 
-
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
         
         let mazo = [];
@@ -159,7 +135,6 @@
         function sacarCarta() {
             const carta = mazo[indiceActual];
             const fullPath = RUTA_IMG + carta.id + ".jpg";
-            
             cartasSalidas.push(carta);
             
             const imgGrande = document.getElementById('img-carta-grande');
@@ -173,26 +148,35 @@
             item.className = 'item-historial';
             item.innerHTML = `<img class="img-mini" src="${fullPath}"><span><b>#${indiceActual + 1}</b><br><small>${carta.nombre.toUpperCase()}</small></span>`;
             document.getElementById('lista-historial').prepend(item);
-
             indiceActual++;
         }
 
         function abrirModal() {
             const grid = document.getElementById('lista-completa-grid');
             grid.innerHTML = "";
-            cartasSalidas.forEach((c, i) => {
+            // Mostramos las 54 posiciones, pero solo las que han salido tienen imagen
+            for(let i=0; i<54; i++) {
                 const item = document.createElement('div');
                 item.className = 'item-completo';
-                item.innerHTML = `<div style="color: #ff00ff; font-size:12px;">#${i+1}</div><img src="${RUTA_IMG}${c.id}.jpg"><div>${c.nombre}</div>`;
+                if(cartasSalidas[i]) {
+                    item.innerHTML = `
+                        <div style="color: #ff00ff; font-size:8px;">#${i+1}</div>
+                        <img src="${RUTA_IMG}${cartasSalidas[i].id}.jpg">
+                        <div style="font-size:7px;">${cartasSalidas[i].nombre}</div>
+                    `;
+                } else {
+                    item.style.background = "#222";
+                    item.innerHTML = `<div style="color: #444; height: 40px; display:flex; align-items:center; justify-content:center;">?</div>`;
+                }
                 grid.appendChild(item);
-            });
+            }
             document.getElementById('modal-lista').style.display = "flex";
         }
 
         function cerrarModal() { document.getElementById('modal-lista').style.display = "none"; }
 
         function reiniciar() {
-            if(!confirm("¿Seguro?")) return;
+            if(!confirm("¿Reiniciar baraja?")) return;
             pausar();
             mazo = []; indiceActual = 0; cartasSalidas = [];
             document.getElementById('img-carta-grande').style.display = "none";
