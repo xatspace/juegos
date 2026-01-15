@@ -139,7 +139,7 @@
         };
 
         window.resetJuego = async () => {
-            if (prompt("Clave:") === "juegos2026") {
+            if (prompt("Clave:") === "shere2026") {
                 await remove(refSala);
                 await remove(refIPs);
             }
@@ -148,4 +148,5 @@
         onValue(refSala, (snap) => render(snap.val() || {}));
     </script>
 </body>
+
 </html>
