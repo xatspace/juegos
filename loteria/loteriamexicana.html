@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Lotería Mexicana</title>
+    <title>Sorteador Lotería con Voz</title>
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 5px; margin: 0; overflow: hidden; }
         .neon-title { color: #ff00ff; text-shadow: 0 0 10px #ff00ff; font-size: 20px; text-transform: uppercase; margin: 5px 0; }
@@ -26,7 +26,8 @@
 
         /* CONTROLES */
         .controles { margin-top: 10px; display: flex; gap: 8px; }
-        button { padding: 10px 15px; font-size: 12px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
+        button { padding: 10px 15px; font-size: 12px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
         .btn-play { background: #39ff14; color: #000; }
         .btn-pause { background: #ffeb3b; color: #000; }
         .btn-reset { background: #ff0000; color: #fff; }
@@ -38,7 +39,7 @@
         .item-historial { display: flex; align-items: center; gap: 8px; background: #222; padding: 4px; border-radius: 6px; margin-bottom: 6px; height: 55px; border: 1px solid #444; }
         .img-mini { width: 32px; height: 45px; object-fit: contain; background: #fff; border-radius: 2px; }
 
-        /* MODAL - TABLERO MINIATURA 9x6 SIN SCROLL */
+        /* MODAL - TABLERO SIN SCROLL */
         #modal-lista { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
         .modal-contenido { 
             background: #111; width: 98%; max-width: 950px; max-height: 98vh; 
@@ -61,7 +62,7 @@
         .item-completo img { 
             width: 100%; 
             height: auto; 
-            max-height: 12vh; /* Ajuste basado en el alto de pantalla */
+            max-height: 11vh; 
             object-fit: contain; 
             display: block; 
         }
@@ -116,6 +117,14 @@
         let intervalo = null;
         let cartasSalidas = [];
 
+        // Función para hablar
+        function cantarCarta(texto) {
+            const mensaje = new SpeechSynthesisUtterance(texto);
+            mensaje.lang = 'es-MX'; // Voz en español
+            mensaje.rate = 0.9;    // Velocidad un poco más lenta para que se entienda
+            window.speechSynthesis.speak(mensaje);
+        }
+
         function prepararMazo() {
             mazo = nombres.map((nom, i) => ({ id: i + 1, nombre: nom }));
             for (let i = mazo.length - 1; i > 0; i--) {
@@ -132,7 +141,7 @@
             intervalo = setInterval(() => {
                 if (indiceActual < mazo.length) sacarCarta();
                 else pausar();
-            }, 3000); 
+            }, 3500); // Subí un poco el tiempo a 3.5s para que la voz termine de hablar
         }
 
         function pausar() {
@@ -151,6 +160,9 @@
             imgGrande.style.display = "block";
             document.getElementById('nombre-visor').innerText = carta.nombre;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 54`;
+
+            // ¡CANTA LA CARTA!
+            cantarCarta(carta.nombre);
 
             const item = document.createElement('div');
             item.className = 'item-historial';
@@ -174,7 +186,8 @@
         function cerrarModal() { document.getElementById('modal-lista').style.display = "none"; }
 
         function reiniciar() {
-            if(!confirm("¿Reiniciar?")) return;
+            if(!confirm("¿Reiniciar baraja?")) return;
+            window.speechSynthesis.cancel(); // Detiene la voz si estaba hablando
             pausar();
             mazo = []; indiceActual = 0; cartasSalidas = [];
             document.getElementById('img-carta-grande').style.display = "none";
