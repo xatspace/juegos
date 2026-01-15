@@ -3,44 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Lotería</title>
+    <title>Sorteador Lotería Mexicana</title>
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
         .neon-title { color: #ff00ff; text-shadow: 0 0 15px #ff00ff; font-size: 24px; text-transform: uppercase; margin: 15px 0; }
 
         .main-container { display: flex; flex-direction: row; gap: 20px; width: 95%; max-width: 900px; justify-content: center; }
 
-        /* VISOR CORREGIDO PARA QUE LA CARTA NO SE CORTE */
+        /* VISOR CON MEDIDA EXACTA */
         .visor { 
-            width: 260px; 
-            height: 420px; 
+            width: 280px; /* Ancho fijo */
+            height: 420px; /* Alto fijo (Proporción exacta 2:3) */
             background-color: #fff; 
-            /* contain asegura que la imagen se vea completa sin importar su forma */
-            background-size: contain; 
-            background-repeat: no-repeat; 
-            background-position: center center; 
             border: 5px solid #ff00ff; 
             border-radius: 15px; 
             box-shadow: 0 0 25px rgba(255, 0, 255, 0.5); 
             display: flex; 
             flex-direction: column; 
-            justify-content: flex-end; 
+            align-items: center;
+            justify-content: flex-start; 
             overflow: hidden;
             position: relative;
         }
+
+        /* LA IMAGEN AHORA ES UN ELEMENTO REAL */
+        #img-carta-grande {
+            width: 100%;
+            height: 360px; /* Espacio exacto para la imagen */
+            object-fit: contain; /* Obliga a que se vea entera sin estirar */
+            display: block;
+            margin: 0 auto;
+            background: #fff;
+        }
         
         .nombre-carta { 
-            height: 55px; 
+            width: 100%;
+            height: 60px; /* Espacio para el nombre */
             background: #fff; 
             color: #000; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 22px; 
+            font-size: 24px; 
             text-transform: uppercase; 
-            border-top: 3px solid #f0f0f0; 
+            border-top: 2px solid #000; 
             font-weight: bold;
-            z-index: 5;
+            margin: 0;
         }
 
         .controles { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
@@ -53,24 +61,26 @@
 
         /* HISTORIAL */
         .historial-container { display: flex; flex-direction: column; width: 230px; }
-        .historial { height: 400px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 10px; overflow-y: auto; }
+        .historial { height: 420px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 10px; overflow-y: auto; }
         .item-historial { 
             display: flex; align-items: center; gap: 10px; background: #222; 
             padding: 8px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; height: 75px;
         }
-        .img-mini { width: 45px; height: 60px; background-color: #fff; background-size: contain; background-repeat: no-repeat; background-position: center; border-radius: 4px; flex-shrink: 0; }
+        .img-mini { width: 45px; height: 60px; object-fit: contain; background: #fff; border-radius: 4px; }
 
         /* MODAL */
         #modal-lista { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; }
         .modal-contenido { background: #111; width: 90%; max-width: 600px; height: 85%; border: 2px solid #00e5ff; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; position: relative; }
         .cerrar-modal { position: absolute; top: 10px; right: 15px; color: #ff0000; font-size: 35px; cursor: pointer; }
-        #lista-completa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; overflow-y: auto; margin-top: 25px; padding: 10px; }
+        #lista-completa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; overflow-y: auto; margin-top: 25px; }
         .item-completo { background: #fff; color: #000; padding: 8px; border-radius: 8px; text-align: center; font-size: 11px; font-weight: bold; }
-        .item-completo img { width: 100%; aspect-ratio: 2/3; object-fit: contain; }
+        .item-completo img { width: 100%; height: 120px; object-fit: contain; }
 
         @media (max-width: 600px) {
             .main-container { flex-direction: column; align-items: center; }
-            .visor { width: 240px; height: 380px; }
+            .visor { width: 260px; height: 390px; }
+            #img-carta-grande { height: 335px; }
+            .nombre-carta { height: 55px; font-size: 20px; }
             .historial-container { width: 100%; }
             .historial { height: 200px; }
         }
@@ -83,6 +93,7 @@
     <div class="main-container">
         <div style="display:flex; flex-direction:column; align-items:center;">
             <div class="visor" id="visor">
+                <img src="" id="img-carta-grande" style="display: none;">
                 <div class="nombre-carta" id="nombre-visor">---</div>
             </div>
             <div class="controles">
@@ -150,13 +161,17 @@
             const fullPath = RUTA_IMG + carta.id + ".jpg";
             
             cartasSalidas.push(carta);
-            document.getElementById('visor').style.backgroundImage = `url('${fullPath}')`;
+            
+            const imgGrande = document.getElementById('img-carta-grande');
+            imgGrande.src = fullPath;
+            imgGrande.style.display = "block";
+            
             document.getElementById('nombre-visor').innerText = carta.nombre;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 54`;
 
             const item = document.createElement('div');
             item.className = 'item-historial';
-            item.innerHTML = `<div class="img-mini" style="background-image: url('${fullPath}')"></div><span><b>#${indiceActual + 1}</b><br><small>${carta.nombre.toUpperCase()}</small></span>`;
+            item.innerHTML = `<img class="img-mini" src="${fullPath}"><span><b>#${indiceActual + 1}</b><br><small>${carta.nombre.toUpperCase()}</small></span>`;
             document.getElementById('lista-historial').prepend(item);
 
             indiceActual++;
@@ -177,10 +192,10 @@
         function cerrarModal() { document.getElementById('modal-lista').style.display = "none"; }
 
         function reiniciar() {
-            if(!confirm("¿Seguro que quieres reiniciar la baraja?")) return;
+            if(!confirm("¿Seguro?")) return;
             pausar();
             mazo = []; indiceActual = 0; cartasSalidas = [];
-            document.getElementById('visor').style.backgroundImage = "none";
+            document.getElementById('img-carta-grande').style.display = "none";
             document.getElementById('nombre-visor').innerText = "---";
             document.getElementById('lista-historial').innerHTML = "";
             document.getElementById('contador-cartas').innerText = "SALIERON: 0 / 54";
