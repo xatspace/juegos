@@ -113,8 +113,8 @@
                 div.className = `celda ${nick ? 'ocupado' : ''}`;
                 div.onclick = () => { if(!nick) anotar(nom); };
                 
-                // RUTA AJUSTADA PARA LA CARPETA SHERE
-                const imgUrl = `img/${num}.jpg`;
+                // RUTA CORREGIDA: Sale de /shere/ y busca la carpeta /img/ en /loteria/
+                const imgUrl = `../img/${num}.jpg`;
 
                 div.innerHTML = `
                     <img src="${imgUrl}" class="img-carta" alt="${nom}">
