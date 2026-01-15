@@ -3,117 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invertidos | 1 al 90</title>
+    <title>Invertidos | Suerte</title>
     <style>
         body { 
-            background: #000; 
-            color: #fff; 
-            font-family: 'Arial Black', sans-serif; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 10px; 
-            margin: 0;
+            background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0;
+            user-select: none;
         }
         .neon-title { 
-            color: #ffb6c1; 
-            text-shadow: 0 0 15px #ffb6c1; 
-            font-size: clamp(22px, 6vw, 32px); 
-            text-transform: uppercase; 
-            margin: 10px 0 5px 0; 
-            text-align: center;
+            color: #ffb6c1; text-shadow: 0 0 15px #ffb6c1; 
+            font-size: clamp(22px, 6vw, 32px); text-transform: uppercase; margin: 20px 0; text-align: center;
         }
         
-        /* Estilo del Contador */
-        #contador-libre {
-            color: #39ff14;
-            font-size: 14px;
-            margin-bottom: 15px;
-            text-shadow: 0 0 5px #39ff14;
+        #status-tabla {
+            font-size: 12px; padding: 5px 15px; border-radius: 20px; margin-bottom: 10px;
+            font-weight: bold; text-transform: uppercase;
         }
+        .estado-abierta { background: #1b5e20; color: #4caf50; }
+        .estado-cerrada { background: #b71c1c; color: #ff5252; border: 1px solid #ff5252; }
 
         #tablero { 
-            display: grid; 
-            grid-template-columns: repeat(9, 1fr); 
-            gap: 6px; 
-            width: 95%; 
-            max-width: 950px; 
-            background: #111; 
-            border: 3px solid #ffb6c1; 
-            padding: 12px; 
-            border-radius: 12px; 
-            box-sizing: border-box;
+            display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
+            width: 95%; max-width: 950px; background: #111; border: 3px solid #ffb6c1; 
+            padding: 12px; border-radius: 12px; box-sizing: border-box;
         }
 
         .celda { 
-            aspect-ratio: 1 / 1.1;
-            min-height: 70px;
-            border: 1px solid #333; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            border-radius: 8px; 
-            background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
-            transition: all 0.2s ease; 
-            overflow: hidden;
-            padding: 2px;
+            aspect-ratio: 1 / 1.1; min-height: 70px; border: 1px solid #333; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            cursor: pointer; border-radius: 8px; background: linear-gradient(145deg, #0a0a0a, #1a1a1a);
+            transition: all 0.2s ease; overflow: hidden; padding: 2px;
         }
-        
         .celda:hover { border-color: #ffb6c1; }
         
-        .n-info { 
-            font-size: clamp(14px, 3.5vw, 18px); 
-            color: #ffb6c1; 
-            font-weight: 900; 
-            line-height: 1;
-        }
-        
+        .n-info { font-size: clamp(14px, 3.5vw, 18px); color: #ffb6c1; font-weight: 900; line-height: 1; }
         .n-user { 
-            font-size: clamp(10px, 2.8vw, 13px);
-            font-weight: 900; 
-            color: #fff; 
-            text-transform: uppercase; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            max-width: 95%; 
-            margin-top: 6px;
-            letter-spacing: 0.5px;
+            font-size: clamp(10px, 2.8vw, 13px); font-weight: 900; color: #fff; 
+            text-transform: uppercase; white-space: nowrap; overflow: hidden; 
+            text-overflow: ellipsis; max-width: 95%; margin-top: 6px; letter-spacing: 0.5px;
         }
         
-        .ocupado { 
-            background: #ffb6c1 !important; 
-            border-color: #fff; 
-        }
+        .ocupado { background: #ffb6c1 !important; border-color: #fff; }
         .ocupado .n-info, .ocupado .n-user { color: #000; }
 
-        .btn-reset { 
-            margin-top: 30px; 
-            background: #000; 
-            color: #444; 
-            border: 1px dashed #444; 
-            padding: 10px 20px; 
-            cursor: pointer; 
-            border-radius: 5px; 
-            font-size: 11px;
-        }
+        #contador-libre { color: #39ff14; font-size: 16px; margin-top: 25px; text-shadow: 0 0 5px #39ff14; font-weight: bold; }
 
-        @media (max-width: 700px) {
-            #tablero { grid-template-columns: repeat(5, 1fr); }
-            .celda { min-height: 80px; }
+        .area-admin { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+        
+        .btn-admin { 
+            background: #000; color: #666; border: 1px dashed #444; 
+            padding: 10px 18px; cursor: pointer; border-radius: 5px; font-size: 11px;
+            transition: all 0.3s;
         }
+        .btn-admin:hover { border-color: #ffb6c1; color: #fff; }
+
+        @media (max-width: 700px) { #tablero { grid-template-columns: repeat(5, 1fr); } }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <div class="neon-title">TABLA INVERTIDOS</div>
-    <div id="contador-libre">Cargando espacios...</div>
     
+    <div id="status-tabla" class="estado-abierta">Tabla Abierta</div>
+
     <div id="tablero"></div>
 
-    <button class="btn-reset" onclick="resetJuego()">🔄 REINICIAR TODO EL JUEGO</button>
+    <div id="contador-libre">ESPACIOS LIBRES: -- / --</div>
+
+    <div class="area-admin">
+        <button class="btn-admin" onclick="toggleTabla()">🔒 CERRAR / ABRIR TABLA</button>
+        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR TABLA</button>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -122,19 +82,12 @@
         const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
         const refSala = ref(db, 'invertidos_juego');
+        const refConfig = ref(db, 'invertidos_config');
         const claveAdmin = "juegos2026"; 
 
-        const pares = [
-            "01-10", "02-20", "03-30", "04-40", "05-50", 
-            "06-60", "07-70", "08-80", "09-90", "11-22",
-            "12-21", "13-31", "14-41", "15-51", "16-61",
-            "17-71", "18-81", "19-29", "23-32", "24-42", 
-            "25-52", "26-62", "27-72", "28-82", "33-44",
-            "34-43", "35-53", "36-63", "37-73", "38-83",
-            "39-49", "45-54", "46-64", "47-74", "48-84",
-            "55-66", "56-65", "57-75", "58-85", "59-69",
-            "67-76", "68-86", "77-88", "78-87", "79-89"
-        ];
+        let tablaBloqueada = false;
+
+        const pares = ["01-10", "02-20", "03-30", "04-40", "05-50", "06-60", "07-70", "08-80", "09-90", "11-22", "12-21", "13-31", "14-41", "15-51", "16-61", "17-71", "18-81", "19-29", "23-32", "24-42", "25-52", "26-62", "27-72", "28-82", "33-44", "34-43", "35-53", "36-63", "37-73", "38-83", "39-49", "45-54", "46-64", "47-74", "48-84", "55-66", "56-65", "57-75", "58-85", "59-69", "67-76", "68-86", "77-88", "78-87", "79-89"];
 
         async function obtenerIP() {
             try {
@@ -144,11 +97,17 @@
             } catch (e) { return null; }
         }
 
+        // Bloqueos de seguridad
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false; 
+            if(e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 67 || e.keyCode == 74)) return false;
+            if(e.ctrlKey && e.keyCode == 85) return false; 
+        };
+
         function render(datos = {}) {
             const tab = document.getElementById('tablero');
             const cont = document.getElementById('contador-libre');
             tab.innerHTML = "";
-            
             let ocupados = 0;
 
             pares.forEach(p => {
@@ -166,62 +125,75 @@
                     }
                 };
 
-                div.innerHTML = `
-                    <span class="n-info">${p}</span>
-                    <span class="n-user">${usuario ? usuario.nombre : '---'}</span>
-                `;
+                div.innerHTML = `<span class="n-info">${p}</span><span class="n-user">${usuario ? usuario.nombre : '---'}</span>`;
                 tab.appendChild(div);
             });
 
-            // Actualizar contador
-            const libres = pares.length - ocupados;
-            cont.innerText = `ESPACIOS LIBRES: ${libres} / ${pares.length}`;
+            cont.innerText = `ESPACIOS LIBRES: ${pares.length - ocupados} / ${pares.length}`;
         }
 
         window.anotar = async (p) => {
+            if (tablaBloqueada) {
+                alert("🔒 La tabla está cerrada actualmente.");
+                return;
+            }
             const miIP = await obtenerIP();
             if (!miIP) return alert("Error de conexión.");
             
             const snap = await get(refSala);
             const datos = snap.val() || {};
-            const yaJugo = Object.values(datos).some(u => u.ip === miIP);
-
-            if (yaJugo) {
-                alert("🚫 Solo se permite un número por usuario.");
-                return;
+            if (Object.values(datos).some(u => u.ip === miIP)) {
+                return alert("🚫 Solo se permite un número por usuario.");
             }
 
             const n = prompt("Número " + p + " - Tu Nick:");
             if (n && n.trim() !== "") {
-                const nickFinal = n.trim().toUpperCase();
                 await set(ref(db, 'invertidos_juego/' + p), { 
-                    nombre: nickFinal,
-                    ip: miIP
+                    nombre: n.trim().toUpperCase(), 
+                    ip: miIP 
                 });
             }
         };
 
-        window.borrarUsuarioIndividual = async (p, nick) => {
-            const pass = prompt(`¿Deseas borrar a "${nick}" del número ${p}?\nClave de admin:`);
+        // Función de alternancia corregida (siempre pide clave)
+        window.toggleTabla = async () => {
+            const accion = tablaBloqueada ? "ABRIR" : "CERRAR";
+            const pass = prompt("Ingresa la clave de admin para " + accion + " la tabla:");
+            
             if (pass === claveAdmin) {
-                if (confirm(`¿Confirmas borrar a ${nick}?`)) {
-                    await remove(ref(db, 'invertidos_juego/' + p));
-                }
+                const nuevoEstado = !tablaBloqueada;
+                await set(refConfig, nuevoEstado);
+                alert("Operación exitosa: Tabla " + (nuevoEstado ? "CERRADA" : "ABIERTA"));
+            } else if (pass !== null) {
+                alert("Clave incorrecta.");
+            }
+        };
+
+        window.borrarUsuarioIndividual = async (p, nick) => {
+            const pass = prompt(`¿Deseas eliminar a "${nick}"? Ingresa la clave:`);
+            if (pass === claveAdmin) {
+                await remove(ref(db, 'invertidos_juego/' + p));
             } else if (pass !== null) {
                 alert("Clave incorrecta.");
             }
         };
 
         window.resetJuego = async () => {
-            const pass = prompt("Clave para REINICIAR TODO:");
-            if (pass === claveAdmin) {
-                if (confirm("¿Limpiar todo el tablero?")) {
-                    await remove(refSala);
-                }
+            const pass = prompt("Clave para REINICIAR TODO EL TABLERO:");
+            if (pass === claveAdmin && confirm("¿Estás seguro de que quieres limpiar todo?")) {
+                await remove(refSala);
             }
         };
 
+        // Escuchadores de Firebase
         onValue(refSala, (snap) => render(snap.val() || {}));
+        
+        onValue(refConfig, (snap) => {
+            tablaBloqueada = snap.val() || false;
+            const status = document.getElementById('status-tabla');
+            status.innerText = tablaBloqueada ? "Tabla Cerrada" : "Tabla Abierta";
+            status.className = tablaBloqueada ? "estado-cerrada" : "estado-abierta";
+        });
     </script>
 </body>
 </html>
