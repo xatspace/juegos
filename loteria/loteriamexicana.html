@@ -61,10 +61,10 @@
             <div class="historial"><div class="lista-historial" id="lista-historial"></div></div>
             <button class="btn-lista" onclick="abrirModal()">📋 TABLERO DE SALIDA</button>
             <div class="chat-tools">
-                <span style="font-size: 9px; color: #aaa; text-align: center;">AUTO-COPIANDO AL PORTAPAPELES...</span>
+                <span style="font-size: 9px; color: #aaa; text-align: center;">COPIANDO AUTOMÁTICAMENTE:</span>
                 <div class="copy-row">
                     <input type="text" id="txt-copiar" readonly placeholder="Esperando carta...">
-                    <button class="btn-copy" id="btn-copy" onclick="copiarManual()">COPIAR</button>
+                    <button class="btn-copy" id="btn-copy" onclick="copiarAlChat()">COPIAR</button>
                 </div>
             </div>
         </div>
@@ -104,29 +104,19 @@
             window.speechSynthesis.speak(mensaje);
         }
 
-        // FUNCIÓN CLAVE PARA LA COPIA AUTOMÁTICA
-        async function autoCopiar(texto) {
+        function copiarAlChat() {
+            const input = document.getElementById('txt-copiar');
             const btn = document.getElementById('btn-copy');
-            try {
-                // Intentamos usar la API moderna
-                await navigator.clipboard.writeText(texto);
-                btn.innerText = "¡OK!";
-                btn.classList.add('success');
-                setTimeout(() => { btn.innerText = "COPIAR"; btn.classList.remove('success'); }, 500);
-            } catch (err) {
-                // Si falla la API (por seguridad), usamos el método de fallback
-                const tempInput = document.createElement("input");
-                tempInput.value = texto;
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                document.execCommand("copy");
-                document.body.removeChild(tempInput);
-            }
-        }
-
-        function copiarManual() {
-            const texto = document.getElementById('txt-copiar').value;
-            if(texto) autoCopiar(texto);
+            if(input.value === "") return;
+            
+            // Método clásico que suele saltarse mejor las restricciones
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            
+            btn.innerText = "¡OK!";
+            btn.classList.add('success');
+            setTimeout(() => { btn.innerText = "COPIAR"; btn.classList.remove('success'); }, 500);
         }
 
         function prepararMazo() {
@@ -141,10 +131,17 @@
             if (mazo.length === 0) prepararMazo();
             document.getElementById('btn-play').disabled = true;
             document.getElementById('btn-pause').disabled = false;
+            
+            // SACAR LA PRIMERA CARTA INMEDIATAMENTE
             if(indiceActual === 0) sacarCarta();
+            
+            // EL INTERVALO LLAMA A SACAR CARTA
             intervalo = setInterval(() => {
-                if (indiceActual < mazo.length) sacarCarta();
-                else pausar();
+                if (indiceActual < mazo.length) {
+                    sacarCarta();
+                } else {
+                    pausar();
+                }
             }, velocidadS * 1000); 
         }
 
@@ -164,11 +161,13 @@
             document.getElementById('nombre-visor').innerText = carta.nombre;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 54`;
             
-            const textoFinal = "☆ " + carta.nombre.toUpperCase() + " ☆";
-            document.getElementById('txt-copiar').value = textoFinal;
+            const texto = "☆ " + carta.nombre.toUpperCase() + " ☆";
+            document.getElementById('txt-copiar').value = texto;
             
-            // LLAMADA A LA COPIA AUTOMÁTICA
-            autoCopiar(textoFinal);
+            // FORZAMOS LA COPIA
+            setTimeout(() => {
+                copiarAlChat();
+            }, 100);
 
             cantarCarta(carta.nombre);
 
