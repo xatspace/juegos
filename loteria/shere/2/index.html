@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotería Mexicana - Shere </title>
+    <title>Lotería Mexicana - Shere 2</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -23,33 +23,33 @@
             border: 2px solid #333; 
             display: flex; flex-direction: column; 
             cursor: pointer; border-radius: 4px; 
-            background: #fff; /* Regresamos a fondo blanco para que combine con la carta */
-            padding: 0; 
-            position: relative; overflow: hidden;
+            background: #fff; 
+            position: relative; 
+            overflow: hidden; /* ESTO ES LO QUE ESCONDE LO BLANCO */
             box-sizing: border-box;
         }
         
-        /* AJUSTE MANUAL: ESTIRA UN POCO Y SUBE PARA OCULTAR EL MARGEN SUPERIOR */
+        /* ZOOM Y POSICIONAMIENTO PARA QUITAR BORDES ORIGINALES */
         .img-carta { 
-            width: 100%;
-            height: 110%; /* La hacemos un poco más alta */
-            object-fit: fill; /* La obliga a ocupar todo el ancho */
-            margin-top: -12px; /* LA SUBE para que el borde blanco de arriba se salga del cuadro */
+            width: 110%; /* Aumentamos ancho para quitar blanco lateral */
+            height: 110%; /* Aumentamos alto para quitar blanco superior */
+            object-fit: contain; 
+            margin-top: -8%; /* SUBE LA IMAGEN PARA ESCONDER EL BLANCO DE ARRIBA */
+            margin-left: -5%; /* CENTRA LA IMAGEN */
             pointer-events: none; 
             display: block;
             filter: none !important;
-            opacity: 1 !important;
         }
 
-        /* NOMBRE DEL USUARIO: Lo hice más pequeño para que no tape el texto de la foto */
+        /* NICK DEL USUARIO: Estilo discreto para no tapar el nombre de la carta */
         .n-user { 
-            font-size: 8px; color: #fff; font-weight: bold; 
+            font-size: 8px; color: #39ff14; font-weight: bold; 
             text-transform: uppercase; text-align: center; 
-            width: 100%; background: rgba(0, 0, 0, 0.6); /* Fondo oscuro pero muy traslúcido */
+            width: 100%; background: rgba(0, 0, 0, 0.75); 
             padding: 2px 0; position: absolute; bottom: 0; left: 0;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;  
-            box-sizing: border-box;
             z-index: 5;
+            border-top: 1px solid #39ff14;
         }
         
         .seleccionada { 
@@ -59,7 +59,7 @@
         }
 
         .ocupado { border-color: #ff0000 !important; }
-        .ocupado .n-user { background: #ff0000; color: #fff; }
+        .ocupado .n-user { background: #ff0000; color: #fff; border-top: 1px solid #fff; }
         .ocupado .img-carta { opacity: 0.4; filter: grayscale(100%); }
 
         #btn-registrar { 
@@ -133,14 +133,14 @@
                     const limpiaIP = data.ip.replace(/\./g, '_');
                     refIPs.child(limpiaIP).once('value', snapshot => {
                         if(snapshot.exists()) {
-                            alert("Ya registraste cartas.");
+                            alert("Ya registraste tus cartas.");
                         } else {
-                            const nick = prompt("Nick:");
+                            const nick = prompt("Escribe tu Nick:");
                             if(nick && nick.trim()) {
                                 const n = nick.trim().toUpperCase();
                                 seleccionadas.forEach(s => { refSala.child(s).set({ nombre: n }); });
                                 refIPs.child(limpiaIP).set(true);
-                                alert("Hecho!");
+                                alert("¡Cartas enviadas!");
                                 seleccionadas = [];
                                 document.getElementById('btn-registrar').style.display = 'none';
                                 pintar();
@@ -152,7 +152,7 @@
 
         window.resetJuego = function() {
             if(prompt("Clave:") === "shere2026") {
-                refSala.remove(); refIPs.remove(); alert("Reset OK");
+                refSala.remove(); refIPs.remove(); alert("Tablero reiniciado.");
             }
         };
 
