@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Lotería con Voz</title>
+    <title>Sorteador Lotería Pro</title>
     <style>
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 5px; margin: 0; overflow: hidden; }
         .neon-title { color: #ff00ff; text-shadow: 0 0 10px #ff00ff; font-size: 20px; text-transform: uppercase; margin: 5px 0; }
@@ -26,20 +26,29 @@
 
         /* CONTROLES */
         .controles { margin-top: 10px; display: flex; gap: 8px; }
-        button { padding: 10px 15px; font-size: 12px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        button:active { transform: scale(0.95); }
+        button { padding: 10px 15px; font-size: 12px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
         .btn-play { background: #39ff14; color: #000; }
         .btn-pause { background: #ffeb3b; color: #000; }
         .btn-reset { background: #ff0000; color: #fff; }
         .btn-lista { background: #00e5ff; color: #000; margin-top: 10px; width: 100%; }
 
-        /* HISTORIAL LATERAL */
+        /* ICONO VOLUMEN */
+        .volumen-toggle {
+            background: none; border: 2px solid #555; border-radius: 50%;
+            width: 40px; height: 40px; color: #fff; font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; margin-left: 10px; transition: 0.3s;
+        }
+        .volumen-toggle.on { border-color: #39ff14; color: #39ff14; }
+        .volumen-toggle.off { border-color: #ff0000; color: #ff0000; }
+
+        /* HISTORIAL */
         .historial-container { display: flex; flex-direction: column; width: 200px; }
         .historial { height: 360px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 8px; overflow-y: auto; }
         .item-historial { display: flex; align-items: center; gap: 8px; background: #222; padding: 4px; border-radius: 6px; margin-bottom: 6px; height: 55px; border: 1px solid #444; }
         .img-mini { width: 32px; height: 45px; object-fit: contain; background: #fff; border-radius: 2px; }
 
-        /* MODAL - TABLERO SIN SCROLL */
+        /* MODAL 9x6 SIN SCROLL */
         #modal-lista { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; }
         .modal-contenido { 
             background: #111; width: 98%; max-width: 950px; max-height: 98vh; 
@@ -48,24 +57,9 @@
         }
         .cerrar-modal { position: absolute; top: 0px; right: 10px; color: #ff0000; font-size: 35px; cursor: pointer; z-index: 10; }
         
-        #lista-completa-grid { 
-            display: grid; 
-            grid-template-columns: repeat(9, 1fr); 
-            gap: 4px; 
-            margin-top: 10px;
-            padding: 5px;
-        }
-        .item-completo { 
-            background: #fff; color: #000; padding: 2px; border-radius: 3px; 
-            text-align: center; border: 1px solid #ff00ff;
-        }
-        .item-completo img { 
-            width: 100%; 
-            height: auto; 
-            max-height: 11vh; 
-            object-fit: contain; 
-            display: block; 
-        }
+        #lista-completa-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin-top: 10px; padding: 5px; }
+        .item-completo { background: #fff; color: #000; padding: 2px; border-radius: 3px; text-align: center; border: 1px solid #ff00ff; }
+        .item-completo img { width: 100%; height: auto; max-height: 11vh; object-fit: contain; display: block; }
         .num-mini { color: #ff00ff; font-size: 9px; font-weight: bold; line-height: 1; }
 
         @media (max-width: 600px) {
@@ -85,12 +79,17 @@
                 <img src="" id="img-carta-grande" style="display: none;">
                 <div class="nombre-carta" id="nombre-visor">---</div>
             </div>
+            
+            <div style="display:flex; align-items:center; margin-top:10px;">
+                <p id="contador-cartas" style="color:#ffeb3b; margin:0; font-size: 16px;">SALIERON: 0 / 54</p>
+                <button id="btn-audio" class="volumen-toggle on" onclick="toggleAudio()">🔊</button>
+            </div>
+
             <div class="controles">
                 <button class="btn-play" id="btn-play" onclick="comenzar()">▶ Play</button>
                 <button class="btn-pause" id="btn-pause" onclick="pausar()" disabled>⏸ Pausa</button>
                 <button class="btn-reset" onclick="reiniciar()">🔄 Reset</button>
             </div>
-            <p id="contador-cartas" style="color:#ffeb3b; margin-top:10px; font-size: 16px;">SALIERON: 0 / 54</p>
         </div>
 
         <div class="historial-container">
@@ -116,12 +115,27 @@
         let indiceActual = 0;
         let intervalo = null;
         let cartasSalidas = [];
+        let audioActivado = true;
 
-        // Función para hablar
+        function toggleAudio() {
+            audioActivado = !audioActivado;
+            const btn = document.getElementById('btn-audio');
+            if (audioActivado) {
+                btn.innerText = "🔊";
+                btn.className = "volumen-toggle on";
+            } else {
+                btn.innerText = "🔇";
+                btn.className = "volumen-toggle off";
+                window.speechSynthesis.cancel();
+            }
+        }
+
         function cantarCarta(texto) {
+            if (!audioActivado) return;
+            window.speechSynthesis.cancel(); // Corta el audio anterior para no encimarse
             const mensaje = new SpeechSynthesisUtterance(texto);
-            mensaje.lang = 'es-MX'; // Voz en español
-            mensaje.rate = 0.9;    // Velocidad un poco más lenta para que se entienda
+            mensaje.lang = 'es-MX';
+            mensaje.rate = 1; 
             window.speechSynthesis.speak(mensaje);
         }
 
@@ -141,7 +155,7 @@
             intervalo = setInterval(() => {
                 if (indiceActual < mazo.length) sacarCarta();
                 else pausar();
-            }, 3500); // Subí un poco el tiempo a 3.5s para que la voz termine de hablar
+            }, 3500); 
         }
 
         function pausar() {
@@ -161,7 +175,6 @@
             document.getElementById('nombre-visor').innerText = carta.nombre;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 54`;
 
-            // ¡CANTA LA CARTA!
             cantarCarta(carta.nombre);
 
             const item = document.createElement('div');
@@ -186,8 +199,8 @@
         function cerrarModal() { document.getElementById('modal-lista').style.display = "none"; }
 
         function reiniciar() {
-            if(!confirm("¿Reiniciar baraja?")) return;
-            window.speechSynthesis.cancel(); // Detiene la voz si estaba hablando
+            if(!confirm("¿Reiniciar?")) return;
+            window.speechSynthesis.cancel();
             pausar();
             mazo = []; indiceActual = 0; cartasSalidas = [];
             document.getElementById('img-carta-grande').style.display = "none";
