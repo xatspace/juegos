@@ -12,19 +12,15 @@
             display: flex; flex-direction: column; align-items: center; 
             padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
         }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0 5px 0; text-align: center; }
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0 15px 0; text-align: center; }
         
-        #estado-tabla { font-size: 12px; margin-bottom: 10px; font-weight: bold; }
-        .abierta { color: #39ff14; }
-        .cerrada { color: #ff0000; }
-
-        /* AJUSTE: Tablero un poco más ancho */
+        /* Contenedor del tablero */
         #tablero { 
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
             gap: 6px; 
             width: 100%; 
-            max-width: 1050px; /* Más ancho para que las celdas estiren */
+            max-width: 1050px; 
             background: #111; 
             border: 3px solid #39ff14; 
             padding: 10px; 
@@ -33,7 +29,7 @@
         }
 
         .celda { 
-            aspect-ratio: 1.2 / 1.4; /* AJUSTE: Más ancha que alta */
+            aspect-ratio: 1.2 / 1.4; 
             border: 1px solid #444; 
             display: flex; 
             flex-direction: column; 
@@ -63,8 +59,22 @@
             position: absolute; bottom: 0; left: 0; height: 32%;
         }
 
-        /* AJUSTE: Contador debajo de la tabla */
-        #contador { color: #ffeb3b; font-size: 16px; margin: 15px 0; letter-spacing: 1px; font-weight: bold; }
+        /* AJUSTE: Info alineada abajo en una sola línea */
+        .info-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 15px 0;
+            width: 100%;
+            max-width: 1050px;
+        }
+
+        #estado-tabla { font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        .abierta { color: #39ff14; }
+        .cerrada { color: #ff0000; }
+
+        #contador { color: #ffeb3b; font-size: 16px; letter-spacing: 1px; font-weight: bold; }
 
         .admin-tools { display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap; justify-content: center; }
         .btn-admin { 
@@ -76,17 +86,22 @@
         .btn-admin:hover { background: #39ff14; color: #000; }
 
         @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 500px) { 
+            #tablero { grid-template-columns: repeat(4, 1fr); } 
+            .info-container { flex-direction: column; gap: 5px; } /* En celulares se apilan si no caben */
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <div class="neon-title">LOTERÍA MEXICANA 1 CARTA | SHERE</div>
-    <div id="estado-tabla">Cargando...</div>
 
     <div id="tablero"></div>
 
-    <div id="contador">CARTAS DISPONIBLES: -- / 54</div>
+    <div class="info-container">
+        <div id="estado-tabla">Cargando...</div>
+        <div id="contador">CARTAS DISPONIBLES: -- / 54</div>
+    </div>
 
     <div class="admin-tools">
         <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR TABLA</button>
