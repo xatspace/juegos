@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana 2 Cartas - Shere Admin</title>
+    <title>Lotería Mexicana 2 Cartas - Shere</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
@@ -29,7 +29,7 @@
         }
 
         .celda { 
-            aspect-ratio: 1.2 / 1.4; /* Celdas un poco más anchas */
+            aspect-ratio: 1.2 / 1.4; 
             border: 1px solid #444; 
             display: flex; 
             flex-direction: column; 
@@ -53,18 +53,15 @@
             flex-grow: 1; line-height: 1; padding: 0 2px; box-sizing: border-box;
         }
         
-        /* Selección de usuario (Brillo Verde) */
         .seleccionada { outline: 5px solid #39ff14; outline-offset: -5px; box-shadow: 0 0 15px #39ff14; z-index: 5; }
 
-        /* Ocupado (Rojo) */
         .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
         .ocupado .n-user { 
-            background: #ff0000; /* Fondo rojo cuando se anotan */
+            background: #ff0000; 
             color: #fff;
             position: absolute; bottom: 0; left: 0; height: 32%;
         }
 
-        /* Información abajo en una línea */
         .info-container {
             display: flex;
             justify-content: center;
@@ -175,15 +172,25 @@
             document.getElementById('contador').innerText = "DISPONIBLES: " + (54 - ocupadas) + " / 54";
         }
 
+        // CORRECCIÓN: Función para borrar ambas cartas y liberar la IP correctamente
         async function borrarUsuario(nickABorrar) {
-            const pass = prompt(`¿Borrar las 2 cartas de "${nickABorrar}"?\nClave Admin:`);
+            const pass = prompt(`¿Borrar las cartas de "${nickABorrar}"?\nClave Admin:`);
             if (pass === CLAVE) {
+                let ipParaBorrar = null;
+                
+                // Primero identificamos la IP y borramos las entradas en la sala
                 Object.keys(datosFirebase).forEach(key => {
                     if (datosFirebase[key].nombre === nickABorrar) {
+                        if (!ipParaBorrar) ipParaBorrar = datosFirebase[key].ip;
                         refSala.child(key).remove();
-                        if (datosFirebase[key].ip) refIPs.child(datosFirebase[key].ip).remove();
                     }
                 });
+
+                // Luego borramos el registro de la IP para que pueda volver a anotarse
+                if (ipParaBorrar) {
+                    await refIPs.child(ipParaBorrar).remove();
+                }
+                alert("Usuario borrado y permiso restaurado.");
             }
         }
 
@@ -212,7 +219,11 @@
         };
 
         window.resetJuego = function() {
-            if(prompt("Clave Maestra:") === CLAVE) { refSala.remove(); refIPs.remove(); }
+            if(prompt("Clave Maestra:") === CLAVE) { 
+                refSala.remove(); 
+                refIPs.remove(); 
+                alert("Todo se ha reiniciado.");
+            }
         };
 
         refSala.on('value', (snap) => { datosFirebase = snap.val() || {}; pintar(); });
