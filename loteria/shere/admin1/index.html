@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana 1 Carta - Shere</title>
+    <title>Lotería Mexicana 1 Carta | Shere</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -13,26 +13,27 @@
             padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
         }
         .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0 5px 0; text-align: center; }
-        #contador { color: #ffeb3b; font-size: 14px; margin-bottom: 5px; letter-spacing: 1px; }
-        #estado-tabla { font-size: 12px; margin-bottom: 15px; font-weight: bold; }
+        
+        #estado-tabla { font-size: 12px; margin-bottom: 10px; font-weight: bold; }
         .abierta { color: #39ff14; }
         .cerrada { color: #ff0000; }
 
+        /* AJUSTE: Tablero un poco más ancho */
         #tablero { 
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
-            gap: 5px; 
+            gap: 6px; 
             width: 100%; 
-            max-width: 900px; 
+            max-width: 1050px; /* Más ancho para que las celdas estiren */
             background: #111; 
             border: 3px solid #39ff14; 
-            padding: 8px; 
+            padding: 10px; 
             border-radius: 12px; 
             box-sizing: border-box;
         }
 
         .celda { 
-            aspect-ratio: 1 / 1.4; 
+            aspect-ratio: 1.2 / 1.4; /* AJUSTE: Más ancha que alta */
             border: 1px solid #444; 
             display: flex; 
             flex-direction: column; 
@@ -47,37 +48,25 @@
             box-sizing: border-box;
         }
         
-        /* Achicamos un poco la imagen para dar espacio al nombre abajo */
         .img-carta { width: 100%; height: 65%; object-fit: contain; display: block; pointer-events: none; margin-top: 2px; }
 
-        /* Ajuste para que nombres largos como VIOLONCELLO no se corten */
         .n-user { 
-            color: #000; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            text-align: center; 
-            width: 100%; 
-            z-index: 2; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-grow: 1; /* Ocupa todo el espacio restante */
-            line-height: 1;
-            padding: 0 2px;
-            box-sizing: border-box;
+            color: #000; font-weight: 900; text-transform: uppercase; 
+            text-align: center; width: 100%; z-index: 2; 
+            display: flex; justify-content: center; align-items: center;
+            flex-grow: 1; line-height: 1; padding: 0 2px; box-sizing: border-box;
         }
         
         .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
         .ocupado .n-user { 
-            background: #ff0000; 
-            color: #fff;
-            position: absolute; 
-            bottom: 0; 
-            left: 0;
-            height: 32%; /* Más altura para el cuadro de nombre */
+            background: #ff0000; color: #fff;
+            position: absolute; bottom: 0; left: 0; height: 32%;
         }
 
-        .admin-tools { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+        /* AJUSTE: Contador debajo de la tabla */
+        #contador { color: #ffeb3b; font-size: 16px; margin: 15px 0; letter-spacing: 1px; font-weight: bold; }
+
+        .admin-tools { display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap; justify-content: center; }
         .btn-admin { 
             background: #000; color: #39ff14; border: 2px solid #39ff14; 
             padding: 10px 20px; cursor: pointer; font-size: 12px; 
@@ -92,11 +81,12 @@
 </head>
 <body oncontextmenu="return false;">
 
-    <div class="neon-title">LOTERÍA MEXICANA | SHERE</div>
-    <div id="contador">CARGANDO...</div>
+    <div class="neon-title">LOTERÍA MEXICANA 1 CARTA | SHERE</div>
     <div id="estado-tabla">Cargando...</div>
 
     <div id="tablero"></div>
+
+    <div id="contador">CARTAS DISPONIBLES: -- / 54</div>
 
     <div class="admin-tools">
         <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR TABLA</button>
@@ -145,12 +135,9 @@
                 };
 
                 let texto = nick ? nick : nom.toUpperCase();
-                
-                // Lógica mejorada de tamaño de letra para nombres largos
                 let fSize = "15px"; 
                 if (texto.length > 9) fSize = "11px";
                 if (texto.length > 12) fSize = "9px";
-                if (texto.length > 15) fSize = "8px";
 
                 div.innerHTML = `
                     <img src="${RUTA_IMG}${i+1}.jpg" class="img-carta">
