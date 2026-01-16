@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana 1 Carta | Shere</title>
+    <title>Lotería Mexicana 1 Carta - Shere</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -37,7 +37,7 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: space-between; 
+            justify-content: flex-start; 
             cursor: pointer; 
             border-radius: 4px; 
             background: #fff; 
@@ -47,24 +47,24 @@
             box-sizing: border-box;
         }
         
-        .img-carta { width: 100%; height: 68%; object-fit: contain; display: block; pointer-events: none; }
+        /* Achicamos un poco la imagen para dar espacio al nombre abajo */
+        .img-carta { width: 100%; height: 65%; object-fit: contain; display: block; pointer-events: none; margin-top: 2px; }
 
-        /* Ajuste de nombre base */
+        /* Ajuste para que nombres largos como VIOLONCELLO no se corten */
         .n-user { 
-            font-size: 15px; 
             color: #000; 
             font-weight: 900; 
             text-transform: uppercase; 
             text-align: center; 
             width: 100%; 
-            padding: 2px 0; 
             z-index: 2; 
-            white-space: nowrap; /* Evita que salte a dos líneas */
-            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 25%;
+            flex-grow: 1; /* Ocupa todo el espacio restante */
+            line-height: 1;
+            padding: 0 2px;
+            box-sizing: border-box;
         }
         
         .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
@@ -74,8 +74,7 @@
             position: absolute; 
             bottom: 0; 
             left: 0;
-            padding: 4px 0;
-            height: 30%; /* Un poco más alto para nombres grandes */
+            height: 32%; /* Más altura para el cuadro de nombre */
         }
 
         .admin-tools { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
@@ -88,14 +87,12 @@
         .btn-admin:hover { background: #39ff14; color: #000; }
 
         @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 500px) { 
-            #tablero { grid-template-columns: repeat(4, 1fr); } 
-        }
+        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <div class="neon-title">LOTERÍA MEXICANA 1 CARTA | SHERE</div>
+    <div class="neon-title">LOTERÍA MEXICANA | SHERE</div>
     <div id="contador">CARGANDO...</div>
     <div id="estado-tabla">Cargando...</div>
 
@@ -147,15 +144,17 @@
                     }
                 };
 
-                // Lógica de achicar letra: si el nombre es largo, bajamos el tamaño
-                let textoMostrar = nick ? nick : nom.toUpperCase();
-                let fontSize = "16px";
-                if (textoMostrar.length > 10) fontSize = "12px";
-                if (textoMostrar.length > 13) fontSize = "10px";
+                let texto = nick ? nick : nom.toUpperCase();
+                
+                // Lógica mejorada de tamaño de letra para nombres largos
+                let fSize = "15px"; 
+                if (texto.length > 9) fSize = "11px";
+                if (texto.length > 12) fSize = "9px";
+                if (texto.length > 15) fSize = "8px";
 
                 div.innerHTML = `
                     <img src="${RUTA_IMG}${i+1}.jpg" class="img-carta">
-                    <span class="n-user" style="font-size: ${fontSize}">${textoMostrar}</span>
+                    <span class="n-user" style="font-size: ${fSize}">${texto}</span>
                 `;
                 tab.appendChild(div);
             });
