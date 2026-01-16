@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana 1 Carta - Shere</title>
+    <title>Lotería Mexicana 1 Carta | Shere</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -47,10 +47,11 @@
             box-sizing: border-box;
         }
         
-        .img-carta { width: 100%; height: 70%; object-fit: contain; display: block; pointer-events: none; }
+        .img-carta { width: 100%; height: 68%; object-fit: contain; display: block; pointer-events: none; }
 
+        /* Ajuste de nombre base */
         .n-user { 
-            font-size: 16px; 
+            font-size: 15px; 
             color: #000; 
             font-weight: 900; 
             text-transform: uppercase; 
@@ -58,8 +59,12 @@
             width: 100%; 
             padding: 2px 0; 
             z-index: 2; 
-            word-wrap: break-word;
-            line-height: 1;
+            white-space: nowrap; /* Evita que salte a dos líneas */
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 25%;
         }
         
         .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
@@ -69,8 +74,8 @@
             position: absolute; 
             bottom: 0; 
             left: 0;
-            padding: 5px 0;
-            font-size: 17px;
+            padding: 4px 0;
+            height: 30%; /* Un poco más alto para nombres grandes */
         }
 
         .admin-tools { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
@@ -83,12 +88,14 @@
         .btn-admin:hover { background: #39ff14; color: #000; }
 
         @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 500px) { 
+            #tablero { grid-template-columns: repeat(4, 1fr); } 
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <div class="neon-title">LOTERÍA MEXICANA | SHERE</div>
+    <div class="neon-title">LOTERÍA MEXICANA 1 CARTA | SHERE</div>
     <div id="contador">CARGANDO...</div>
     <div id="estado-tabla">Cargando...</div>
 
@@ -100,7 +107,6 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN
         const RUTA_IMG = "https://xatspace.github.io/juegos/loteria/mexicana/img/";
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
@@ -141,7 +147,16 @@
                     }
                 };
 
-                div.innerHTML = `<img src="${RUTA_IMG}${i+1}.jpg" class="img-carta"><span class="n-user">${nick ? nick : nom.toUpperCase()}</span>`;
+                // Lógica de achicar letra: si el nombre es largo, bajamos el tamaño
+                let textoMostrar = nick ? nick : nom.toUpperCase();
+                let fontSize = "16px";
+                if (textoMostrar.length > 10) fontSize = "12px";
+                if (textoMostrar.length > 13) fontSize = "10px";
+
+                div.innerHTML = `
+                    <img src="${RUTA_IMG}${i+1}.jpg" class="img-carta">
+                    <span class="n-user" style="font-size: ${fontSize}">${textoMostrar}</span>
+                `;
                 tab.appendChild(div);
             });
             document.getElementById('contador').innerText = "CARTAS DISPONIBLES: " + (54 - ocupadas) + " / 54";
