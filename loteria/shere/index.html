@@ -3,206 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana 1 Carta - Shere</title>
+    <title>Lotería Mexicana 1 Carta | Bienvenidos Suerte</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { 
             background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
-            padding: 10px; margin: 0; overflow-x: hidden;
-            user-select: none; /* Evita selección de texto */
+            padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
         }
-        .neon-title { color: #00e5ff; text-shadow: 0 0 15px #00e5ff; font-size: 28px; text-transform: uppercase; margin: 15px 0 5px 0; text-align: center; }
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0 15px 0; text-align: center; }
         
-        #contador { color: #ffeb3b; font-size: 14px; margin-bottom: 5px; letter-spacing: 1px; }
-        #estado-tabla { font-size: 12px; margin-bottom: 15px; font-weight: bold; }
-        .abierta { color: #39ff14; }
-        .cerrada { color: #ff0000; }
-
         #tablero { 
             display: grid; 
             grid-template-columns: repeat(9, 1fr); 
-            gap: 8px; 
+            gap: 6px; 
             width: 100%; 
-            max-width: 1000px; 
+            max-width: 1050px; 
             background: #111; 
-            border: 3px solid #00e5ff; 
-            padding: 12px; 
+            border: 3px solid #39ff14; 
+            padding: 10px; 
             border-radius: 12px; 
             box-sizing: border-box;
         }
 
         .celda { 
-            aspect-ratio: 1 / 1.5; 
-            border: 2px solid #444; 
+            aspect-ratio: 1.2 / 1.4; 
+            border: 1px solid #444; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: space-between; 
+            justify-content: flex-start; 
             cursor: pointer; 
-            border-radius: 6px; 
+            border-radius: 4px; 
             background: #fff; 
-            transition: 0.3s; 
-            padding: 4px;
+            padding: 2px;
             overflow: hidden;
             position: relative;
             box-sizing: border-box;
         }
         
-        .celda:hover { border-color: #00e5ff; transform: scale(1.02); }
-        
-        .img-carta { width: 100%; height: 80%; object-fit: contain; display: block; pointer-events: none; }
+        .img-carta { width: 100%; height: 65%; object-fit: contain; display: block; pointer-events: none; margin-top: 2px; }
 
         .n-user { 
-            font-size: 10px; color: #000; font-weight: bold; text-transform: uppercase; 
-            text-align: center; width: 100%; padding: 2px 0; z-index: 2; word-wrap: break-word;
+            color: #000; font-weight: 900; text-transform: uppercase; 
+            text-align: center; width: 100%; z-index: 2; 
+            display: flex; justify-content: center; align-items: center;
+            flex-grow: 1; line-height: 1; padding: 0 2px; box-sizing: border-box;
         }
         
-        .ocupado { border: 3px solid #ff0000 !important; box-shadow: 0 0 10px #ff0000; }
+        .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; cursor: default; }
         .ocupado .n-user { 
-            background: rgba(211, 47, 47, 0.9); color: #fff;
-            position: absolute; bottom: 0; left: 0;
+            background: #ff0000; color: #fff;
+            position: absolute; bottom: 0; left: 0; height: 32%;
         }
 
-        .admin-tools { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
-        .btn-admin { background: #000; color: #555; border: 1px dashed #444; padding: 10px; cursor: pointer; font-size: 10px; text-transform: uppercase; }
-        .btn-admin:hover { color: #fff; border-color: #fff; }
-
-        @media (max-width: 850px) { 
-            #tablero { grid-template-columns: repeat(6, 1fr); } 
+        .info-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 1050px;
         }
+
+        #estado-tabla { font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        .abierta { color: #39ff14; }
+        .cerrada { color: #ff0000; }
+
+        #contador { color: #ffeb3b; font-size: 16px; letter-spacing: 1px; font-weight: bold; }
+
+        @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
         @media (max-width: 500px) { 
-            #tablero { grid-template-columns: repeat(3, 1fr); } 
+            #tablero { grid-template-columns: repeat(4, 1fr); } 
+            .info-container { flex-direction: column; gap: 5px; }
         }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div class="neon-title">LOTERÍA MEXICANA | SHERE</div>
-    <div id="contador">CARTAS DISPONIBLES: 54 / 54</div>
-    <div id="estado-tabla">Cargando estado...</div>
+<body oncontextmenu="return false;">
+
+    <div class="neon-title">LOTERÍA MEXICANA 1 CARTA | SHERE</div>
 
     <div id="tablero"></div>
 
-    <div class="admin-tools">
-        <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR TABLA</button>
-        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR TODO</button>
+    <div class="info-container">
+        <div id="estado-tabla">Cargando...</div>
+        <div id="contador">CARTAS DISPONIBLES: -- / 54</div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const app = initializeApp({ databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" });
-        const db = getDatabase(app);
+    <script>
+        const RUTA_IMG = "https://xatspace.github.io/juegos/loteria/mexicana/img/";
+        const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
         
-        const refSala = ref(db, 'loteria_local_final');
-        const refIPs = ref(db, 'ips_local_final');
-        const refConfig = ref(db, 'config_tabla'); // Para el bloqueo global
-        const CLAVE = "shere2026";
+        const refSala = db.ref('loteria_local_final');
+        const refIPs = db.ref('ips_local_final');
+        const refConfig = db.ref('config_tabla');
 
+        const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
+
+        let datosFirebase = {};
         let tablaAbierta = true;
 
-        // --- SEGURIDAD ADICIONAL ---
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123) return false; // F12
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U (Ver código)
-        };
-
-        function render(datos = {}, config = { abierta: true }) {
+        function pintar() {
             const tab = document.getElementById('tablero');
-            const contDisp = document.getElementById('contador');
             const estTxt = document.getElementById('estado-tabla');
-            
-            tablaAbierta = config.abierta;
-            estTxt.innerText = tablaAbierta ? "● TABLA ABIERTA (PUEDES ELEGIR)" : "● TABLA CERRADA (SOLO LECTURA)";
-            estTxt.className = tablaAbierta ? "abierta" : "cerrada";
-
             tab.innerHTML = "";
             let ocupadas = 0;
 
-            const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
+            estTxt.innerText = tablaAbierta ? "● TABLA ABIERTA" : "● TABLA CERRADA";
+            estTxt.className = tablaAbierta ? "abierta" : "cerrada";
 
-            nombres.forEach((nom, index) => {
-                const num = index + 1;
-                const nick = datos[nom] ? datos[nom].nombre : null;
+            nombres.forEach((nom, i) => {
+                const nick = datosFirebase[nom] ? datosFirebase[nom].nombre : null;
                 if(nick) ocupadas++;
 
                 const div = document.createElement('div');
                 div.className = `celda ${nick ? 'ocupado' : ''}`;
                 
-                div.onclick = () => { 
-                    if(!nick) {
-                        anotar(nom); 
-                    } else {
-                        borrarUno(nom, nick);
+                div.onclick = function() {
+                    // Si no tiene nombre y la tabla está abierta, permite anotar
+                    if(!nick && tablaAbierta) {
+                        anotar(nom);
                     }
+                    // Si ya tiene nombre (ocupado), no hace nada (se quitó la opción de borrar)
                 };
-                
-                const imgUrl = `../img/${num}.jpg`;
+
+                let texto = nick ? nick : nom.toUpperCase();
+                let fSize = "15px"; 
+                if (texto.length > 9) fSize = "11px";
+                if (texto.length > 12) fSize = "9px";
+
                 div.innerHTML = `
-                    <img src="${imgUrl}" class="img-carta">
-                    <span class="n-user">${nick ? nick : nom.toUpperCase()}</span>
+                    <img src="${RUTA_IMG}${i+1}.jpg" class="img-carta">
+                    <span class="n-user" style="font-size: ${fSize}">${texto}</span>
                 `;
                 tab.appendChild(div);
             });
-
-            contDisp.innerText = `CARTAS DISPONIBLES: ${nombres.length - ocupadas} / 54`;
+            document.getElementById('contador').innerText = "CARTAS DISPONIBLES: " + (54 - ocupadas) + " / 54";
         }
 
-        window.anotar = async (nom) => {
-            if(!tablaAbierta) return alert("⚠️ La tabla está cerrada en este momento.");
-
+        async function anotar(nom) {
             const miIP = await fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => d.ip.replace(/\./g, '_')).catch(() => "t"+Math.random());
-            const checkIP = await get(ref(db, 'ips_local_final/' + miIP));
-            
-            if (checkIP.exists()) return alert("🚫 Solo puedes elegir una carta.");
-            
-            const n = prompt("Carta: " + nom + "\nEscribe tu Nick:");
-            if (n && n.trim()) {
-                await set(ref(db, 'loteria_local_final/' + nom), { nombre: n.trim().toUpperCase(), ip: miIP });
-                await set(ref(db, 'ips_local_final/' + miIP), true);
-            }
-        };
-
-        // --- NUEVA FUNCIÓN: BORRAR UNA CARTA ---
-        window.borrarUno = async (nom, nickActual) => {
-            const pass = prompt(`¿Borrar a "${nickActual}" de la carta ${nom}?\nEscribe clave de Admin:`);
-            if (pass === CLAVE) {
-                // Primero buscamos la IP para liberarla también
-                const snap = await get(ref(db, 'loteria_local_final/' + nom));
-                if (snap.exists() && snap.val().ip) {
-                    await remove(ref(db, 'ips_local_final/' + snap.val().ip));
+            refIPs.child(miIP).once('value', snapshot => {
+                if(snapshot.exists()) return alert("Ya elegiste una carta.");
+                const n = prompt("Tu Nick:");
+                if(n && n.trim()) {
+                    refSala.child(nom).set({ nombre: n.trim().toUpperCase(), ip: miIP });
+                    refIPs.child(miIP).set(true);
                 }
-                await remove(ref(db, 'loteria_local_final/' + nom));
-                alert("Carta liberada.");
-            } else if (pass !== null) {
-                alert("Clave incorrecta.");
-            }
-        };
+            });
+        }
 
-        // --- NUEVA FUNCIÓN: ABRIR/CERRAR TABLA ---
-        window.toggleTabla = async () => {
-            const pass = prompt("Clave de Admin:");
-            if (pass === CLAVE) {
-                await set(refConfig, { abierta: !tablaAbierta });
-            }
-        };
-
-        window.resetJuego = async () => {
-            if (prompt("Clave Maestra para BORRAR TODO:") === CLAVE) {
-                if(confirm("¿Estás seguro? Se borrarán todos los nombres e IPs.")){
-                    await remove(refSala);
-                    await remove(refIPs);
-                }
-            }
-        };
-
-        // Escuchar cambios en datos y configuración simultáneamente
-        onValue(ref(db), (snap) => {
-            const val = snap.val() || {};
-            render(val.loteria_local_final || {}, val.config_tabla || { abierta: true });
-        });
+        // Se mantienen los escuchadores para que la tabla se actualice en tiempo real
+        refSala.on('value', snap => { datosFirebase = snap.val() || {}; pintar(); });
+        refConfig.child('abierta').on('value', snap => { tablaAbierta = (snap.val() !== false); pintar(); });
     </script>
 </body>
 </html>
