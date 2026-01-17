@@ -7,131 +7,147 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; user-select: none; }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0 15px 0; }
-        #tablero { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; width: 100%; max-width: 1050px; background: #111; border: 3px solid #39ff14; padding: 10px; border-radius: 12px; box-sizing: border-box; }
-        .celda { aspect-ratio: 1.2 / 1.4; border: 1px solid #444; display: flex; flex-direction: column; align-items: center; cursor: pointer; border-radius: 4px; background: #fff; padding: 2px; position: relative; overflow: hidden; }
-        .img-carta { width: 100%; height: 65%; object-fit: contain; margin-top: 2px; pointer-events: none; }
-        .n-user { color: #000; font-weight: 900; text-transform: uppercase; text-align: center; width: 100%; z-index: 2; flex-grow: 1; display: flex; justify-content: center; align-items: center; }
+        body { 
+            background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
+        }
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0; text-align: center; }
         
-        /* Ocupado otros */
-        .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
-        .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; height: 32%; }
+        #tablero { 
+            display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
+            width: 100%; max-width: 1050px; background: #111; border: 3px solid #39ff14; 
+            padding: 10px; border-radius: 12px; box-sizing: border-box;
+        }
+        .celda { 
+            aspect-ratio: 1.2 / 1.4; border: 1px solid #444; display: flex; 
+            flex-direction: column; align-items: center; justify-content: flex-start; 
+            cursor: pointer; border-radius: 6px; background: #fff; padding: 2px;
+            overflow: hidden; position: relative;
+        }
+        .img-carta { width: 100%; height: 65%; object-fit: contain; pointer-events: none; }
+        .n-user { color: #000; font-weight: 900; text-transform: uppercase; font-size: 11px; text-align: center; width: 100%; line-height: 1.1; margin-top: 2px; }
+        .ocupado { border: 2px solid #ff0000; }
+        .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; height: 32%; display: flex; align-items: center; justify-content: center; }
 
-        /* Mi carta (Verde) */
-        .es-mia { border: 4px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 5; }
-        .es-mia .n-user { background: #39ff14 !important; color: #000 !important; position: absolute; bottom: 0; height: 32%; }
+        .info-container { display: flex; gap: 20px; margin: 20px 0; font-size: 18px; font-weight: bold; }
 
-        .info-container { display: flex; gap: 20px; margin: 20px 0; font-weight: bold; }
-        .abierta { color: #39ff14; } .cerrada { color: #ff0000; }
-        #contador { color: #ffeb3b; }
+        /* ALINEACIÓN DE BOTONES */
+        .admin-tools { 
+            display: flex; 
+            flex-direction: row; 
+            justify-content: center; 
+            gap: 10px; 
+            width: 100%; 
+            max-width: 1050px;
+        }
+        .btn-admin { 
+            flex: 1; 
+            background: #000; color: #39ff14; border: 2px solid #39ff14; 
+            padding: 15px 5px; border-radius: 8px; font-weight: bold; cursor: pointer; 
+            text-transform: uppercase; font-size: 12px;
+            white-space: nowrap;
+        }
+        .btn-admin:hover { background: #39ff14; color: #000; }
 
-        .admin-tools { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-        .btn-admin { background: #000; color: #39ff14; border: 2px solid #39ff14; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 8px; box-shadow: 0 0 5px #39ff14; }
+        #modal-usuarios {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); overflow-y: auto; padding: 20px; box-sizing: border-box;
+        }
+        .lista-usuarios { width: 100%; max-width: 500px; margin: auto; background: #111; border: 2px solid #39ff14; border-radius: 12px; padding: 15px; }
+        .usuario-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
+        .usuario-info { font-family: monospace; color: #39ff14; }
+        .btn-del { background: #ff0000; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
-        @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 600px) {
+            .admin-tools { gap: 5px; }
+            .btn-admin { font-size: 9px; padding: 12px 2px; }
+        }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
+
     <div class="neon-title">LOTERÍA ADMIN | SHERE</div>
     <div id="tablero"></div>
+
     <div class="info-container">
         <div id="estado-tabla">Cargando...</div>
-        <div id="contador">DISPONIBLES: -- / 54</div>
+        <div id="contador">LIBRES: -- / 54</div>
     </div>
+
     <div class="admin-tools">
         <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR</button>
-        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR TODO</button>
+        <button class="btn-admin" onclick="gestionUsuarios()">👥 USUARIOS</button>
+        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR</button>
+    </div>
+
+    <div id="modal-usuarios">
+        <div class="lista-usuarios">
+            <h2 style="color:#39ff14; text-align:center;">JUGADORES</h2>
+            <div id="contenedor-lista"></div>
+            <button class="btn-admin" style="width:100%; margin-top:15px;" onclick="document.getElementById('modal-usuarios').style.display='none'">CERRAR PANEL</button>
+        </div>
     </div>
 
     <script>
         const RUTA_IMG = "https://xatspace.github.io/juegos/loteria/mexicana/img/";
-        const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
+        const firebaseConfig = { databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const refSala = db.ref('loteria_local_final');
-        const refIPs = db.ref('ips_local_final');
-        const refConfig = db.ref('config_tabla');
         const CLAVE = "shere2026";
 
-        const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
+        const refSala = db.ref('loteria_juego');
+        const refConfig = db.ref('config_loteria');
+        const refUsuarios = db.ref('usuarios_registrados');
 
         let datosFirebase = {};
         let tablaAbierta = true;
-        let miIPGlobal = "";
-
-        async function obtenerIP() {
-            const r = await fetch('https://api.ipify.org?format=json');
-            const d = await r.json();
-            miIPGlobal = d.ip.replace(/\./g, '_');
-            return miIPGlobal;
-        }
-        obtenerIP();
+        const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
 
         function pintar() {
-            const tab = document.getElementById('tablero');
-            tab.innerHTML = "";
+            const tab = document.getElementById('tablero'); tab.innerHTML = "";
             let ocupadas = 0;
-
             nombres.forEach((nom, i) => {
-                const data = datosFirebase[nom];
-                const nick = data ? data.nombre : null;
-                const ipDuenio = data ? data.ip : null;
+                const nick = datosFirebase[nom]?.nombre || null;
                 if(nick) ocupadas++;
-
                 const div = document.createElement('div');
-                div.className = "celda";
-                if(nick) div.classList.add("ocupado");
-                if(ipDuenio === miIPGlobal) div.classList.add("es-mia");
-
-                div.onclick = () => {
-                    if(!nick) {
-                        if(!tablaAbierta) return alert("Cerrada.");
-                        anotar(nom);
-                    } else {
-                        borrarUno(nom, nick);
-                    }
-                };
+                div.className = "celda" + (nick ? " ocupado" : "");
+                div.onclick = () => { if(nick) borrarUno(nom, nick); };
                 div.innerHTML = `<img src="${RUTA_IMG}${i+1}.jpg" class="img-carta"><span class="n-user">${nick ? nick : nom.toUpperCase()}</span>`;
                 tab.appendChild(div);
             });
-            document.getElementById('contador').innerText = `DISPONIBLES: ${54 - ocupadas} / 54`;
+            document.getElementById('contador').innerText = "LIBRES: " + (54 - ocupadas) + " / 54";
         }
 
-        async function anotar(nom) {
-            const miIP = await obtenerIP();
-            const snapIP = await refIPs.child(miIP).once('value');
-            if(snapIP.exists()) return alert("Ya elegiste.");
+        window.borrarUno = (nom, nick) => { if(prompt(`¿Borrar a ${nick}?\nClave Admin:`) === CLAVE) refSala.child(nom).remove(); };
+        window.toggleTabla = () => { if(prompt("Clave Admin:") === CLAVE) refConfig.child('abierta').set(!tablaAbierta); };
+        window.resetJuego = () => { if(prompt("CLAVE MAESTRA:") === CLAVE) refSala.remove(); };
 
-            const snapCarta = await refSala.child(nom).once('value');
-            if(snapCarta.exists()) return alert("⚠️ ¡Ya la ganaron!");
-
-            const n = prompt("Tu Nick:");
-            if(n && n.trim()) {
-                await refSala.child(nom).set({ nombre: n.trim().toUpperCase(), ip: miIP });
-                await refIPs.child(miIP).set(true);
-            }
-        }
-
-        function borrarUno(nom, nick) {
-            if(prompt(`¿Borrar a ${nick}?\nClave Admin:`) === CLAVE) {
-                refSala.child(nom).once('value', s => {
-                    if(s.exists() && s.val().ip) refIPs.child(s.val().ip).remove();
-                    refSala.child(nom).remove();
+        window.gestionUsuarios = () => {
+            if(prompt("Clave Admin:") !== CLAVE) return;
+            refUsuarios.once('value', snap => {
+                const contenedor = document.getElementById('contenedor-lista');
+                contenedor.innerHTML = "";
+                snap.forEach(userSnap => {
+                    const div = document.createElement('div');
+                    div.className = "usuario-item";
+                    div.innerHTML = `<div class="usuario-info"><strong>${userSnap.key}</strong> - PIN: ${userSnap.val().pin}</div><button class="btn-del" onclick="eliminarUsuario('${userSnap.key}')">BORRAR</button>`;
+                    contenedor.appendChild(div);
                 });
-            }
-        }
+                document.getElementById('modal-usuarios').style.display = 'block';
+            });
+        };
 
-        function toggleTabla() { if(prompt("Clave Admin:") === CLAVE) refConfig.child('abierta').set(!tablaAbierta); }
-        function resetJuego() { if(prompt("Clave Maestra:") === CLAVE) { refSala.remove(); refIPs.remove(); } }
+        window.eliminarUsuario = (nick) => {
+            if(confirm(`¿Eliminar a ${nick}?`)) refUsuarios.child(nick).remove().then(() => gestionUsuarios());
+        };
 
-        refSala.on('value', s => { datosFirebase = s.val() || {}; pintar(); });
-        refConfig.child('abierta').on('value', s => { 
-            tablaAbierta = s.val() !== false; 
-            document.getElementById('estado-tabla').innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
-            document.getElementById('estado-tabla').className = tablaAbierta ? "abierta" : "cerrada";
-            pintar();
+        refSala.on('value', snap => { datosFirebase = snap.val() || {}; pintar(); });
+        refConfig.child('abierta').on('value', snap => { 
+            tablaAbierta = (snap.val() !== false); 
+            const est = document.getElementById('estado-tabla');
+            est.innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
+            est.style.color = tablaAbierta ? "#39ff14" : "#ff0000";
         });
     </script>
 </body>
