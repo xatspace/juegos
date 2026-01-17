@@ -3,32 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana | Usuario Pro</title>
+    <title>Lotería Admin | Shere</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { 
             background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
-            padding: 10px; margin: 0; overflow-x: hidden;
-            user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+            padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
         }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 10px 0; text-align: center; }
-
-        /* Barra Superior Usuario */
-        .user-bar { 
-            width: 100%; max-width: 1050px; display: flex; justify-content: flex-end; 
-            align-items: center; margin-bottom: 10px; gap: 10px;
-        }
-        .btn-session, .btn-logout {
-            background: transparent; border: 2px solid #39ff14; color: #39ff14;
-            padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
-            text-transform: uppercase; font-size: 10px;
-        }
-        .btn-logout { border-color: #ff4444; color: #ff4444; margin-left: 5px; }
-        .user-logged { color: #39ff14; font-size: 13px; font-weight: bold; }
-
-        /* Tablero */
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0; text-align: center; }
+        
         #tablero { 
             display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
             width: 100%; max-width: 1050px; background: #111; border: 3px solid #39ff14; 
@@ -38,219 +23,131 @@
             aspect-ratio: 1.2 / 1.4; border: 1px solid #444; display: flex; 
             flex-direction: column; align-items: center; justify-content: flex-start; 
             cursor: pointer; border-radius: 6px; background: #fff; padding: 2px;
-            overflow: hidden; position: relative; box-sizing: border-box;
+            overflow: hidden; position: relative;
         }
-        .img-carta { width: 100%; height: 65%; object-fit: contain; pointer-events: none; margin-top: 2px; }
+        .img-carta { width: 100%; height: 65%; object-fit: contain; pointer-events: none; }
+        .n-user { color: #000; font-weight: 900; text-transform: uppercase; font-size: 11px; text-align: center; width: 100%; line-height: 1.1; margin-top: 2px; }
+        .ocupado { border: 2px solid #ff0000; }
+        .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; height: 32%; display: flex; align-items: center; justify-content: center; }
 
-        .n-user { 
-            color: #000; font-weight: 900; text-transform: uppercase; 
-            font-size: 14px; text-align: center; width: 100%; z-index: 2; 
-            flex-grow: 1; display: flex; justify-content: center; align-items: center;
-            line-height: 1.1; word-wrap: break-word;
-        }
-        
-        .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
-        .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; left: 0; height: 32%; }
-        
-        .es-mia { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 5; }
-        .es-mia .n-user { background: #39ff14; color: #000; position: absolute; bottom: 0; left: 0; height: 32%; }
+        .info-container { display: flex; gap: 20px; margin: 20px 0; font-size: 18px; font-weight: bold; }
 
-        /* BARRA INFERIOR */
-        .info-bar { 
-            display: grid; grid-template-columns: 1fr 1fr 1fr; 
-            align-items: center; width: 100%; max-width: 1050px; margin-top: 15px; 
-            background: #111; padding: 18px 5px; border-radius: 10px; border: 1px solid #333;
+        /* ALINEACIÓN DE BOTONES */
+        .admin-tools { 
+            display: flex; 
+            flex-direction: row; 
+            justify-content: center; 
+            gap: 10px; 
+            width: 100%; 
+            max-width: 1050px;
         }
-        .info-item { font-size: 18px; font-weight: 900; text-align: center; text-transform: uppercase; }
-        .abierta { color: #39ff14; text-shadow: 0 0 10px #39ff14; } 
-        .cerrada { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
-        #contador { color: #ffeb3b; }
+        .btn-admin { 
+            flex: 1; 
+            background: #000; color: #39ff14; border: 2px solid #39ff14; 
+            padding: 15px 5px; border-radius: 8px; font-weight: bold; cursor: pointer; 
+            text-transform: uppercase; font-size: 12px;
+            white-space: nowrap;
+        }
+        .btn-admin:hover { background: #39ff14; color: #000; }
 
-        .btn-copy { 
-            background: transparent; color: #39ff14; border: 2px solid #39ff14; 
-            padding: 10px 15px; border-radius: 5px; cursor: pointer; 
-            font-size: 12px; font-weight: bold; text-transform: uppercase;
+        #modal-usuarios {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); overflow-y: auto; padding: 20px; box-sizing: border-box;
         }
-        .copiado-exito { background: #fff !important; color: #000 !important; border-color: #fff !important; }
+        .lista-usuarios { width: 100%; max-width: 500px; margin: auto; background: #111; border: 2px solid #39ff14; border-radius: 12px; padding: 15px; }
+        .usuario-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
+        .usuario-info { font-family: monospace; color: #39ff14; }
+        .btn-del { background: #ff0000; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
-        /* Login Modal */
-        #login-modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); align-items: center; justify-content: center;
-        }
-        .modal-content {
-            background: #111; border: 2px solid #39ff14; padding: 25px; border-radius: 15px;
-            display: flex; flex-direction: column; gap: 12px; width: 80%; max-width: 280px;
-        }
-        input { background: #000; border: 1px solid #333; color: #39ff14; padding: 12px; border-radius: 8px; text-align: center; font-size: 16px; outline: none; }
-        .btn-confirmar { background: #39ff14; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-
-        @media (max-width: 850px) { #tablero { grid-template-columns: repeat(5, 1fr); } }
-        @media (max-width: 500px) { 
-            #tablero { grid-template-columns: repeat(4, 1fr); } 
-            .info-item { font-size: 14px; }
+        @media (max-width: 600px) {
+            .admin-tools { gap: 5px; }
+            .btn-admin { font-size: 9px; padding: 12px 2px; }
         }
     </style>
 </head>
-<body oncontextmenu="return false">
+<body oncontextmenu="return false;">
 
-    <div class="neon-title">LOTERÍA MEXICANA</div>
-
-    <div class="user-bar">
-        <div id="user-display">
-            <button class="btn-session" onclick="abrirLogin()">Iniciar Sesión / Registro</button>
-        </div>
-    </div>
-
+    <div class="neon-title">LOTERÍA ADMIN | SHERE</div>
     <div id="tablero"></div>
 
-    <div class="info-bar">
-        <div class="info-item"><span id="estado-tabla">Cargando...</span></div>
-        <div class="info-item"><button id="btn-copiar" class="btn-copy" onclick="copiarMiCarta()">Copiar Carta</button></div>
-        <div class="info-item"><span id="contador">LIBRES: -- / 54</span></div>
+    <div class="info-container">
+        <div id="estado-tabla">Cargando...</div>
+        <div id="contador">LIBRES: -- / 54</div>
     </div>
 
-    <div id="login-modal">
-        <div class="modal-content">
-            <input type="text" id="login-nick" placeholder="TU NICK" maxlength="15">
-            <input type="password" id="login-pin" placeholder="PIN (4 NÚMEROS)" maxlength="4" inputmode="numeric">
-            <button class="btn-confirmar" onclick="procesarLogin()">ENTRAR</button>
-            <button style="background:transparent; color:#888; border:none; cursor:pointer; font-size:11px;" onclick="cerrarLogin()">Cancelar</button>
+    <div class="admin-tools">
+        <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR</button>
+        <button class="btn-admin" onclick="gestionUsuarios()">👥 USUARIOS</button>
+        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR</button>
+    </div>
+
+    <div id="modal-usuarios">
+        <div class="lista-usuarios">
+            <h2 style="color:#39ff14; text-align:center;">JUGADORES</h2>
+            <div id="contenedor-lista"></div>
+            <button class="btn-admin" style="width:100%; margin-top:15px;" onclick="document.getElementById('modal-usuarios').style.display='none'">CERRAR PANEL</button>
         </div>
     </div>
 
     <script>
         const RUTA_IMG = "https://xatspace.github.io/juegos/loteria/mexicana/img/";
-        // URL de tu base de datos
         const firebaseConfig = { databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        
+        const CLAVE = "shere2026";
+
         const refSala = db.ref('loteria_juego');
         const refConfig = db.ref('config_loteria');
         const refUsuarios = db.ref('usuarios_registrados');
 
-        let usuarioActual = localStorage.getItem('shere_nick') || null;
         let datosFirebase = {};
         let tablaAbierta = true;
-        let miCartaGlobal = "";
-
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
 
-        // BLOQUEOS DE SEGURIDAD
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
-                e.preventDefault();
-                return false;
-            }
-        });
-
-        window.onload = () => { if(usuarioActual) actualizarInterfazUsuario(); };
-        window.abrirLogin = () => { document.getElementById('login-modal').style.display = 'flex'; };
-        window.cerrarLogin = () => { document.getElementById('login-modal').style.display = 'none'; };
-
-        window.cerrarSesion = () => {
-            if(confirm("¿Cerrar sesión?")) {
-                localStorage.removeItem('shere_nick');
-                location.reload();
-            }
-        };
-
-        window.procesarLogin = async () => {
-            const nick = document.getElementById('login-nick').value.trim().toUpperCase();
-            const pin = document.getElementById('login-pin').value.trim();
-            if(nick.length < 3 || pin.length < 4) return alert("Nick (3+) y PIN (4 números).");
-
-            refUsuarios.child(nick).once('value', snap => {
-                if(snap.exists()) {
-                    if(snap.val().pin !== pin) return alert("❌ PIN incorrecto.");
-                } else {
-                    refUsuarios.child(nick).set({ nick: nick, pin: pin });
-                }
-                usuarioActual = nick;
-                localStorage.setItem('shere_nick', nick);
-                actualizarInterfazUsuario();
-                cerrarLogin();
-                pintar();
-            });
-        };
-
-        function actualizarInterfazUsuario() {
-            document.getElementById('user-display').innerHTML = `
-                <span class="user-logged">HOLA, ${usuarioActual}</span>
-                <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
-            `;
-        }
-
         function pintar() {
-            const tab = document.getElementById('tablero');
-            const estTxt = document.getElementById('estado-tabla');
-            tab.innerHTML = "";
+            const tab = document.getElementById('tablero'); tab.innerHTML = "";
             let ocupadas = 0;
-            miCartaGlobal = "";
-
-            estTxt.innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
-            estTxt.className = tablaAbierta ? "abierta" : "cerrada";
-
             nombres.forEach((nom, i) => {
-                const nick = datosFirebase[nom] ? datosFirebase[nom].nombre : null;
+                const nick = datosFirebase[nom]?.nombre || null;
                 if(nick) ocupadas++;
-                if(usuarioActual && nick === usuarioActual) miCartaGlobal = nom;
-
                 const div = document.createElement('div');
-                div.className = "celda";
-                if(nick) div.classList.add("ocupado");
-                if(usuarioActual && nick === usuarioActual) div.classList.add("es-mia");
-                
-                div.onclick = function() {
-                    if(!usuarioActual) return abrirLogin();
-                    if(!nick && tablaAbierta) anotar(nom);
-                };
-
-                div.innerHTML = `
-                    <img src="${RUTA_IMG}${i+1}.jpg" class="img-carta">
-                    <span class="n-user">${nick ? nick : nom.toUpperCase()}</span>
-                `;
+                div.className = "celda" + (nick ? " ocupado" : "");
+                div.onclick = () => { if(nick) borrarUno(nom, nick); };
+                div.innerHTML = `<img src="${RUTA_IMG}${i+1}.jpg" class="img-carta"><span class="n-user">${nick ? nick : nom.toUpperCase()}</span>`;
                 tab.appendChild(div);
             });
             document.getElementById('contador').innerText = "LIBRES: " + (54 - ocupadas) + " / 54";
         }
 
-        async function anotar(nom) {
-            let yaTiene = false;
-            Object.values(datosFirebase).forEach(v => { if(v.nombre === usuarioActual) yaTiene = true; });
-            if(yaTiene) return alert("Ya tienes una carta elegida.");
+        window.borrarUno = (nom, nick) => { if(prompt(`¿Borrar a ${nick}?\nClave Admin:`) === CLAVE) refSala.child(nom).remove(); };
+        window.toggleTabla = () => { if(prompt("Clave Admin:") === CLAVE) refConfig.child('abierta').set(!tablaAbierta); };
+        window.resetJuego = () => { if(prompt("CLAVE MAESTRA:") === CLAVE) refSala.remove(); };
 
-            // PROTECCIÓN ANTI-ROBO (Doble chequeo)
-            refSala.child(nom).once('value', snap => {
-                if(snap.exists()) {
-                    alert("⚠️ ¡Ya se ocupó! Elige otra.");
-                    return;
-                }
-                refSala.child(nom).set({ 
-                    nombre: usuarioActual,
-                    hora: firebase.database.ServerValue.TIMESTAMP 
+        window.gestionUsuarios = () => {
+            if(prompt("Clave Admin:") !== CLAVE) return;
+            refUsuarios.once('value', snap => {
+                const contenedor = document.getElementById('contenedor-lista');
+                contenedor.innerHTML = "";
+                snap.forEach(userSnap => {
+                    const div = document.createElement('div');
+                    div.className = "usuario-item";
+                    div.innerHTML = `<div class="usuario-info"><strong>${userSnap.key}</strong> - PIN: ${userSnap.val().pin}</div><button class="btn-del" onclick="eliminarUsuario('${userSnap.key}')">BORRAR</button>`;
+                    contenedor.appendChild(div);
                 });
+                document.getElementById('modal-usuarios').style.display = 'block';
             });
-        }
+        };
 
-        window.copiarMiCarta = () => {
-            if(!miCartaGlobal) return alert("Aún no tienes carta");
-            navigator.clipboard.writeText(miCartaGlobal.toUpperCase());
-            const btn = document.getElementById('btn-copiar');
-            btn.innerText = "¡COPIADO!";
-            btn.classList.add('copiado-exito');
-            setTimeout(() => {
-                btn.innerText = "COPIAR CARTA";
-                btn.classList.remove('copiado-exito');
-            }, 1500);
+        window.eliminarUsuario = (nick) => {
+            if(confirm(`¿Eliminar a ${nick}?`)) refUsuarios.child(nick).remove().then(() => gestionUsuarios());
         };
 
         refSala.on('value', snap => { datosFirebase = snap.val() || {}; pintar(); });
         refConfig.child('abierta').on('value', snap => { 
             tablaAbierta = (snap.val() !== false); 
-            pintar(); 
+            const est = document.getElementById('estado-tabla');
+            est.innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
+            est.style.color = tablaAbierta ? "#39ff14" : "#ff0000";
         });
     </script>
 </body>
