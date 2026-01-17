@@ -3,185 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería 2 Cartas | Usuario</title>
+    <title>Lotería Mexicana | 2 Cartas</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
     <style>
         body { 
             background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
             padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
         }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 15px 0 15px 0; }
-        
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 24px; text-transform: uppercase; margin: 10px 0; text-align: center; }
+
+        /* Barra de Sesión */
+        .user-bar { width: 100%; max-width: 1050px; display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; gap: 10px; }
+        .btn-session, .btn-logout { background: transparent; border: 2px solid #39ff14; color: #39ff14; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; }
+        .btn-logout { border-color: #ff4444; color: #ff4444; }
+        .user-logged { color: #39ff14; font-size: 13px; font-weight: bold; }
+
+        /* Tablero */
         #tablero { 
             display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
             width: 100%; max-width: 1050px; background: #111; border: 3px solid #39ff14; 
             padding: 10px; border-radius: 12px; box-sizing: border-box;
         }
-
         .celda { 
             aspect-ratio: 1.2 / 1.4; border: 1px solid #444; display: flex; 
             flex-direction: column; align-items: center; justify-content: flex-start; 
-            cursor: pointer; border-radius: 4px; background: #fff; padding: 2px;
-            overflow: hidden; position: relative; box-sizing: border-box;
+            cursor: pointer; border-radius: 6px; background: #fff; padding: 2px;
+            overflow: hidden; position: relative;
         }
-        
-        .img-carta { width: 100%; height: 65%; object-fit: contain; display: block; pointer-events: none; margin-top: 2px; }
-
+        .img-carta { width: 100%; height: 65%; object-fit: contain; pointer-events: none; margin-top: 2px; }
         .n-user { 
-            color: #000; font-weight: 900; text-transform: uppercase; 
-            text-align: center; width: 100%; z-index: 2; 
-            display: flex; justify-content: center; align-items: center;
-            flex-grow: 1; line-height: 1; padding: 0 2px; box-sizing: border-box;
+            color: #000; font-weight: 900; text-transform: uppercase; font-size: 11px; 
+            text-align: center; width: 100%; z-index: 2; flex-grow: 1; display: flex; 
+            justify-content: center; align-items: center; line-height: 1.1;
         }
         
-        /* Selección del usuario antes de enviar */
         .seleccionada { outline: 5px solid #ffeb3b; outline-offset: -5px; box-shadow: 0 0 15px #ffeb3b; z-index: 5; }
-
-        /* Ocupado por otros (Rojo) */
-        .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; cursor: default; }
+        .ocupado { border: 2px solid #ff0000 !important; }
         .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; left: 0; height: 32%; }
+        .es-mia { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 6; }
+        .es-mia .n-user { background: #39ff14; color: #000; position: absolute; bottom: 0; left: 0; height: 32%; }
 
-        /* MI ELECCIÓN (Verde Neón) */
-        .es-mia { border: 4px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 6; }
-        .es-mia .n-user { background: #39ff14 !important; color: #000 !important; position: absolute; bottom: 0; height: 32%; }
-
+        /* BOTÓN FLOTANTE REGISTRO */
         #btn-registrar { 
             display: none; margin: 15px 0; background: #39ff14; color: #000; 
-            border: none; padding: 15px 45px; font-weight: bold; font-size: 20px; 
+            border: none; padding: 12px 30px; font-weight: bold; font-size: 18px; 
             border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
-            text-transform: uppercase;
         }
 
-        .info-container { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 15px 0; width: 100%; }
-        #estado-tabla { font-size: 16px; font-weight: bold; text-transform: uppercase; }
-        .abierta { color: #39ff14; } .cerrada { color: #ff0000; }
-        #contador { color: #ffeb3b; font-size: 16px; font-weight: bold; }
+        /* Barra Inferior REQUERIDA */
+        .info-bar { 
+            display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; 
+            width: 100%; max-width: 1050px; margin-top: 15px; background: #111; 
+            padding: 15px 5px; border-radius: 10px; border: 1px solid #333;
+        }
+        .info-item { font-size: 14px; font-weight: 900; text-align: center; text-transform: uppercase; }
+        .abierta { color: #39ff14; } .cerrada { color: #ff4444; }
+        #contador { color: #ffeb3b; }
+        .btn-copy { background: transparent; color: #39ff14; border: 2px solid #39ff14; padding: 8px; border-radius: 5px; cursor: pointer; font-size: 10px; font-weight: bold; }
+
+        /* Login Modal */
+        #login-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
+        .modal-content { background: #111; border: 2px solid #39ff14; padding: 25px; border-radius: 15px; display: flex; flex-direction: column; gap: 12px; width: 280px; }
+        input { background: #000; border: 1px solid #333; color: #39ff14; padding: 12px; border-radius: 8px; text-align: center; font-size: 16px; }
+        .btn-confirmar { background: #39ff14; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; }
 
         @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(4, 1fr); } .info-container { flex-direction: column; gap: 5px; } }
+        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(4, 1fr); } .info-item { font-size: 11px; } }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="return false">
 
-    <div class="neon-title">LOTERÍA 2 CARTAS</div>
+    <div class="neon-title">LOTERÍA (2 CARTAS)</div>
+
+    <div class="user-bar">
+        <div id="user-display">
+            <button class="btn-session" onclick="abrirLogin()">Entrar / Registrar PIN</button>
+        </div>
+    </div>
 
     <div id="tablero"></div>
 
-    <button id="btn-registrar" onclick="registrarSeleccion()">LISTO: ENVIAR MIS 2 CARTAS</button>
+    <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
 
-    <div class="info-container">
-        <div id="estado-tabla">Cargando...</div>
-        <div id="contador">LIBRES: -- / 54</div>
+    <div class="info-bar">
+        <div class="info-item"><span id="estado-tabla">Cargando...</span></div>
+        <div class="info-item"><button id="btn-copiar" class="btn-copy" onclick="copiarMisCartas()">COPIAR CARTAS</button></div>
+        <div class="info-item"><span id="contador">LIBRES: -- / 54</span></div>
+    </div>
+
+    <div id="login-modal">
+        <div class="modal-content">
+            <input type="text" id="login-nick" placeholder="TU NICK" maxlength="15">
+            <input type="password" id="login-pin" placeholder="PIN (4 NÚMEROS)" maxlength="4" inputmode="numeric">
+            <button class="btn-confirmar" onclick="procesarLogin()">ENTRAR</button>
+            <button style="background:transparent; color:#888; border:none; cursor:pointer;" onclick="cerrarLogin()">Cancelar</button>
+        </div>
     </div>
 
     <script>
-        const RUTA_IMG = "https://xatspace.github.io/juegos/loteria/mexicana/img/";
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
         const refSala = db.ref('loteria_shere_2');
-        const refIPs = db.ref('ips_shere_2');
         const refConfig = db.ref('config_shere_2');
+        const refUsuarios = db.ref('usuarios_registrados');
 
-        const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
-
+        let usuarioActual = localStorage.getItem('shere_nick') || null;
         let seleccionadas = [];
         let datosFirebase = {};
         let tablaAbierta = true;
-        let miIPGlobal = "";
+        let misCartasGlobal = [];
 
-        async function obtenerIP() {
-            try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                miIPGlobal = data.ip.replace(/\./g, '_');
-                return miIPGlobal;
-            } catch (e) { return "t"+Math.random(); }
+        const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
+
+        window.onload = () => { if(usuarioActual) actualizarInterfazUsuario(); };
+        window.abrirLogin = () => { document.getElementById('login-modal').style.display = 'flex'; };
+        window.cerrarLogin = () => { document.getElementById('login-modal').style.display = 'none'; };
+
+        window.cerrarSesion = () => {
+            if(confirm("¿Cerrar sesión?")) {
+                localStorage.removeItem('shere_nick');
+                location.reload();
+            }
+        };
+
+        window.procesarLogin = () => {
+            const nick = document.getElementById('login-nick').value.trim().toUpperCase();
+            const pin = document.getElementById('login-pin').value.trim();
+            if(nick.length < 3 || pin.length < 4) return alert("Nick (3+) y PIN (4 números).");
+
+            refUsuarios.child(nick).once('value', snap => {
+                if(snap.exists()) {
+                    if(snap.val().pin !== pin) return alert("❌ PIN incorrecto.");
+                } else {
+                    refUsuarios.child(nick).set({ nick: nick, pin: pin });
+                }
+                usuarioActual = nick;
+                localStorage.setItem('shere_nick', nick);
+                actualizarInterfazUsuario();
+                cerrarLogin();
+                pintar();
+            });
+        };
+
+        function actualizarInterfazUsuario() {
+            document.getElementById('user-display').innerHTML = `
+                <span class="user-logged">${usuarioActual}</span>
+                <button class="btn-logout" onclick="cerrarSesion()">SALIR</button>
+            `;
         }
-        obtenerIP();
 
         function pintar() {
             const tab = document.getElementById('tablero');
             tab.innerHTML = "";
             let ocupadas = 0;
+            misCartasGlobal = [];
 
             nombres.forEach((nom, i) => {
-                const data = datosFirebase[nom];
-                const nick = data ? data.nombre : null;
-                const ipDuenio = data ? data.ip : null;
+                const nick = datosFirebase[nom] ? datosFirebase[nom].nombre : null;
                 if(nick) ocupadas++;
+                if(usuarioActual && nick === usuarioActual) misCartasGlobal.push(nom);
 
                 const div = document.createElement('div');
                 div.className = "celda";
+                if(nick) div.classList.add("ocupado");
+                if(usuarioActual && nick === usuarioActual) div.classList.add("es-mia");
+                if(seleccionadas.includes(nom)) div.classList.add("seleccionada");
                 
-                if(nick) {
-                    div.classList.add("ocupado");
-                    if(ipDuenio === miIPGlobal) div.classList.add("es-mia");
-                } else if(seleccionadas.includes(nom)) {
-                    div.classList.add("seleccionada");
-                }
-                
-                div.onclick = function() {
-                    if(!nick) {
-                        if(!tablaAbierta) return alert("La tabla está cerrada.");
-                        if(seleccionadas.includes(nom)) {
-                            seleccionadas = seleccionadas.filter(a => a !== nom);
-                        } else if(seleccionadas.length < 2) {
-                            seleccionadas.push(nom);
-                        }
-                        document.getElementById('btn-registrar').style.display = (seleccionadas.length === 2) ? 'block' : 'none';
-                        pintar();
+                div.onclick = () => {
+                    if(!usuarioActual) return abrirLogin();
+                    if(nick) return;
+                    if(!tablaAbierta) return alert("La tabla está cerrada.");
+
+                    if(seleccionadas.includes(nom)) {
+                        seleccionadas = seleccionadas.filter(a => a !== nom);
+                    } else if(seleccionadas.length < 2) {
+                        seleccionadas.push(nom);
                     }
+                    document.getElementById('btn-registrar').style.display = (seleccionadas.length === 2) ? 'block' : 'none';
+                    pintar();
                 };
 
-                let texto = nick ? nick : nom.toUpperCase();
-                div.innerHTML = `<img src="${RUTA_IMG}${i+1}.jpg" class="img-carta"><div class="n-user">${texto}</div>`;
+                div.innerHTML = `<img src="https://xatspace.github.io/juegos/loteria/mexicana/img/${i+1}.jpg" class="img-carta">
+                                 <span class="n-user">${nick ? nick : nom.toUpperCase()}</span>`;
                 tab.appendChild(div);
             });
-            document.getElementById('contador').innerText = "DISPONIBLES: " + (54 - ocupadas) + " / 54";
+            document.getElementById('contador').innerText = "LIBRES: " + (54 - ocupadas) + " / 54";
         }
 
         async function registrarSeleccion() {
-            const miIP = await obtenerIP();
-            const snapIP = await refIPs.child(miIP).once('value');
-            if(snapIP.exists()) return alert("🚫 Solo puedes tener 2 cartas registradas.");
+            let misYaRegistradas = 0;
+            Object.values(datosFirebase).forEach(v => { if(v.nombre === usuarioActual) misYaRegistradas++; });
+            if(misYaRegistradas >= 2) return alert("Ya tienes 2 cartas registradas.");
 
-            // Verificación doble de seguridad
+            // Anti-Robo: verificar si siguen libres
             for(let s of seleccionadas) {
-                const snapCarta = await refSala.child(s).once('value');
-                if(snapCarta.exists()) {
-                    alert(`⚠️ ¡Lo sentimos! Alguien acaba de ganar la carta "${s}". Elige otra.`);
-                    seleccionadas = seleccionadas.filter(item => item !== s);
-                    document.getElementById('btn-registrar').style.display = 'none';
+                const snap = await refSala.child(s).once('value');
+                if(snap.exists()) {
+                    alert(`⚠️ ¡La carta "${s}" ya se ocupó!`);
+                    seleccionadas = [];
                     pintar();
                     return;
                 }
             }
 
-            const nick = prompt("Tu Nick para las 2 cartas:");
-            if(nick && nick.trim()) {
-                const n = nick.trim().toUpperCase();
-                for(let s of seleccionadas) {
-                    await refSala.child(s).set({ nombre: n, ip: miIP });
-                }
-                await refIPs.child(miIP).set(true);
-                seleccionadas = [];
-                document.getElementById('btn-registrar').style.display = 'none';
-                alert("¡Cartas guardadas! ¡Mucha suerte!");
+            for(let s of seleccionadas) {
+                await refSala.child(s).set({ nombre: usuarioActual });
             }
+            seleccionadas = [];
+            document.getElementById('btn-registrar').style.display = 'none';
+            alert("¡Cartas enviadas!");
         }
 
+        window.copiarMisCartas = () => {
+            if(misCartasGlobal.length === 0) return alert("No tienes cartas");
+            navigator.clipboard.writeText(misCartasGlobal.join(" y ").toUpperCase());
+            alert("Copiado: " + misCartasGlobal.join(", "));
+        };
+
         refSala.on('value', snap => { datosFirebase = snap.val() || {}; pintar(); });
-        refConfig.child('abierta').on('value', snap => {
-            tablaAbierta = (snap.val() !== false);
+        refConfig.child('abierta').on('value', snap => { 
+            tablaAbierta = (snap.val() !== false); 
             const est = document.getElementById('estado-tabla');
-            est.innerText = tablaAbierta ? "● TABLA ABIERTA" : "● TABLA CERRADA";
-            est.className = tablaAbierta ? "abierta" : "cerrada";
-            pintar();
+            est.innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
+            est.className = "info-item " + (tablaAbierta ? "abierta" : "cerrada");
         });
     </script>
 </body>
