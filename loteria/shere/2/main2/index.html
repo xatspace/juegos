@@ -37,14 +37,9 @@
             flex-grow: 1; line-height: 1; padding: 0 2px; box-sizing: border-box;
         }
         
-        /* Selección actual (antes de enviar) */
         .seleccionada { outline: 5px solid #ffeb3b; outline-offset: -5px; box-shadow: 0 0 15px #ffeb3b; z-index: 5; }
-
-        /* Ocupado por otros */
         .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
         .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; left: 0; height: 32%; }
-
-        /* MIS CARTAS (Verde Neón) */
         .es-mia { border: 4px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 6; }
         .es-mia .n-user { background: #39ff14 !important; color: #000 !important; position: absolute; bottom: 0; height: 32%; }
 
@@ -60,11 +55,35 @@
         .abierta { color: #39ff14; } .cerrada { color: #ff0000; }
         #contador { color: #ffeb3b; font-size: 16px; font-weight: bold; }
 
-        .admin-panel { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-admin { background: #000; color: #39ff14; border: 2px solid #39ff14; padding: 10px 20px; cursor: pointer; font-size: 12px; font-weight: bold; border-radius: 8px; }
+        /* PANEL ADMIN MEJORADO */
+        .admin-panel { 
+            display: flex; flex-direction: row; justify-content: center; 
+            gap: 10px; width: 100%; max-width: 1050px; margin-top: 10px;
+        }
+        .btn-admin { 
+            flex: 1; background: #000; color: #39ff14; border: 2px solid #39ff14; 
+            padding: 15px 5px; border-radius: 8px; font-weight: bold; 
+            cursor: pointer; text-transform: uppercase; font-size: 12px;
+        }
+        .btn-admin:hover { background: #39ff14; color: #000; }
+
+        /* MODAL GESTIÓN */
+        #modal-usuarios {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); overflow-y: auto; padding: 20px; box-sizing: border-box;
+        }
+        .lista-usuarios { width: 100%; max-width: 500px; margin: auto; background: #111; border: 2px solid #39ff14; border-radius: 12px; padding: 15px; }
+        .usuario-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
+        .usuario-info { font-family: monospace; color: #39ff14; }
+        .btn-del { background: #ff0000; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
         @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(4, 1fr); } .info-container { flex-direction: column; } }
+        @media (max-width: 500px) { 
+            #tablero { grid-template-columns: repeat(4, 1fr); } 
+            .info-container { flex-direction: column; }
+            .admin-panel { gap: 5px; }
+            .btn-admin { font-size: 9px; padding: 12px 2px; }
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -82,7 +101,16 @@
 
     <div class="admin-panel">
         <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR</button>
-        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR TODO</button>
+        <button class="btn-admin" onclick="gestionUsuarios()">👥 USUARIOS</button>
+        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR</button>
+    </div>
+
+    <div id="modal-usuarios">
+        <div class="lista-usuarios">
+            <h2 style="color:#39ff14; text-align:center;">JUGADORES REGISTRADOS</h2>
+            <div id="contenedor-lista"></div>
+            <button class="btn-admin" style="width:100%; margin-top:15px;" onclick="document.getElementById('modal-usuarios').style.display='none'">CERRAR PANEL</button>
+        </div>
     </div>
 
     <script>
@@ -154,16 +182,13 @@
 
         async function registrarSeleccion() {
             const miIP = await obtenerIP();
-            
-            // 1. Verificar IP
             const snapIP = await refIPs.child(miIP).once('value');
             if(snapIP.exists()) return alert("🚫 Ya tienes cartas registradas.");
 
-            // 2. Verificar disponibilidad de AMBAS cartas justo antes de anotar
             for(let s of seleccionadas) {
                 const snapCarta = await refSala.child(s).once('value');
                 if(snapCarta.exists()) {
-                    alert(`⚠️ ¡Mala suerte! La carta "${s}" se ocupó hace un instante. Elige otra.`);
+                    alert(`⚠️ ¡Mala suerte! La carta "${s}" se ocupó. Elige otra.`);
                     seleccionadas = seleccionadas.filter(item => item !== s);
                     document.getElementById('btn-registrar').style.display = 'none';
                     pintar();
@@ -174,14 +199,11 @@
             const nick = prompt("Tu Nick para las 2 cartas:");
             if(nick && nick.trim()) {
                 const n = nick.trim().toUpperCase();
-                // Registro seguro
-                for(let s of seleccionadas) {
-                    await refSala.child(s).set({ nombre: n, ip: miIP });
-                }
+                for(let s of seleccionadas) { await refSala.child(s).set({ nombre: n, ip: miIP }); }
                 await refIPs.child(miIP).set(true);
                 seleccionadas = [];
                 document.getElementById('btn-registrar').style.display = 'none';
-                alert("¡Cartas registradas con éxito!");
+                alert("¡Cartas registradas!");
             }
         }
 
@@ -197,6 +219,53 @@
                 if (ipParaBorrar) await refIPs.child(ipParaBorrar).remove();
             }
         }
+
+        // NUEVA FUNCIÓN GESTIÓN DE USUARIOS
+        window.gestionUsuarios = () => {
+            if(prompt("Clave Admin:") !== CLAVE) return;
+            
+            const contenedor = document.getElementById('contenedor-lista');
+            contenedor.innerHTML = "";
+            
+            // Obtenemos los nombres únicos de los jugadores actuales
+            const usuariosUnicos = {};
+            Object.keys(datosFirebase).forEach(carta => {
+                const user = datosFirebase[carta].nombre;
+                if(!usuariosUnicos[user]) usuariosUnicos[user] = true;
+            });
+
+            const listaNombres = Object.keys(usuariosUnicos);
+            
+            if(listaNombres.length > 0) {
+                listaNombres.forEach(nick => {
+                    const div = document.createElement('div');
+                    div.className = "usuario-item";
+                    div.innerHTML = `
+                        <div class="usuario-info"><strong>${nick}</strong></div>
+                        <button class="btn-del" onclick="borrarUsuarioDesdeLista('${nick}')">BORRAR</button>
+                    `;
+                    contenedor.appendChild(div);
+                });
+            } else {
+                contenedor.innerHTML = "<p style='text-align:center; color:#888;'>No hay registros activos.</p>";
+            }
+            document.getElementById('modal-usuarios').style.display = 'block';
+        };
+
+        window.borrarUsuarioDesdeLista = async (nick) => {
+            // Reutiliza la lógica de borrarUsuario pero sin pedir clave de nuevo (ya se validó al abrir el modal)
+            if(confirm(`¿Confirmas borrar a ${nick}?`)) {
+                let ipParaBorrar = null;
+                Object.keys(datosFirebase).forEach(key => {
+                    if (datosFirebase[key].nombre === nick) {
+                        ipParaBorrar = datosFirebase[key].ip;
+                        refSala.child(key).remove();
+                    }
+                });
+                if (ipParaBorrar) await refIPs.child(ipParaBorrar).remove();
+                gestionUsuarios(); // Recargar lista
+            }
+        };
 
         window.toggleTabla = () => { if(prompt("Clave:") === CLAVE) refConfig.child('abierta').set(!tablaAbierta); };
         window.resetJuego = () => { if(prompt("Clave Maestra:") === CLAVE) { refSala.remove(); refIPs.remove(); seleccionadas = []; } };
