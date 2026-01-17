@@ -3,26 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Invertidos | Bienvenidos</title>
+    <title>Invertidos | Usuario Pro</title>
     <style>
         body { 
             background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
-            padding: 10px; margin: 0; 
+            padding: 10px; margin: 0; overflow-x: hidden;
             /* BLOQUEO DE SELECCIÓN */
             user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
-            overflow-x: hidden;
         }
         .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 10px 0; }
 
         /* Barra Superior */
-        .user-bar { width: 100%; max-width: 1050px; display: flex; justify-content: flex-end; margin-bottom: 10px; }
-        .btn-session {
-            background: transparent; border: 2px solid #39ff14; color: #39ff14;
-            padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer;
-            text-transform: uppercase; font-size: 11px;
+        .user-bar { 
+            width: 100%; max-width: 1050px; display: flex; justify-content: flex-end; 
+            align-items: center; margin-bottom: 10px; gap: 10px;
         }
-        .user-logged { color: #39ff14; font-size: 13px; text-decoration: underline; }
+        .btn-session, .btn-logout {
+            background: transparent; border: 2px solid #39ff14; color: #39ff14;
+            padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
+            text-transform: uppercase; font-size: 10px;
+        }
+        .btn-logout { border-color: #ff4444; color: #ff4444; margin-left: 5px; }
+        .user-logged { color: #39ff14; font-size: 13px; font-weight: bold; }
 
         /* Tablero */
         #tablero { 
@@ -37,7 +40,6 @@
         }
         .n-info { font-size: clamp(14px, 3vw, 19px); color: #39ff14; font-weight: 900; }
         
-        /* NOMBRES GRANDES (IGUAL ADMIN) */
         .n-user { 
             color: #ffffff; font-weight: 900; text-transform: uppercase; 
             font-size: 14px; margin-top: 5px; text-align: center; 
@@ -48,7 +50,7 @@
         .ocupado .n-info { color: #ff0000; }
         .es-mia { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14; background: #052005; }
 
-        /* BARRA INFERIOR - MÁS GRANDE */
+        /* BARRA INFERIOR */
         .info-bar { 
             display: grid; grid-template-columns: 1fr 1fr 1fr; 
             align-items: center; width: 100%; max-width: 1050px; margin-top: 15px; 
@@ -57,7 +59,7 @@
         .info-item { font-size: 18px; font-weight: 900; text-align: center; text-transform: uppercase; }
         .abierta { color: #39ff14; text-shadow: 0 0 10px #39ff14; } 
         .cerrada { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
-        #contador { color: #ffeb3b; text-shadow: 0 0 5px rgba(255, 235, 59, 0.5); }
+        #contador { color: #ffeb3b; }
 
         .btn-copy { 
             background: transparent; color: #39ff14; border: 2px solid #39ff14; 
@@ -66,7 +68,6 @@
         }
         .copiado-exito { background: #fff !important; color: #000 !important; border-color: #fff !important; }
 
-        /* Modal Login */
         #login-modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); align-items: center; justify-content: center;
@@ -85,7 +86,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false">
 
     <div class="neon-title">INVERTIDOS</div>
 
@@ -124,9 +125,9 @@
         let tablaAbierta = true;
         let misNumerosGlobal = [];
 
-        // BLOQUEO DE CLIC DERECHO Y TECLAS EN TODA LA PÁGINA
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('keydown', (e) => {
+        // BLOQUEOS TOTALES
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
             if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
                 e.preventDefault();
                 return false;
@@ -137,10 +138,17 @@
         window.abrirLogin = () => { document.getElementById('login-modal').style.display = 'flex'; };
         window.cerrarLogin = () => { document.getElementById('login-modal').style.display = 'none'; };
 
+        window.cerrarSesion = () => {
+            if(confirm("¿Cerrar sesión?")) {
+                localStorage.removeItem('shere_nick');
+                location.reload();
+            }
+        };
+
         window.procesarLogin = async () => {
             const nick = document.getElementById('login-nick').value.trim().toUpperCase();
             const pin = document.getElementById('login-pin').value.trim();
-            if(nick.length < 3 || pin.length < 4) return alert("Nick (3+ letras) y PIN (4 números).");
+            if(nick.length < 3 || pin.length < 4) return alert("Nick (3+) y PIN (4 números).");
 
             const userRef = ref(db, 'usuarios_registrados/' + nick);
             const snap = await get(userRef);
@@ -159,7 +167,10 @@
         };
 
         function actualizarInterfazUsuario() {
-            document.getElementById('user-display').innerHTML = `<span class="user-logged">Hola, ${usuarioActual}</span>`;
+            document.getElementById('user-display').innerHTML = `
+                <span class="user-logged">HOLA, ${usuarioActual}</span>
+                <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+            `;
         }
 
         const pares = ["01-10", "02-20", "03-30", "04-40", "05-50", "06-60", "07-70", "08-80", "09-90", "11-22", "12-21", "13-31", "14-41", "15-51", "16-61", "17-71", "18-81", "19-29", "23-32", "24-42", "25-52", "26-62", "27-72", "28-82", "33-44", "34-43", "35-53", "36-63", "37-73", "38-83", "39-49", "45-54", "46-64", "47-74", "48-84", "55-66", "56-65", "57-75", "58-85", "59-69", "67-76", "68-86", "77-88", "78-87", "79-89"];
@@ -184,7 +195,6 @@
                 div.onclick = () => { 
                     if(!usuarioActual) return abrirLogin();
                     if(!nick && tablaAbierta) anotar(p); 
-                    if(!nick && !tablaAbierta) alert("La tabla está cerrada.");
                 };
                 div.innerHTML = `<span class="n-info">${p}</span><span class="n-user">${nick ? nick : '---'}</span>`;
                 tab.appendChild(div);
@@ -199,16 +209,14 @@
 
             try {
                 const snapshot = await get(ref(db, 'invertidos_juego/' + p));
-                if (snapshot.exists()) {
-                    alert("⚠️ ¡DEMASIADO TARDE! Alguien acaba de elegir este número.");
-                    return; 
-                }
+                if (snapshot.exists()) return alert("⚠️ ¡Ya se ocupó!");
+                
                 await set(ref(db, 'invertidos_juego/' + p), { nombre: usuarioActual });
             } catch (e) { console.log(e); }
         }
 
         window.copiarMisNumeros = () => {
-            if(misNumerosGlobal.length === 0) return;
+            if(misNumerosGlobal.length === 0) return alert("Aún no tienes número");
             navigator.clipboard.writeText(misNumerosGlobal.join(", "));
             const btn = document.getElementById('btn-copiar');
             btn.innerText = "¡COPIADO!";
