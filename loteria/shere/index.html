@@ -3,202 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana 1 Carta | Shere</title>
+    <title>Lotería Mexicana | Usuario Pro</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { 
             background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
-            padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
+            padding: 10px; margin: 0; overflow-x: hidden;
+            user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
         }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0 15px 0; text-align: center; }
-        
-        #tablero { 
-            display: grid; 
-            grid-template-columns: repeat(9, 1fr); 
-            gap: 6px; 
-            width: 100%; 
-            max-width: 1050px; 
-            background: #111; 
-            border: 3px solid #39ff14; 
-            padding: 10px; 
-            border-radius: 12px; 
-            box-sizing: border-box;
-        }
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 10px 0; text-align: center; }
 
-        .celda { 
-            aspect-ratio: 1.2 / 1.4; 
-            border: 1px solid #444; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: flex-start; 
-            cursor: pointer; 
-            border-radius: 4px; 
-            background: #fff; 
-            padding: 2px;
-            overflow: hidden;
-            position: relative;
-            box-sizing: border-box;
+        /* Barra Superior Usuario */
+        .user-bar { 
+            width: 100%; max-width: 1050px; display: flex; justify-content: flex-end; 
+            align-items: center; margin-bottom: 10px; gap: 10px;
         }
-        
-        .img-carta { width: 100%; height: 65%; object-fit: contain; display: block; pointer-events: none; margin-top: 2px; }
+        .btn-session, .btn-logout {
+            background: transparent; border: 2px solid #39ff14; color: #39ff14;
+            padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
+            text-transform: uppercase; font-size: 10px;
+        }
+        .btn-logout { border-color: #ff4444; color: #ff4444; margin-left: 5px; }
+        .user-logged { color: #39ff14; font-size: 13px; font-weight: bold; }
+
+        /* Tablero */
+        #tablero { 
+            display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
+            width: 100%; max-width: 1050px; background: #111; border: 3px solid #39ff14; 
+            padding: 10px; border-radius: 12px; box-sizing: border-box;
+        }
+        .celda { 
+            aspect-ratio: 1.2 / 1.4; border: 1px solid #444; display: flex; 
+            flex-direction: column; align-items: center; justify-content: flex-start; 
+            cursor: pointer; border-radius: 6px; background: #fff; padding: 2px;
+            overflow: hidden; position: relative; box-sizing: border-box;
+        }
+        .img-carta { width: 100%; height: 65%; object-fit: contain; pointer-events: none; margin-top: 2px; }
 
         .n-user { 
             color: #000; font-weight: 900; text-transform: uppercase; 
-            text-align: center; width: 100%; z-index: 2; 
-            display: flex; justify-content: center; align-items: center;
-            flex-grow: 1; line-height: 1; padding: 0 2px; box-sizing: border-box;
+            font-size: 14px; text-align: center; width: 100%; z-index: 2; 
+            flex-grow: 1; display: flex; justify-content: center; align-items: center;
+            line-height: 1.1; word-wrap: break-word;
         }
         
-        /* CARTA OCUPADA POR OTROS */
-        .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; cursor: default; }
-        .ocupado .n-user { 
-            background: #ff0000; color: #fff;
-            position: absolute; bottom: 0; left: 0; height: 32%;
+        .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
+        .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; left: 0; height: 32%; }
+        
+        .es-mia { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 5; }
+        .es-mia .n-user { background: #39ff14; color: #000; position: absolute; bottom: 0; left: 0; height: 32%; }
+
+        /* BARRA INFERIOR */
+        .info-bar { 
+            display: grid; grid-template-columns: 1fr 1fr 1fr; 
+            align-items: center; width: 100%; max-width: 1050px; margin-top: 15px; 
+            background: #111; padding: 18px 5px; border-radius: 10px; border: 1px solid #333;
         }
+        .info-item { font-size: 18px; font-weight: 900; text-align: center; text-transform: uppercase; }
+        .abierta { color: #39ff14; text-shadow: 0 0 10px #39ff14; } 
+        .cerrada { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+        #contador { color: #ffeb3b; }
 
-        /* MI CARTA ELEGIDA (VERDE NEÓN) */
-        .es-mia { border: 4px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 5; }
-        .es-mia .n-user { 
-            background: #39ff14 !important; color: #000 !important;
-            position: absolute; bottom: 0; left: 0; height: 32%;
+        .btn-copy { 
+            background: transparent; color: #39ff14; border: 2px solid #39ff14; 
+            padding: 10px 15px; border-radius: 5px; cursor: pointer; 
+            font-size: 12px; font-weight: bold; text-transform: uppercase;
         }
+        .copiado-exito { background: #fff !important; color: #000 !important; border-color: #fff !important; }
 
-        .info-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin: 20px 0;
-            width: 100%;
-            max-width: 1050px;
+        /* Login Modal */
+        #login-modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); align-items: center; justify-content: center;
         }
+        .modal-content {
+            background: #111; border: 2px solid #39ff14; padding: 25px; border-radius: 15px;
+            display: flex; flex-direction: column; gap: 12px; width: 80%; max-width: 280px;
+        }
+        input { background: #000; border: 1px solid #333; color: #39ff14; padding: 12px; border-radius: 8px; text-align: center; font-size: 16px; outline: none; }
+        .btn-confirmar { background: #39ff14; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; }
 
-        #estado-tabla { font-size: 16px; font-weight: bold; text-transform: uppercase; }
-        .abierta { color: #39ff14; }
-        .cerrada { color: #ff0000; }
-
-        #contador { color: #ffeb3b; font-size: 16px; letter-spacing: 1px; font-weight: bold; }
-
-        @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
+        @media (max-width: 850px) { #tablero { grid-template-columns: repeat(5, 1fr); } }
         @media (max-width: 500px) { 
             #tablero { grid-template-columns: repeat(4, 1fr); } 
-            .info-container { flex-direction: column; gap: 5px; }
+            .info-item { font-size: 14px; }
         }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="return false">
 
-    <div class="neon-title">LOTERÍA MEXICANA 1 CARTA | SHERE</div>
+    <div class="neon-title">LOTERÍA MEXICANA</div>
+
+    <div class="user-bar">
+        <div id="user-display">
+            <button class="btn-session" onclick="abrirLogin()">Iniciar Sesión / Registro</button>
+        </div>
+    </div>
 
     <div id="tablero"></div>
 
-    <div class="info-container">
-        <div id="estado-tabla">Cargando...</div>
-        <div id="contador">CARTAS DISPONIBLES: -- / 54</div>
+    <div class="info-bar">
+        <div class="info-item"><span id="estado-tabla">Cargando...</span></div>
+        <div class="info-item"><button id="btn-copiar" class="btn-copy" onclick="copiarMiCarta()">Copiar Carta</button></div>
+        <div class="info-item"><span id="contador">LIBRES: -- / 54</span></div>
+    </div>
+
+    <div id="login-modal">
+        <div class="modal-content">
+            <input type="text" id="login-nick" placeholder="TU NICK" maxlength="15">
+            <input type="password" id="login-pin" placeholder="PIN (4 NÚMEROS)" maxlength="4" inputmode="numeric">
+            <button class="btn-confirmar" onclick="procesarLogin()">ENTRAR</button>
+            <button style="background:transparent; color:#888; border:none; cursor:pointer; font-size:11px;" onclick="cerrarLogin()">Cancelar</button>
+        </div>
     </div>
 
     <script>
         const RUTA_IMG = "https://xatspace.github.io/juegos/loteria/mexicana/img/";
-        const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
+        // URL de tu base de datos
+        const firebaseConfig = { databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
-        const refSala = db.ref('loteria_local_final');
-        const refIPs = db.ref('ips_local_final');
-        const refConfig = db.ref('config_tabla');
+        const refSala = db.ref('loteria_juego');
+        const refConfig = db.ref('config_loteria');
+        const refUsuarios = db.ref('usuarios_registrados');
+
+        let usuarioActual = localStorage.getItem('shere_nick') || null;
+        let datosFirebase = {};
+        let tablaAbierta = true;
+        let miCartaGlobal = "";
 
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
 
-        let datosFirebase = {};
-        let tablaAbierta = true;
-        let miIPGlobal = "";
+        // BLOQUEOS DE SEGURIDAD
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
+                e.preventDefault();
+                return false;
+            }
+        });
 
-        // Obtener IP del usuario para identificar su carta
-        async function obtenerIP() {
-            try {
-                const response = await fetch('https://api.ipify.org?format=json');
-                const data = await response.json();
-                miIPGlobal = data.ip.replace(/\./g, '_');
-                return miIPGlobal;
-            } catch (e) { return "t"+Math.random(); }
+        window.onload = () => { if(usuarioActual) actualizarInterfazUsuario(); };
+        window.abrirLogin = () => { document.getElementById('login-modal').style.display = 'flex'; };
+        window.cerrarLogin = () => { document.getElementById('login-modal').style.display = 'none'; };
+
+        window.cerrarSesion = () => {
+            if(confirm("¿Cerrar sesión?")) {
+                localStorage.removeItem('shere_nick');
+                location.reload();
+            }
+        };
+
+        window.procesarLogin = async () => {
+            const nick = document.getElementById('login-nick').value.trim().toUpperCase();
+            const pin = document.getElementById('login-pin').value.trim();
+            if(nick.length < 3 || pin.length < 4) return alert("Nick (3+) y PIN (4 números).");
+
+            refUsuarios.child(nick).once('value', snap => {
+                if(snap.exists()) {
+                    if(snap.val().pin !== pin) return alert("❌ PIN incorrecto.");
+                } else {
+                    refUsuarios.child(nick).set({ nick: nick, pin: pin });
+                }
+                usuarioActual = nick;
+                localStorage.setItem('shere_nick', nick);
+                actualizarInterfazUsuario();
+                cerrarLogin();
+                pintar();
+            });
+        };
+
+        function actualizarInterfazUsuario() {
+            document.getElementById('user-display').innerHTML = `
+                <span class="user-logged">HOLA, ${usuarioActual}</span>
+                <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
+            `;
         }
-        obtenerIP();
 
         function pintar() {
             const tab = document.getElementById('tablero');
             const estTxt = document.getElementById('estado-tabla');
             tab.innerHTML = "";
             let ocupadas = 0;
+            miCartaGlobal = "";
 
-            estTxt.innerText = tablaAbierta ? "● TABLA ABIERTA" : "● TABLA CERRADA";
+            estTxt.innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
             estTxt.className = tablaAbierta ? "abierta" : "cerrada";
 
             nombres.forEach((nom, i) => {
-                const data = datosFirebase[nom];
-                const nick = data ? data.nombre : null;
-                const ipDuenio = data ? data.ip : null;
-
+                const nick = datosFirebase[nom] ? datosFirebase[nom].nombre : null;
                 if(nick) ocupadas++;
+                if(usuarioActual && nick === usuarioActual) miCartaGlobal = nom;
 
                 const div = document.createElement('div');
                 div.className = "celda";
-                
-                // Aplicar estilos visuales
-                if (nick) {
-                    div.classList.add("ocupado");
-                    if (ipDuenio === miIPGlobal) {
-                        div.classList.add("es-mia");
-                    }
-                }
+                if(nick) div.classList.add("ocupado");
+                if(usuarioActual && nick === usuarioActual) div.classList.add("es-mia");
                 
                 div.onclick = function() {
-                    if(!nick && tablaAbierta) {
-                        anotar(nom);
-                    }
+                    if(!usuarioActual) return abrirLogin();
+                    if(!nick && tablaAbierta) anotar(nom);
                 };
-
-                let texto = nick ? nick : nom.toUpperCase();
-                let fSize = "15px"; 
-                if (texto.length > 9) fSize = "11px";
-                if (texto.length > 12) fSize = "9px";
 
                 div.innerHTML = `
                     <img src="${RUTA_IMG}${i+1}.jpg" class="img-carta">
-                    <span class="n-user" style="font-size: ${fSize}">${texto}</span>
+                    <span class="n-user">${nick ? nick : nom.toUpperCase()}</span>
                 `;
                 tab.appendChild(div);
             });
-            document.getElementById('contador').innerText = "CARTAS DISPONIBLES: " + (54 - ocupadas) + " / 54";
+            document.getElementById('contador').innerText = "LIBRES: " + (54 - ocupadas) + " / 54";
         }
 
         async function anotar(nom) {
-            const miIP = await obtenerIP();
-            
-            // 1. Verificar si el usuario ya tiene una carta
-            const snapshotIP = await refIPs.child(miIP).once('value');
-            if(snapshotIP.exists()) return alert("🚫 Ya elegiste una carta.");
+            let yaTiene = false;
+            Object.values(datosFirebase).forEach(v => { if(v.nombre === usuarioActual) yaTiene = true; });
+            if(yaTiene) return alert("Ya tienes una carta elegida.");
 
-            // 2. Verificar si la carta sigue disponible (Seguridad Anti-Duplicados)
-            const snapshotCarta = await refSala.child(nom).once('value');
-            if(snapshotCarta.exists()) {
-                alert("⚠️ ¡Lo siento! Alguien acaba de elegir esta carta. Por favor elige otra.");
-                return;
-            }
-
-            const n = prompt("Tu Nick:");
-            if(n && n.trim()) {
-                const nickFinal = n.trim().toUpperCase();
-                // Guardamos la carta vinculada a la IP para el marcado verde
-                await refSala.child(nom).set({ nombre: nickFinal, ip: miIP });
-                await refIPs.child(miIP).set(true);
-            }
+            // PROTECCIÓN ANTI-ROBO (Doble chequeo)
+            refSala.child(nom).once('value', snap => {
+                if(snap.exists()) {
+                    alert("⚠️ ¡Ya se ocupó! Elige otra.");
+                    return;
+                }
+                refSala.child(nom).set({ 
+                    nombre: usuarioActual,
+                    hora: firebase.database.ServerValue.TIMESTAMP 
+                });
+            });
         }
 
+        window.copiarMiCarta = () => {
+            if(!miCartaGlobal) return alert("Aún no tienes carta");
+            navigator.clipboard.writeText(miCartaGlobal.toUpperCase());
+            const btn = document.getElementById('btn-copiar');
+            btn.innerText = "¡COPIADO!";
+            btn.classList.add('copiado-exito');
+            setTimeout(() => {
+                btn.innerText = "COPIAR CARTA";
+                btn.classList.remove('copiado-exito');
+            }, 1500);
+        };
+
         refSala.on('value', snap => { datosFirebase = snap.val() || {}; pintar(); });
-        refConfig.child('abierta').on('value', snap => { tablaAbierta = (snap.val() !== false); pintar(); });
+        refConfig.child('abierta').on('value', snap => { 
+            tablaAbierta = (snap.val() !== false); 
+            pintar(); 
+        });
     </script>
 </body>
 </html>
