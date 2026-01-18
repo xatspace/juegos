@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Admin | Shere</title>
+    <title>Admin Lotería 1 Carta | Shere</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -18,35 +18,49 @@
         .celda { aspect-ratio: 1.2 / 1.4; border: 1px solid #444; display: flex; flex-direction: column; align-items: center; cursor: pointer; background: #fff; position: relative; overflow: hidden;}
         .img-carta { width: 100%; height: 65%; object-fit: contain; }
         .n-user { color: #000; font-weight: 900; text-transform: uppercase; font-size: 10px; text-align: center; }
+        
         .ocupado { border: 2px solid #ff0000; }
         .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; width: 100%; height: 30%; display: flex; align-items: center; justify-content: center; }
 
-        .admin-tools { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-admin { background: #000; color: #39ff14; border: 2px solid #39ff14; padding: 15px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .admin-tools { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+        .btn-admin { background: #000; color: #39ff14; border: 2px solid #39ff14; padding: 15px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         #estado-tabla { font-size: 20px; margin: 10px; font-weight: bold; }
+        
+        /* Modal Usuarios */
+        #modal-usuarios { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid #39ff14; padding: 20px; z-index: 1000; width: 300px; max-height: 400px; overflow-y: auto; }
+        .user-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #333; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <div class="neon-title">ADMIN LOTERÍA 2 CARTAS</div>
+    <div class="neon-title">ADMIN (1 CARTA)</div>
     <div id="estado-tabla">Cargando...</div>
+    
     <div id="tablero"></div>
 
     <div class="admin-tools">
-        <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR TABLA</button>
-        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR TODO</button>
+        <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR</button>
+        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR TABLA</button>
+        <button class="btn-admin" onclick="verUsuarios()">👥 VER PINs</button>
+    </div>
+
+    <div id="modal-usuarios">
+        <h3 style="color:#39ff14; text-align:center;">USUARIOS Y PINs</h3>
+        <div id="lista-usuarios"></div>
+        <button onclick="document.getElementById('modal-usuarios').style.display='none'" style="width:100%; margin-top:10px; cursor:pointer;">Cerrar</button>
     </div>
 
     <script>
-        // CONFIGURACIÓN IGUAL A LA DEL JUEGO
+        // CONFIGURACIÓN PARA 1 CARTA
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const CLAVE = "shere2026";
 
-        // RUTAS CORREGIDAS PARA QUE COINCIDAN CON EL JUEGO
-        const refSala = db.ref('loteria_shere_2'); 
-        const refConfig = db.ref('config_shere_2');
+        // RUTAS ESPECÍFICAS DE 1 CARTA
+        const refSala = db.ref('loteria_shere_1'); 
+        const refConfig = db.ref('config_shere_1');
+        const refUsuarios = db.ref('usuarios_registrados');
 
         let datosFirebase = {};
         let tablaAbierta = true;
@@ -58,7 +72,7 @@
                 const nick = datosFirebase[nom]?.nombre || null;
                 const div = document.createElement('div');
                 div.className = "celda" + (nick ? " ocupado" : "");
-                div.onclick = () => { if(nick && prompt("Clave Admin:") === CLAVE) refSala.child(nom).remove(); };
+                div.onclick = () => { if(nick && prompt("Clave Admin para borrar esta carta:") === CLAVE) refSala.child(nom).remove(); };
                 div.innerHTML = `<img src="https://xatspace.github.io/juegos/loteria/mexicana/img/${i+1}.jpg" class="img-carta"><span class="n-user">${nick ? nick : nom.toUpperCase()}</span>`;
                 tab.appendChild(div);
             });
@@ -71,16 +85,31 @@
         };
 
         window.resetJuego = () => {
-            if(confirm("¿Seguro que quieres borrar todas las cartas?") && prompt("CLAVE:") === CLAVE) {
+            if(confirm("¿Borrar todos los seleccionados de la tabla?") && prompt("CLAVE:") === CLAVE) {
                 refSala.remove();
             }
+        };
+
+        window.verUsuarios = () => {
+            if(prompt("Clave para ver PINs:") !== CLAVE) return;
+            refUsuarios.once('value', snap => {
+                const lista = document.getElementById('lista-usuarios');
+                lista.innerHTML = "";
+                snap.forEach(u => {
+                    const div = document.createElement('div');
+                    div.className = "user-item";
+                    div.innerHTML = `<span>${u.key}</span> <span>${u.val().pin}</span>`;
+                    lista.appendChild(div);
+                });
+                document.getElementById('modal-usuarios').style.display = 'block';
+            });
         };
 
         refSala.on('value', snap => { datosFirebase = snap.val() || {}; pintar(); });
         refConfig.child('abierta').on('value', snap => { 
             tablaAbierta = (snap.val() !== false); 
             const est = document.getElementById('estado-tabla');
-            est.innerText = tablaAbierta ? "● TABLA ABIERTA" : "● TABLA CERRADA";
+            est.innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
             est.style.color = tablaAbierta ? "#39ff14" : "#ff0000";
         });
     </script>
