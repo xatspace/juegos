@@ -3,81 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería Mexicana | 2 Cartas</title>
+    <title>Lotería Mexicana 2 Cartas | Shere</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
+        /* PROTECCIÓN GLOBAL */
+        * { 
+            -webkit-touch-callout: none !important; 
+            -webkit-user-select: none !important; 
+            user-select: none !important; 
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
         body { 
             background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
-            padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
+            padding: 10px; margin: 0; overflow-x: hidden;
         }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 24px; text-transform: uppercase; margin: 10px 0; text-align: center; }
+        
+        /* CABECERA ALINEADA */
+        .header-main {
+            width: 100%; max-width: 1050px; display: flex;
+            justify-content: space-between; align-items: center;
+            margin: 10px 0 20px 0; padding: 0 10px; box-sizing: border-box;
+        }
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 24px; text-transform: uppercase; margin: 0; }
 
-        /* Barra de Sesión */
-        .user-bar { width: 100%; max-width: 1050px; display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px; gap: 10px; }
-        .btn-session, .btn-logout { background: transparent; border: 2px solid #39ff14; color: #39ff14; padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; }
+        .btn-session, .btn-logout { background: transparent; border: 2px solid #39ff14; color: #39ff14; padding: 8px 15px; border-radius: 50px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; }
         .btn-logout { border-color: #ff4444; color: #ff4444; }
-        .user-logged { color: #39ff14; font-size: 13px; font-weight: bold; }
+        .user-logged { color: #39ff14; font-size: 14px; font-weight: bold; margin-right: 10px; }
 
-        /* Tablero */
+        /* TABLERO FONDO NEGRO */
         #tablero { 
             display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
-            width: 100%; max-width: 1050px; background: #111; border: 3px solid #39ff14; 
+            width: 100%; max-width: 1050px; background: #000; border: 3px solid #39ff14; 
             padding: 10px; border-radius: 12px; box-sizing: border-box;
         }
         .celda { 
-            aspect-ratio: 1.2 / 1.4; border: 1px solid #444; display: flex; 
-            flex-direction: column; align-items: center; justify-content: flex-start; 
-            cursor: pointer; border-radius: 6px; background: #fff; padding: 2px;
-            overflow: hidden; position: relative;
+            aspect-ratio: 1.2 / 1.4; border: 1px solid #333; display: flex; 
+            flex-direction: column; align-items: center; cursor: pointer; 
+            border-radius: 6px; background: #000; overflow: hidden; position: relative;
         }
-        .img-carta { width: 100%; height: 65%; object-fit: contain; pointer-events: none; margin-top: 2px; }
+        .img-carta { width: 100%; height: 65%; object-fit: contain; pointer-events: none; margin-top: 4px; }
+        
+        /* NOMBRES VERDE NEON */
         .n-user { 
-            color: #000; font-weight: 900; text-transform: uppercase; font-size: 11px; 
-            text-align: center; width: 100%; z-index: 2; flex-grow: 1; display: flex; 
-            justify-content: center; align-items: center; line-height: 1.1;
+            color: #39ff14; text-shadow: 0 0 5px #39ff14; font-weight: 900; 
+            text-transform: uppercase; font-size: 10px; text-align: center; width: 100%; 
+            flex-grow: 1; display: flex; justify-content: center; align-items: center;
         }
         
-        .seleccionada { outline: 5px solid #ffeb3b; outline-offset: -5px; box-shadow: 0 0 15px #ffeb3b; z-index: 5; }
-        .ocupado { border: 2px solid #ff0000 !important; }
-        .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; left: 0; height: 32%; }
-        .es-mia { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 6; }
-        .es-mia .n-user { background: #39ff14; color: #000; position: absolute; bottom: 0; left: 0; height: 32%; }
+        /* ESTADOS DE CARTA */
+        .seleccionada { border: 2px dashed #00bcff !important; box-shadow: 0 0 10px #00bcff; }
+        .ocupado { border: 1px solid #ff0000 !important; cursor: not-allowed; }
+        .ocupado .n-user { color: #fff !important; text-shadow: none; }
+        .es-mia { border: 2px solid #39ff14 !important; box-shadow: 0 0 10px #39ff14; }
+        .es-mia .n-user { color: #fff !important; text-shadow: none; }
 
-        /* BOTÓN FLOTANTE REGISTRO */
-        #btn-registrar { 
-            display: none; margin: 15px 0; background: #39ff14; color: #000; 
-            border: none; padding: 12px 30px; font-weight: bold; font-size: 18px; 
-            border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
+        /* BOTÓN DE ACCIÓN */
+        .btn-accion-central {
+            margin: 20px 0; background: #000; color: #39ff14; 
+            border: 2px solid #39ff14; padding: 15px 30px; font-weight: bold; 
+            font-size: 16px; border-radius: 8px; cursor: pointer;
+            text-transform: uppercase; min-width: 350px;
         }
 
-        /* Barra Inferior REQUERIDA */
         .info-bar { 
-            display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; 
-            width: 100%; max-width: 1050px; margin-top: 15px; background: #111; 
-            padding: 15px 5px; border-radius: 10px; border: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; max-width: 1050px; margin-top: 15px; padding: 0 10px;
         }
-        .info-item { font-size: 14px; font-weight: 900; text-align: center; text-transform: uppercase; }
-        .abierta { color: #39ff14; } .cerrada { color: #ff4444; }
-        #contador { color: #ffeb3b; }
-        .btn-copy { background: transparent; color: #39ff14; border: 2px solid #39ff14; padding: 8px; border-radius: 5px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        
+        #contador { font-weight: 900; text-transform: uppercase; }
+        .libres-neon { color: #39ff14; text-shadow: 0 0 10px #39ff14; }
+        .llena-neon { color: #ff0000; text-shadow: 0 0 15px #ff0000; }
 
-        /* Login Modal */
+        /* MODAL LOGIN */
         #login-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
         .modal-content { background: #111; border: 2px solid #39ff14; padding: 25px; border-radius: 15px; display: flex; flex-direction: column; gap: 12px; width: 280px; }
-        input { background: #000; border: 1px solid #333; color: #39ff14; padding: 12px; border-radius: 8px; text-align: center; font-size: 16px; }
-        .btn-confirmar { background: #39ff14; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        input { background: #000; border: 1px solid #333; color: #39ff14; padding: 12px; border-radius: 8px; text-align: center; }
 
         @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(4, 1fr); } .info-item { font-size: 11px; } }
+        @media (max-width: 500px) { #tablero { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
 <body oncontextmenu="return false">
 
-    <div class="neon-title">LOTERÍA (2 CARTAS)</div>
-
-    <div class="user-bar">
+    <div class="header-main">
+        <div class="neon-title">LOTERÍA 2 CARTAS | SHERE </div>
         <div id="user-display">
             <button class="btn-session" onclick="abrirLogin()">Entrar / Registrar PIN</button>
         </div>
@@ -85,36 +97,45 @@
 
     <div id="tablero"></div>
 
-    <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
+    <button id="btn-accion" class="btn-accion-central" onclick="manejarAccion()">ELIJE 2 CARTAS</button>
 
     <div class="info-bar">
-        <div class="info-item"><span id="estado-tabla">Cargando...</span></div>
-        <div class="info-item"><button id="btn-copiar" class="btn-copy" onclick="copiarMisCartas()">COPIAR CARTAS</button></div>
-        <div class="info-item"><span id="contador">LIBRES: -- / 54</span></div>
+        <div style="font-size: 12px; font-weight: bold;">
+            <span id="estado-tabla" style="color:#ff4444">● TABLA CERRADA</span>
+        </div>
+        <div id="contador" class="libres-neon">LIBRES: 54 / 54</div>
     </div>
 
     <div id="login-modal">
         <div class="modal-content">
             <input type="text" id="login-nick" placeholder="TU NICK" maxlength="15">
-            <input type="password" id="login-pin" placeholder="PIN (4 NÚMEROS)" maxlength="4" inputmode="numeric">
-            <button class="btn-confirmar" onclick="procesarLogin()">ENTRAR</button>
+            <input type="password" id="login-pin" placeholder="PIN (4 NÚMEROS)" maxlength="4">
+            <button style="background:#39ff14; border:none; padding:12px; font-weight:bold; cursor:pointer;" onclick="procesarLogin()">ENTRAR</button>
             <button style="background:transparent; color:#888; border:none; cursor:pointer;" onclick="cerrarLogin()">Cancelar</button>
         </div>
     </div>
 
     <script>
+        // PROTECCIÓN ANTI-CLICK DERECHO Y CONSOLA
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
-        const refSala = db.ref('loteria_shere_2');
+        const refSala = db.ref('loteria_shere_2'); // Referencia para lote 2 cartas
         const refConfig = db.ref('config_shere_2');
         const refUsuarios = db.ref('usuarios_registrados');
 
         let usuarioActual = localStorage.getItem('shere_nick') || null;
-        let seleccionadas = [];
+        let preSeleccion = []; 
         let datosFirebase = {};
-        let tablaAbierta = true;
+        let tablaAbierta = false;
         let misCartasGlobal = [];
 
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
@@ -123,36 +144,24 @@
         window.abrirLogin = () => { document.getElementById('login-modal').style.display = 'flex'; };
         window.cerrarLogin = () => { document.getElementById('login-modal').style.display = 'none'; };
 
-        window.cerrarSesion = () => {
-            if(confirm("¿Cerrar sesión?")) {
-                localStorage.removeItem('shere_nick');
-                location.reload();
-            }
-        };
-
         window.procesarLogin = () => {
             const nick = document.getElementById('login-nick').value.trim().toUpperCase();
             const pin = document.getElementById('login-pin').value.trim();
-            if(nick.length < 3 || pin.length < 4) return alert("Nick (3+) y PIN (4 números).");
+            if(!nick || !pin) return;
 
             refUsuarios.child(nick).once('value', snap => {
-                if(snap.exists()) {
-                    if(snap.val().pin !== pin) return alert("❌ PIN incorrecto.");
-                } else {
-                    refUsuarios.child(nick).set({ nick: nick, pin: pin });
-                }
+                if(snap.exists() && snap.val().pin !== pin) return alert("PIN incorrecto");
+                if(!snap.exists()) refUsuarios.child(nick).set({ nick, pin });
                 usuarioActual = nick;
                 localStorage.setItem('shere_nick', nick);
-                actualizarInterfazUsuario();
-                cerrarLogin();
-                pintar();
+                location.reload();
             });
         };
 
         function actualizarInterfazUsuario() {
             document.getElementById('user-display').innerHTML = `
                 <span class="user-logged">${usuarioActual}</span>
-                <button class="btn-logout" onclick="cerrarSesion()">SALIR</button>
+                <button class="btn-logout" onclick="localStorage.removeItem('shere_nick'); location.reload();">SALIR</button>
             `;
         }
 
@@ -163,73 +172,104 @@
             misCartasGlobal = [];
 
             nombres.forEach((nom, i) => {
-                const nick = datosFirebase[nom] ? datosFirebase[nom].nombre : null;
-                if(nick) ocupadas++;
-                if(usuarioActual && nick === usuarioActual) misCartasGlobal.push(nom);
+                const nickEnCarta = datosFirebase[nom] ? datosFirebase[nom].nombre : null;
+                if(nickEnCarta) ocupadas++;
+                if(usuarioActual && nickEnCarta === usuarioActual) misCartasGlobal.push(nom);
 
                 const div = document.createElement('div');
                 div.className = "celda";
-                if(nick) div.classList.add("ocupado");
-                if(usuarioActual && nick === usuarioActual) div.classList.add("es-mia");
-                if(seleccionadas.includes(nom)) div.classList.add("seleccionada");
+                if(nickEnCarta) div.classList.add("ocupado");
+                if(usuarioActual && nickEnCarta === usuarioActual) div.classList.add("es-mia");
+                if(preSeleccion.includes(nom)) div.classList.add("seleccionada");
                 
                 div.onclick = () => {
                     if(!usuarioActual) return abrirLogin();
-                    if(nick) return;
-                    if(!tablaAbierta) return alert("La tabla está cerrada.");
-
-                    if(seleccionadas.includes(nom)) {
-                        seleccionadas = seleccionadas.filter(a => a !== nom);
-                    } else if(seleccionadas.length < 2) {
-                        seleccionadas.push(nom);
+                    if(nickEnCarta || !tablaAbierta || misCartasGlobal.length >= 2) return;
+                    
+                    if(preSeleccion.includes(nom)) {
+                        preSeleccion = preSeleccion.filter(n => n !== nom);
+                    } else if(preSeleccion.length < 2) {
+                        preSeleccion.push(nom);
                     }
-                    document.getElementById('btn-registrar').style.display = (seleccionadas.length === 2) ? 'block' : 'none';
                     pintar();
                 };
 
                 div.innerHTML = `<img src="https://xatspace.github.io/juegos/loteria/mexicana/img/${i+1}.jpg" class="img-carta">
-                                 <span class="n-user">${nick ? nick : nom.toUpperCase()}</span>`;
+                                 <span class="n-user">${nickEnCarta ? nickEnCarta : nom.toUpperCase()}</span>`;
                 tab.appendChild(div);
             });
-            document.getElementById('contador').innerText = "LIBRES: " + (54 - ocupadas) + " / 54";
+
+            const cont = document.getElementById('contador');
+            const libres = 54 - ocupadas;
+            if(libres === 0) {
+                cont.innerText = "TABLA LLENA";
+                cont.className = "llena-neon";
+            } else {
+                cont.innerText = "LIBRES: " + libres + " / 54";
+                cont.className = "libres-neon";
+            }
+            actualizarBoton();
         }
 
-        async function registrarSeleccion() {
-            let misYaRegistradas = 0;
-            Object.values(datosFirebase).forEach(v => { if(v.nombre === usuarioActual) misYaRegistradas++; });
-            if(misYaRegistradas >= 2) return alert("Ya tienes 2 cartas registradas.");
+        function actualizarBoton() {
+            const btn = document.getElementById('btn-accion');
+            if(misCartasGlobal.length === 2) {
+                btn.innerText = "COPIAR: " + misCartasGlobal[0].toUpperCase() + "-" + misCartasGlobal[1].toUpperCase();
+                btn.style.borderColor = "#39ff14";
+            } else if(preSeleccion.length === 2) {
+                btn.innerText = "ENVIAR MIS CARTAS";
+                btn.style.borderColor = "#00bcff";
+            } else if(preSeleccion.length === 1) {
+                btn.innerText = "TE FALTA ELEGIR 1 CARTA";
+                btn.style.borderColor = "#ffeb3b";
+            } else {
+                btn.innerText = "ELIJE 2 CARTAS";
+                btn.style.borderColor = "#39ff14";
+            }
+        }
 
-            // Anti-Robo: verificar si siguen libres
-            for(let s of seleccionadas) {
-                const snap = await refSala.child(s).once('value');
-                if(snap.exists()) {
-                    alert(`⚠️ ¡La carta "${s}" ya se ocupó!`);
-                    seleccionadas = [];
-                    pintar();
-                    return;
+        async function manejarAccion() {
+            const btn = document.getElementById('btn-accion');
+            
+            // Caso: COPIAR
+            if(misCartasGlobal.length === 2) {
+                const txt = misCartasGlobal[0].toUpperCase() + "-" + misCartasGlobal[1].toUpperCase();
+                const el = document.createElement('textarea');
+                el.value = txt;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                btn.innerText = "¡COPIADO!";
+                setTimeout(actualizarBoton, 1000);
+                return;
+            }
+
+            // Caso: REGISTRAR
+            if(preSeleccion.length === 2 && tablaAbierta) {
+                // Anti-Robo: Verificar ambas cartas
+                for(let sel of preSeleccion) {
+                    const snap = await refSala.child(sel).once('value');
+                    if(snap.exists()) {
+                        alert(`¡La carta ${sel} se ocupó recién!`);
+                        preSeleccion = [];
+                        return pintar();
+                    }
                 }
+                
+                for(let sel of preSeleccion) {
+                    await refSala.child(sel).set({ nombre: usuarioActual });
+                }
+                preSeleccion = [];
             }
-
-            for(let s of seleccionadas) {
-                await refSala.child(s).set({ nombre: usuarioActual });
-            }
-            seleccionadas = [];
-            document.getElementById('btn-registrar').style.display = 'none';
-            alert("¡Cartas enviadas!");
         }
-
-        window.copiarMisCartas = () => {
-            if(misCartasGlobal.length === 0) return alert("No tienes cartas");
-            navigator.clipboard.writeText(misCartasGlobal.join(" y ").toUpperCase());
-            alert("Copiado: " + misCartasGlobal.join(", "));
-        };
 
         refSala.on('value', snap => { datosFirebase = snap.val() || {}; pintar(); });
         refConfig.child('abierta').on('value', snap => { 
             tablaAbierta = (snap.val() !== false); 
             const est = document.getElementById('estado-tabla');
             est.innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
-            est.className = "info-item " + (tablaAbierta ? "abierta" : "cerrada");
+            est.style.color = tablaAbierta ? "#39ff14" : "#ff4444";
         });
     </script>
 </body>
