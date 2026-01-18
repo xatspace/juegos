@@ -3,114 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Invertidos | Usuario Pro</title>
+    <title>Invertidos - Bienvenidos Suerte! | Shere</title>
     <style>
         body { 
             background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
-            padding: 10px; margin: 0; overflow-x: hidden;
-            /* BLOQUEO DE SELECCIÓN */
-            user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+            padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
         }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 10px 0; }
-
-        /* Barra Superior */
-        .user-bar { 
-            width: 100%; max-width: 1050px; display: flex; justify-content: flex-end; 
-            align-items: center; margin-bottom: 10px; gap: 10px;
-        }
-        .btn-session, .btn-logout {
-            background: transparent; border: 2px solid #39ff14; color: #39ff14;
-            padding: 6px 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
-            text-transform: uppercase; font-size: 10px;
-        }
-        .btn-logout { border-color: #ff4444; color: #ff4444; margin-left: 5px; }
-        .user-logged { color: #39ff14; font-size: 13px; font-weight: bold; }
-
-        /* Tablero */
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0 20px 0; text-align: center; }
+        
         #tablero { 
-            display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
-            width: 100%; max-width: 1050px; background: #111; border: 3px solid #39ff14; 
-            padding: 10px; border-radius: 12px; box-sizing: border-box;
+            display: grid; 
+            grid-template-columns: repeat(9, 1fr); 
+            gap: 6px; 
+            width: 100%; 
+            max-width: 1050px; 
+            background: #111; 
+            border: 3px solid #39ff14; 
+            padding: 10px; 
+            border-radius: 12px; 
+            box-sizing: border-box;
         }
+
         .celda { 
-            aspect-ratio: 1.2 / 1.1; border: 1px solid #444; display: flex; 
-            flex-direction: column; align-items: center; justify-content: center; 
-            cursor: pointer; border-radius: 8px; background: #0a0a0a;
+            aspect-ratio: 1.2 / 1.1; 
+            border: 1px solid #444; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            background: #0a0a0a; 
+            padding: 5px;
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
         }
-        .n-info { font-size: clamp(14px, 3vw, 19px); color: #39ff14; font-weight: 900; }
         
+        .n-info { 
+            font-size: clamp(14px, 3vw, 20px); 
+            color: #39ff14; 
+            font-weight: 900; 
+            line-height: 1;
+            text-shadow: 0 0 5px #39ff14;
+        }
+
         .n-user { 
-            color: #ffffff; font-weight: 900; text-transform: uppercase; 
-            font-size: 14px; margin-top: 5px; text-align: center; 
-            width: 95%; line-height: 1.1; word-wrap: break-word;
+            color: #ffffff; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            text-align: center; 
+            width: 95%; 
+            font-size: 14px; 
+            margin-top: 8px; 
+            line-height: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: 0.5px;
         }
         
-        .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 5px #ff0000; }
-        .ocupado .n-info { color: #ff0000; }
-        .es-mia { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14; background: #052005; }
+        /* ESTILO OCUPADO (OTROS) */
+        .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; cursor: default; }
+        .ocupado .n-info { text-shadow: none; color: #ff0000; }
 
-        /* BARRA INFERIOR */
-        .info-bar { 
-            display: grid; grid-template-columns: 1fr 1fr 1fr; 
-            align-items: center; width: 100%; max-width: 1050px; margin-top: 15px; 
-            background: #111; padding: 18px 5px; border-radius: 10px; border: 1px solid #333;
-        }
-        .info-item { font-size: 18px; font-weight: 900; text-align: center; text-transform: uppercase; }
-        .abierta { color: #39ff14; text-shadow: 0 0 10px #39ff14; } 
-        .cerrada { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
-        #contador { color: #ffeb3b; }
+        /* ESTILO MI CARTA (VERDE NEÓN) */
+        .es-mia { border: 3px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 5; }
+        .es-mia .n-info { color: #39ff14 !important; text-shadow: 0 0 10px #39ff14; }
 
-        .btn-copy { 
-            background: transparent; color: #39ff14; border: 2px solid #39ff14; 
-            padding: 10px 15px; border-radius: 5px; cursor: pointer; 
-            font-size: 12px; font-weight: bold; text-transform: uppercase;
+        .info-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 1050px;
         }
-        .copiado-exito { background: #fff !important; color: #000 !important; border-color: #fff !important; }
 
-        #login-modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); align-items: center; justify-content: center;
-        }
-        .modal-content {
-            background: #111; border: 2px solid #39ff14; padding: 25px; border-radius: 15px;
-            display: flex; flex-direction: column; gap: 12px; width: 80%; max-width: 280px;
-        }
-        input { background: #000; border: 1px solid #333; color: #39ff14; padding: 12px; border-radius: 8px; text-align: center; font-size: 16px; outline: none; }
-        .btn-confirmar { background: #39ff14; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        #estado-tabla { font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        .abierta { color: #39ff14; }
+        .cerrada { color: #ff0000; }
+        #contador { color: #ffeb3b; font-size: 16px; letter-spacing: 1px; font-weight: bold; }
 
         @media (max-width: 850px) { #tablero { grid-template-columns: repeat(5, 1fr); } }
         @media (max-width: 500px) { 
             #tablero { grid-template-columns: repeat(4, 1fr); } 
-            .info-item { font-size: 14px; }
+            .info-container { flex-direction: column; gap: 5px; }
+            .n-user { font-size: 12px; }
         }
     </style>
 </head>
-<body oncontextmenu="return false">
+<body oncontextmenu="return false;">
 
-    <div class="neon-title">INVERTIDOS</div>
-
-    <div class="user-bar">
-        <div id="user-display">
-            <button class="btn-session" onclick="abrirLogin()">Iniciar Sesión / Registro</button>
-        </div>
-    </div>
+    <div class="neon-title">INVERTIDOS | Shere</div>
 
     <div id="tablero"></div>
 
-    <div class="info-bar">
-        <div class="info-item"><span id="estado-tabla">Cargando...</span></div>
-        <div class="info-item"><button id="btn-copiar" class="btn-copy" onclick="copiarMisNumeros()">Copiar Números</button></div>
-        <div class="info-item"><span id="contador">LIBRES: -- / 45</span></div>
-    </div>
-
-    <div id="login-modal">
-        <div class="modal-content">
-            <input type="text" id="login-nick" placeholder="TU NICK" maxlength="15">
-            <input type="password" id="login-pin" placeholder="PIN (4 NÚMEROS)" maxlength="4" inputmode="numeric">
-            <button class="btn-confirmar" onclick="procesarLogin()">ENTRAR</button>
-            <button style="background:transparent; color:#888; border:none; cursor:pointer; font-size:11px;" onclick="cerrarLogin()">Cancelar</button>
-        </div>
+    <div class="info-container">
+        <div id="estado-tabla">Cargando...</div>
+        <div id="contador">ESPACIOS LIBRES: -- / 45</div>
     </div>
 
     <script type="module">
@@ -119,120 +112,95 @@
 
         const app = initializeApp({ databaseURL: "https://invertidos-default-rtdb.firebaseio.com/" });
         const db = getDatabase(app);
-        
-        let usuarioActual = localStorage.getItem('shere_nick') || null;
-        let datosFirebase = {};
-        let tablaAbierta = true;
-        let misNumerosGlobal = [];
-
-        // BLOQUEOS TOTALES
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
-                e.preventDefault();
-                return false;
-            }
-        });
-
-        window.onload = () => { if(usuarioActual) actualizarInterfazUsuario(); };
-        window.abrirLogin = () => { document.getElementById('login-modal').style.display = 'flex'; };
-        window.cerrarLogin = () => { document.getElementById('login-modal').style.display = 'none'; };
-
-        window.cerrarSesion = () => {
-            if(confirm("¿Cerrar sesión?")) {
-                localStorage.removeItem('shere_nick');
-                location.reload();
-            }
-        };
-
-        window.procesarLogin = async () => {
-            const nick = document.getElementById('login-nick').value.trim().toUpperCase();
-            const pin = document.getElementById('login-pin').value.trim();
-            if(nick.length < 3 || pin.length < 4) return alert("Nick (3+) y PIN (4 números).");
-
-            const userRef = ref(db, 'usuarios_registrados/' + nick);
-            const snap = await get(userRef);
-
-            if(snap.exists()) {
-                if(snap.val().pin !== pin) return alert("❌ PIN incorrecto.");
-            } else {
-                await set(userRef, { nick: nick, pin: pin });
-            }
-
-            usuarioActual = nick;
-            localStorage.setItem('shere_nick', nick);
-            actualizarInterfazUsuario();
-            cerrarLogin();
-            render();
-        };
-
-        function actualizarInterfazUsuario() {
-            document.getElementById('user-display').innerHTML = `
-                <span class="user-logged">HOLA, ${usuarioActual}</span>
-                <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
-            `;
-        }
+        const refSala = ref(db, 'invertidos_juego');
+        const refIPs = ref(db, 'usuarios_ips');
+        const refConfig = ref(db, 'config_invertidos');
 
         const pares = ["01-10", "02-20", "03-30", "04-40", "05-50", "06-60", "07-70", "08-80", "09-90", "11-22", "12-21", "13-31", "14-41", "15-51", "16-61", "17-71", "18-81", "19-29", "23-32", "24-42", "25-52", "26-62", "27-72", "28-82", "33-44", "34-43", "35-53", "36-63", "37-73", "38-83", "39-49", "45-54", "46-64", "47-74", "48-84", "55-66", "56-65", "57-75", "58-85", "59-69", "67-76", "68-86", "77-88", "78-87", "79-89"];
 
+        let tablaAbierta = true;
+        let datosFirebase = {};
+        let miIPGlobal = "";
+
+        // Obtener IP al cargar para marcar "mi carta"
+        async function obtenerIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                miIPGlobal = data.ip.replace(/\./g, '_');
+                return miIPGlobal;
+            } catch (e) { return null; }
+        }
+        obtenerIP();
+
         function render() {
             const tab = document.getElementById('tablero');
+            const estTxt = document.getElementById('estado-tabla');
+            const contTxt = document.getElementById('contador');
             tab.innerHTML = "";
             let ocupados = 0;
-            misNumerosGlobal = [];
+
+            estTxt.innerText = tablaAbierta ? "● TABLA ABIERTA" : "● TABLA CERRADA";
+            estTxt.className = tablaAbierta ? "abierta" : "cerrada";
 
             pares.forEach(p => {
                 const data = datosFirebase[p];
                 const nick = data ? data.nombre : null;
+                const ipDuenio = data ? data.ip : null;
+                
                 if(nick) ocupados++;
-                if(usuarioActual && nick === usuarioActual) misNumerosGlobal.push(p);
 
                 const div = document.createElement('div');
                 div.className = "celda";
-                if(nick) div.classList.add("ocupado");
-                if(usuarioActual && nick === usuarioActual) div.classList.add("es-mia");
+                
+                // Aplicar colores según ocupación y dueño
+                if (nick) {
+                    div.classList.add("ocupado");
+                    if (ipDuenio === miIPGlobal) {
+                        div.classList.add("es-mia");
+                    }
+                }
                 
                 div.onclick = () => { 
-                    if(!usuarioActual) return abrirLogin();
-                    if(!nick && tablaAbierta) anotar(p); 
+                    if(!nick) {
+                        if(!tablaAbierta) return alert("La tabla está cerrada por el administrador.");
+                        anotar(p);
+                    }
                 };
+
                 div.innerHTML = `<span class="n-info">${p}</span><span class="n-user">${nick ? nick : '---'}</span>`;
                 tab.appendChild(div);
             });
-            document.getElementById('contador').innerText = `LIBRES: ${pares.length - ocupados} / ${pares.length}`;
+            contTxt.innerText = "ESPACIOS LIBRES: " + (pares.length - ocupados) + " / " + pares.length;
         }
 
-        async function anotar(p) {
-            let yaTiene = false;
-            Object.values(datosFirebase).forEach(v => { if(v.nombre === usuarioActual) yaTiene = true; });
-            if(yaTiene) return alert("Solo puedes elegir un número.");
+        window.anotar = async (p) => {
+            const miIP = await obtenerIP();
+            if (!miIP) return alert("Error de conexión.");
+            
+            const checkIP = await get(ref(db, 'usuarios_ips/' + miIP));
+            if (checkIP.exists()) return alert("🚫 Ya has elegido un número anteriormente.");
 
-            try {
-                const snapshot = await get(ref(db, 'invertidos_juego/' + p));
-                if (snapshot.exists()) return alert("⚠️ ¡Ya se ocupó!");
-                
-                await set(ref(db, 'invertidos_juego/' + p), { nombre: usuarioActual });
-            } catch (e) { console.log(e); }
-        }
+            // VERIFICACIÓN DE SEGURIDAD: ¿Sigue libre el lugar?
+            const checkLugar = await get(ref(db, 'invertidos_juego/' + p));
+            if (checkLugar.exists()) {
+                alert("⚠️ ¡Lo siento! Alguien acaba de elegir este número. Por favor, elige otro.");
+                return;
+            }
 
-        window.copiarMisNumeros = () => {
-            if(misNumerosGlobal.length === 0) return alert("Aún no tienes número");
-            navigator.clipboard.writeText(misNumerosGlobal.join(", "));
-            const btn = document.getElementById('btn-copiar');
-            btn.innerText = "¡COPIADO!";
-            btn.classList.add('copiado-exito');
-            setTimeout(() => {
-                btn.innerText = "COPIAR NÚMEROS";
-                btn.classList.remove('copiado-exito');
-            }, 1500);
+            const n = prompt("Número " + p + " - Tu Nick:");
+            if (n && n.trim() !== "") {
+                const nickFinal = n.trim().toUpperCase();
+                // Se guarda la carta con la IP del dueño para poder marcarla después
+                await set(ref(db, 'invertidos_juego/' + p), { nombre: nickFinal, ip: miIP });
+                await set(ref(db, 'usuarios_ips/' + miIP), true);
+            }
         };
 
-        onValue(ref(db, 'invertidos_juego'), (snap) => { datosFirebase = snap.val() || {}; render(); });
-        onValue(ref(db, 'config_invertidos'), (snap) => {
-            tablaAbierta = snap.val()?.abierta !== false;
-            const est = document.getElementById('estado-tabla');
-            est.innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
-            est.className = tablaAbierta ? "abierta" : "cerrada";
+        onValue(refSala, (snap) => { datosFirebase = snap.val() || {}; render(); });
+        onValue(refConfig, (snap) => {
+            tablaAbierta = (snap.val() && snap.val().abierta !== false);
+            render();
         });
     </script>
 </body>
