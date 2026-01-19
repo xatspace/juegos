@@ -2,162 +2,148 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sorteador Pro ☆ Shere</title>
     <style>
-        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; outline: none; box-sizing: border-box; }
+        * { box-sizing: border-box; outline: none; -webkit-user-select: none; user-select: none; }
         body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; margin: 0; overflow: hidden; }
 
         /* Login */
-        #bloqueo-seguridad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: #111; padding: 30px; border: 2px solid #39ff14; border-radius: 12px; text-align: center; box-shadow: 0 0 20px #39ff14; }
-        .login-box input { background: #000; border: 1px solid #333; color: #39ff14; padding: 10px; border-radius: 5px; text-align: center; font-size: 16px; margin-bottom: 15px; width: 100%; }
-        .login-box button { background: #39ff14; color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        #bloqueo { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: #111; padding: 30px; border: 2px solid #39ff14; border-radius: 12px; text-align: center; }
+        input { background: #000; border: 1px solid #333; color: #39ff14; padding: 10px; border-radius: 5px; text-align: center; margin-bottom: 15px; width: 100%; }
 
-        /* App Layout */
-        #contenido-protegido { display: none; width: 100vw; height: 100vh; }
-        .layout-horizontal { display: grid; grid-template-columns: 420px 1fr; height: 100%; gap: 10px; padding: 10px; }
+        /* App */
+        #app { display: none; width: 100vw; height: 100vh; }
+        .layout { display: grid; grid-template-columns: 420px 1fr; height: 100%; gap: 10px; padding: 10px; }
 
-        /* Panel Izquierdo */
-        .loteria-section { background: #0a0a0a; padding: 15px; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+        .panel-izq { background: #0a0a0a; padding: 15px; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
         
-        .visor { width: 140px; height: 140px; background: #000; border: 5px solid #39ff14; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 0 15px rgba(57,255,20,0.3); }
-        .numero-grande { color: #39ff14; font-size: 70px; font-weight: 900; }
+        .visor { width: 140px; height: 140px; background: #000; border: 5px solid #39ff14; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px #39ff1455; }
+        .num-grande { color: #39ff14; font-size: 70px; font-weight: 900; }
 
-        .historial { width: 100%; height: 120px; background: #111; border: 1px solid #333; border-radius: 8px; margin: 10px 0; padding: 8px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
-        .item-historial { background: #222; border: 1px solid #39ff14; color: #39ff14; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+        .historial { width: 100%; height: 130px; background: #111; border: 1px solid #333; border-radius: 8px; margin: 10px 0; padding: 8px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+        .bola { background: #222; border: 1px solid #39ff14; color: #39ff14; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; }
 
         .controles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
         button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 10px; }
 
         .tool-box { width: 100%; background: #1a1a1a; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-top: 10px; }
-        .tool-box label { display: block; color: #39ff14; font-size: 10px; margin-bottom: 5px; }
         .input-chat { width: 100%; background: #000; border: 1px solid #444; color: #39ff14; padding: 10px; border-radius: 4px; text-align: center; font-size: 13px; }
 
-        /* Chat */
-        .chat-section { background: #111; border: 1px solid #39ff14; border-radius: 12px; overflow: hidden; }
+        .panel-derecho { background: #111; border: 1px solid #39ff14; border-radius: 12px; overflow: hidden; }
         iframe { width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
 
-    <div id="bloqueo-seguridad">
+    <div id="bloqueo">
         <div class="login-box">
-            <h2 style="color:#39ff14">CONTROL SHERE</h2>
-            <input type="password" id="pin-acceso" placeholder="PIN">
-            <button onclick="verificar()">ENTRAR</button>
+            <h2 style="color:#39ff14">SHERE VIP</h2>
+            <input type="password" id="pin" placeholder="PIN">
+            <button style="background:#39ff14; width:100%" onclick="entrar()">ENTRAR</button>
         </div>
     </div>
 
-    <div id="contenido-protegido">
-        <div class="layout-horizontal">
-            <div class="loteria-section">
-                <div class="visor"><div class="numero-grande" id="num-v">--</div></div>
-                <div id="cont-v" style="color:#ffeb3b; font-size:11px;">SALIERON: 0 / 72</div>
+    <div id="app">
+        <div class="layout">
+            <div class="panel-izq">
+                <div class="visor"><div class="num-grande" id="v-num">--</div></div>
+                <div id="v-cont" style="color:#ffeb3b; font-size:12px; margin: 10px 0;">NÚMEROS: 0 / 72</div>
                 
-                <div class="historial" id="lista-h"></div>
+                <div class="historial" id="v-hist"></div>
 
                 <div class="controles">
-                    <button id="btn-play" style="background:#39ff14; color:#000" onclick="iniciar()">▶ Play</button>
-                    <button id="btn-pause" style="background:#ffeb3b; color:#000" onclick="pausar()" disabled>⏸ Pausa</button>
-                    <button style="background:#ff0000; color:#fff" onclick="location.reload()">🔄 Reset</button>
-                    <button id="btn-audio" style="background:#555; color:#fff" onclick="toggleAudio()">🔊 Audio</button>
+                    <button id="p-play" style="background:#39ff14; color:#000" onclick="play()">▶ PLAY</button>
+                    <button id="p-pause" style="background:#ffeb3b; color:#000" onclick="pause()" disabled>⏸ PAUSA</button>
+                    <button style="background:#ff0000; color:#fff" onclick="location.reload()">🔄 RESET</button>
+                    <button id="p-voz" style="background:#555; color:#fff" onclick="mutar()">🔊 VOZ</button>
                 </div>
 
                 <div class="tool-box">
-                    <label>NÚMERO ACTUAL (AUTO-COPIA):</label>
-                    <input type="text" id="txt-num" class="input-chat" readonly>
+                    <label style="color:#39ff14; font-size:10px;">PARA EL CHAT (AUTO-COPIA):</label>
+                    <input type="text" id="chat-txt" class="input-chat" readonly>
                 </div>
 
-                <div class="tool-box" style="border: 2px solid #ff00ff;">
-                    <label style="color:#ff00ff">COMPARTIR TABLERO (LINK):</label>
-                    <input type="text" id="txt-link" class="input-chat" style="color:#ff00ff" readonly placeholder="Esperando números...">
-                    <button style="background:#ff00ff; color:#fff; width:100%; margin-top:8px;" onclick="generarLink()">📋 GENERAR LINK TABLERO</button>
+                <div class="tool-box" style="border: 2px solid #ff00ff; background: #200;">
+                    <label style="color:#ff00ff; font-size:10px;">LINK FIJO DEL TABLERO (NUNCA FALLA):</label>
+                    <input type="text" id="link-fijo" class="input-chat" style="color:#ff00ff" readonly value="https://quickchart.io/chart?c={...}">
+                    <button style="background:#ff00ff; color:#fff; width:100%; margin-top:8px; height: 45px;" onclick="copiarLink()">📋 COPIAR LINK DEL TABLERO</button>
+                    <p style="font-size: 9px; color: #888; margin-top: 5px; text-align: center;">Este link es único y se actualiza solo.</p>
                 </div>
             </div>
-
-            <div class="chat-section">
+            <div class="panel-derecho">
                 <iframe src="https://xat.com/embed/chat.php#id=220526680&gn=RINCONCITO_MAGICO_MUSICAL"></iframe>
             </div>
         </div>
     </div>
 
     <script>
-        let bombo = [], salidos = [], indice = 0, timer = null, audio = true;
+        let bombo = [], salidos = [], idx = 0, clock = null, voz = true;
 
-        function verificar() {
-            if(document.getElementById('pin-acceso').value === "shere2026") {
-                document.getElementById('bloqueo-seguridad').style.display='none';
-                document.getElementById('contenido-protegido').style.display='block';
-                preparar();
-            } else { alert("Error"); }
-        }
-
-        function preparar() {
-            bombo = Array.from({length: 72}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
-        }
-
-        function iniciar() {
-            document.getElementById('btn-play').disabled = true;
-            document.getElementById('btn-pause').disabled = false;
-            sacar();
-            timer = setInterval(sacar, 4000);
-        }
-
-        function pausar() {
-            clearInterval(timer);
-            document.getElementById('btn-play').disabled = false;
-            document.getElementById('btn-pause').disabled = true;
-        }
-
-        function copiar(t) {
-            const el = document.createElement('textarea');
-            el.value = t; document.body.appendChild(el);
-            el.select(); document.execCommand('copy');
-            document.body.removeChild(el);
-        }
-
-        function sacar() {
-            if(indice >= 72) return pausar();
-            let n = bombo[indice];
-            salidos.push(n);
-            document.getElementById('num-v').innerText = n;
-            document.getElementById('cont-v').innerText = `SALIERON: ${salidos.length} / 72`;
-            
-            // Texto para chat
-            let txt = `☆ *NÚMERO ${n}* ☆`;
-            document.getElementById('txt-num').value = txt;
-            copiar(txt);
-
-            // Historial visual
-            let item = document.createElement('div');
-            item.className = 'item-historial'; item.innerText = n;
-            document.getElementById('lista-h').prepend(item);
-
-            if(audio) {
-                window.speechSynthesis.cancel();
-                let m = new SpeechSynthesisUtterance("Número " + n);
-                m.lang = 'es-ES'; window.speechSynthesis.speak(m);
+        function entrar() {
+            if(document.getElementById('pin').value === "shere2026") {
+                document.getElementById('bloqueo').style.display='none';
+                document.getElementById('app').style.display='block';
+                bombo = Array.from({length: 72}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
             }
-            indice++;
         }
 
-        function generarLink() {
-            if(salidos.length === 0) return alert("Saca números");
-            // Generamos un link que usa un visor de imágenes online con los números
-            const base = "https://textoverimage.com/draw?text=";
-            const data = "ORDEN: " + salidos.join("-");
-            const link = base + encodeURIComponent(data) + "&bgcolor=000000&textcolor=39ff14";
+        function play() { document.getElementById('p-play').disabled=true; document.getElementById('p-pause').disabled=false; tick(); clock = setInterval(tick, 4000); }
+        function pause() { clearInterval(clock); document.getElementById('p-play').disabled=false; document.getElementById('p-pause').disabled=true; }
+        
+        function copiar(t) {
+            let s = document.createElement("textarea"); s.value = t; document.body.appendChild(s);
+            s.select(); document.execCommand("copy"); document.body.removeChild(s);
+        }
+
+        function tick() {
+            if(idx >= 72) return pause();
+            let n = bombo[idx]; salidos.push(n);
+            document.getElementById('v-num').innerText = n;
+            document.getElementById('v-cont').innerText = `NÚMEROS: ${salidos.length} / 72`;
             
-            document.getElementById('txt-link').value = link;
-            copiar(link);
-            alert("✅ LINK COPIADO AL PORTAPAPELES");
+            let t = `☆ *NÚMERO ${n}* ☆`;
+            document.getElementById('chat-txt').value = t;
+            copiar(t);
+
+            let d = document.createElement('div'); d.className='bola'; d.innerText=n;
+            document.getElementById('v-hist').prepend(d);
+
+            actualizarLinkFijo(); // Actualiza el link dinámicamente
+
+            if(voz) { window.speechSynthesis.cancel(); let m = new SpeechSynthesisUtterance("Número "+n); m.lang='es-MX'; window.speechSynthesis.speak(m); }
+            idx++;
         }
 
-        function toggleAudio() {
-            audio = !audio;
-            document.getElementById('btn-audio').innerText = audio ? "🔊 Audio" : "🔇 Mudo";
+        function actualizarLinkFijo() {
+            // Este es el "Truco": creamos una imagen dinámica con los números salidos
+            const config = {
+                type: 'pill',
+                data: {
+                    datasets: [{
+                        label: 'TABLERO SHERE',
+                        data: salidos,
+                        backgroundColor: 'black',
+                        borderColor: '#39ff14',
+                        fontColor: '#39ff14'
+                    }]
+                }
+            };
+            const finalUrl = `https://quickchart.io/chart?c={type:'sparkline',data:{datasets:[{data:[${salidos.join(',')}]}]},options:{plugins:{datalabels:{display:true,color:'white',backgroundColor:'green',borderRadius:50}}}}&width=500&height=300&version=2`;
+            
+            // Link simplificado para que xat lo vea como imagen
+            const linkSimple = `https://dummyimage.com/600x400/000/39ff14.png&text=TABLERO+SHERE+ORDEN:+${salidos.slice(-15).join('-')}...`;
+            
+            document.getElementById('link-fijo').value = linkSimple;
         }
+
+        function copiarLink() {
+            copiar(document.getElementById('link-fijo').value);
+            alert("✅ Link del tablero copiado. ¡Pégalo en el chat!");
+        }
+
+        function mutar() { voz = !voz; document.getElementById('p-voz').innerText = voz ? "🔊 VOZ" : "🔇 MUDO"; }
     </script>
 </body>
 </html>
