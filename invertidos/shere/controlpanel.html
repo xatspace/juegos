@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Control Shere</title>
+    <style>
+        body { background: #111; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .visor { font-size: 80px; color: #39ff14; border: 5px solid #39ff14; width: 150px; height: 150px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 20px; }
+        button { padding: 15px 30px; cursor: pointer; font-weight: bold; background: #39ff14; border: none; border-radius: 5px; margin: 5px; }
+        .btn-link { background: #ff00ff; color: white; width: 100%; margin-top: 20px; font-size: 16px; }
+        #input-link { width: 100%; padding: 10px; margin-top: 10px; background: #000; color: #ff00ff; border: 1px solid #ff00ff; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="visor" id="visor">--</div>
+    
+    <div>
+        <button onclick="sacarNumero()">▶ SACAR NÚMERO</button>
+        <button style="background:red; color:white;" onclick="location.reload()">🔄 REINICIAR</button>
+    </div>
+
+    <div style="width: 300px;">
+        <input type="text" id="input-link" readonly placeholder="Link para el chat">
+        <button class="btn-link" onclick="copiarLink()">📋 COPIAR LINK CORTO</button>
+    </div>
+
+    <script>
+        let salidos = [];
+        // !!! CAMBIA ESTO POR TU URL REAL !!!
+        const MI_URL_HOSTING = "https://shere.github.io/tablero.html"; 
+
+        function sacarNumero() {
+            if (salidos.length >= 72) return alert("Fin del sorteo");
+            let n;
+            do { n = Math.floor(Math.random() * 72) + 1; } while (salidos.includes(n));
+            salidos.push(n);
+            document.getElementById('visor').innerText = n;
+            
+            // Generar el link para el chat
+            const linkChat = MI_URL_HOSTING + "?n=" + salidos.join(',');
+            document.getElementById('input-link').value = linkChat;
+            
+            // Copiado automático del número para el chat
+            const temp = document.createElement("textarea");
+            temp.value = "☆ *NÚMERO " + n + "* ☆";
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+        }
+
+        function copiarLink() {
+            const el = document.getElementById('input-link');
+            el.select();
+            document.execCommand("copy");
+            alert("✅ Link del tablero copiado");
+        }
+    </script>
+</body>
+</html>
