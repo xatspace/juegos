@@ -34,15 +34,19 @@
         .tool-box label { font-size: 10px; color: #39ff14; display: block; margin-bottom: 5px; }
         .input-chat { background: #000; border: 1px solid #444; color: #39ff14; padding: 8px; border-radius: 4px; font-size: 13px; text-align: center; width: 100%; box-sizing: border-box; margin-bottom: 5px; outline: none; }
         
+        /* Estilo especial para el Link cuando aparece */
+        #txt-link { color: #ff00ff; border-color: #ff00ff; font-weight: bold; }
+
         .chat-section { width: 100%; height: 100%; background: #111; border: 2px solid #39ff14; border-radius: 12px; overflow: hidden; }
         .chat-section iframe { width: 100%; height: 100%; border: none; }
 
         #modal-general { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; justify-content:center; align-items:center; }
-        .modal-contenedor-dinamico { background:#000; border:2px solid #39ff14; border-radius:10px; padding:20px; position:relative; width: 90%; max-width: 800px; }
-        #captura-area { background: #000; padding: 10px; }
-        .grid-numeros { display:grid; grid-template-columns: repeat(12, 1fr); gap: 5px; }
-        .num-bola-modal { border-radius: 50%; display: flex; align-items: center; justify-content: center; aspect-ratio: 1/1; font-weight: bold; font-size: 14px; border: 1px solid #39ff14; color: #39ff14; }
-        .bola-salio { border-color: #ff0000; background: #ff0000; color: #fff; }
+        .modal-contenedor-dinamico { background:#000; border:2px solid #39ff14; border-radius:10px; padding:20px; position:relative; width: 95%; max-width: 800px; }
+        #captura-area { background: #000; padding: 15px; border: 1px solid #333; }
+        .grid-numeros { display:grid; grid-template-columns: repeat(12, 1fr); gap: 5px; margin-top: 10px; }
+        .num-bola-modal { border-radius: 50%; display: flex; align-items: center; justify-content: center; aspect-ratio: 1/1; font-weight: bold; font-size: 14px; border: 1px solid #333; color: #444; }
+        .bola-salio { border-color: #ff0000; background: #ff0000; color: #fff; box-shadow: 0 0 5px #ff0000; }
+        .bola-orden-neon { border-color: #39ff14; color: #39ff14; box-shadow: 0 0 8px #39ff14; }
     </style>
 </head>
 <body oncontextmenu="return false">
@@ -85,19 +89,17 @@
                 </div>
 
                 <div class="tool-box">
-                    <label>COPIAR NÚMERO (AUTO):</label>
+                    <label>NÚMERO ACTUAL (AUTO-COPIADO):</label>
                     <div style="display:flex; gap:5px;">
                         <input type="text" id="input-adorno" style="width:40px; background:#000; color:#39ff14; border:1px solid #333; text-align:center;" value="☆">
-                        <input type="text" id="txt-numero" class="input-chat" readonly placeholder="Esperando...">
+                        <input type="text" id="txt-numero" class="input-chat" readonly placeholder="...">
                     </div>
-                    <button style="background:#39ff14; color:#000; width:100%; font-size:9px;" onclick="window.copiarManual('txt-numero')">COPIAR MANUAL</button>
                 </div>
 
-                <div class="tool-box" style="border-color: #ff00ff;">
-                    <label style="color:#ff00ff;">LINK DE IMAGEN IMBB:</label>
-                    <input type="text" id="txt-link" class="input-chat" readonly placeholder="Genera el link abajo...">
-                    <button style="background:#ff00ff; color:#fff; width:100%; margin-bottom:5px;" onclick="window.copiarManual('txt-link')">COPIAR LINK</button>
-                    <button style="background:#fff; color:#000; width:100%;" id="btn-gen" onclick="window.generarLinkInternet()">🌐 GENERAR LINK DE TABLERO</button>
+                <div class="tool-box" style="border: 2px solid #ff00ff;">
+                    <label style="color:#ff00ff;">LINK DE TABLERO (SUBIDA A INTERNET):</label>
+                    <input type="text" id="txt-link" class="input-chat" readonly placeholder="El link aparecerá aquí">
+                    <button style="background:#fff; color:#000; width:100%; font-weight: bold; height: 40px;" id="btn-gen" onclick="window.generarLinkInternet()">🌐 GENERAR Y COPIAR LINK</button>
                 </div>
             </div>
 
@@ -111,7 +113,7 @@
         <div class="modal-contenedor-dinamico">
             <span onclick="window.cerrarModal()" style="position:absolute; top:0px; right:15px; color:#ff4444; font-size:40px; cursor:pointer;">&times;</span>
             <div id="captura-area">
-                <h2 id="modal-titulo" style="color: #39ff14; text-align: center; font-size: 16px; margin-bottom: 10px;">TABLERO</h2>
+                <h2 id="modal-titulo" style="color: #39ff14; text-align: center; font-size: 18px; margin: 0;">TABLERO</h2>
                 <div id="modal-grid" class="grid-numeros"></div>
             </div>
         </div>
@@ -140,6 +142,20 @@
 
         window.pausar = () => { clearInterval(intervalo); intervalo = null; document.getElementById('btn-play').disabled = false; document.getElementById('btn-pause').disabled = true; }
 
+        async function copiarAlPortapapeles(texto) {
+            try {
+                await navigator.clipboard.writeText(texto);
+            } catch (err) {
+                // Fallback si el navegador bloquea el clipboard
+                const inputOculto = document.createElement("input");
+                inputOculto.value = texto;
+                document.body.appendChild(inputOculto);
+                inputOculto.select();
+                document.execCommand("copy");
+                document.body.removeChild(inputOculto);
+            }
+        }
+
         function sacarNumero() {
             if(indiceActual >= bombo.length) { window.pausar(); return; }
             const n = bombo[indiceActual];
@@ -147,11 +163,11 @@
             document.getElementById('numero-visor').innerText = n;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 72`;
             
-            // Texto y Copiado Automático
             const adorno = document.getElementById('input-adorno').value || "";
             const textoFinal = adorno + " *NÚMERO " + n + "* " + adorno;
             document.getElementById('txt-numero').value = textoFinal;
-            navigator.clipboard.writeText(textoFinal).catch(()=>{}); // COPIADO AUTOMÁTICO
+            
+            copiarAlPortapapeles(textoFinal); // COPIADO AUTO
             
             if(audioActivado) {
                 window.speechSynthesis.cancel();
@@ -165,15 +181,8 @@
             indiceActual++;
         }
 
-        window.copiarManual = (id) => {
-            const el = document.getElementById(id);
-            el.select();
-            navigator.clipboard.writeText(el.value);
-            alert("Copiado!");
-        }
-
         window.abrirTableroFijo = () => {
-            document.getElementById('modal-titulo').innerText = "TABLERO FIJO (1-72)";
+            document.getElementById('modal-titulo').innerText = "TABLERO COMPLETO (1-72)";
             const grid = document.getElementById('modal-grid');
             grid.innerHTML = "";
             for (let i = 1; i <= 72; i++) {
@@ -197,38 +206,54 @@
         }
 
         window.generarLinkInternet = async () => {
-            if(numerosSalidos.length === 0) return alert("Sin números");
+            if(numerosSalidos.length === 0) return alert("Primero saca algunos números");
             const btn = document.getElementById('btn-gen');
-            btn.innerText = "⏳ PROCESANDO...";
+            const txtLink = document.getElementById('txt-link');
+            
+            btn.innerText = "⏳ SUBIENDO FOTO...";
+            btn.disabled = true;
+
+            // Preparamos la imagen (orden de salida)
             window.abrirTableroOrden();
             
             setTimeout(async () => {
-                const area = document.getElementById('captura-area');
-                const canvas = await html2canvas(area, { backgroundColor: "#000" });
-                const b64 = canvas.toDataURL("image/png").split(',')[1];
-                const fd = new FormData();
-                fd.append("image", b64);
-
                 try {
-                    const res = await fetch("https://api.imgbb.com/1/upload?key=8197992750e33433e5066318991a034f", {
-                        method: "POST", body: fd
+                    const area = document.getElementById('captura-area');
+                    const canvas = await html2canvas(area, { backgroundColor: "#000" });
+                    const b64 = canvas.toDataURL("image/png").split(',')[1];
+                    
+                    const fd = new FormData();
+                    fd.append("image", b64);
+
+                    // API Key de ImgBB
+                    const response = await fetch("https://api.imgbb.com/1/upload?key=8197992750e33433e5066318991a034f", {
+                        method: "POST",
+                        body: fd
                     });
-                    const d = await res.json();
-                    if(d.success) {
-                        const urlFinal = d.data.url;
-                        document.getElementById('txt-link').value = urlFinal;
-                        navigator.clipboard.writeText(urlFinal); // COPIADO AUTO DEL LINK
-                        alert("✅ LINK GENERADO Y COPIADO AUTOMÁTICAMENTE");
+                    
+                    const resData = await response.json();
+                    
+                    if(resData.success) {
+                        const linkDirecto = resData.data.url;
+                        txtLink.value = linkDirecto;
+                        await copiarAlPortapapeles(linkDirecto);
+                        alert("✅ LINK GENERADO Y COPIADO:\n" + linkDirecto);
+                    } else {
+                        alert("Error del servidor de imágenes.");
                     }
-                } catch (e) { alert("Error de red"); }
-                btn.innerText = "🌐 GENERAR LINK DE TABLERO";
-                window.cerrarModal();
-            }, 500);
+                } catch (e) {
+                    alert("Error al conectar con el servidor.");
+                } finally {
+                    btn.innerText = "🌐 GENERAR Y COPIAR LINK";
+                    btn.disabled = false;
+                    window.cerrarModal();
+                }
+            }, 600);
         }
 
         window.toggleAudio = () => { audioActivado = !audioActivado; document.getElementById('btn-audio').innerText = audioActivado ? "🔊 Audio" : "🔇 Mudo"; }
         window.cerrarModal = () => { document.getElementById('modal-general').style.display = "none"; }
-        window.reiniciar = () => { if(confirm("¿Reiniciar?")) location.reload(); }
+        window.reiniciar = () => { if(confirm("¿Deseas reiniciar el sorteo?")) location.reload(); }
     </script>
 </body>
 </html>
