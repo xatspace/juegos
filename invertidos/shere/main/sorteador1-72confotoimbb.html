@@ -3,78 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador Números 1 72 ☆ Shere</title>
+    <title>Sorteador Números 1-72 ☆ Shere</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; outline: none; }
-        
-        body { 
-            background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
-            display: flex; flex-direction: column; align-items: center; 
-            padding: 0; margin: 0; overflow: hidden;
-        }
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 0; margin: 0; overflow: hidden; }
 
-        /* Bloqueo de seguridad */
-        #bloqueo-seguridad {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-        }
+        #bloqueo-seguridad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .login-box { background: #111; padding: 30px; border: 2px solid #39ff14; border-radius: 12px; text-align: center; box-shadow: 0 0 20px #39ff14; }
         .login-box input { background: #000; border: 1px solid #333; color: #39ff14; padding: 10px; border-radius: 5px; text-align: center; font-size: 16px; margin-bottom: 15px; }
         .login-box button { background: #39ff14; color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
         #contenido-protegido { display: none; width: 100%; height: 100%; }
 
-        .layout-horizontal {
-            display: grid;
-            grid-template-columns: 450px 1fr; 
-            width: 100vw; height: 100vh;
-            gap: 10px; padding: 10px; box-sizing: border-box;
-        }
+        .layout-horizontal { display: grid; grid-template-columns: 450px 1fr; width: 100vw; height: 100vh; gap: 10px; padding: 10px; box-sizing: border-box; }
 
-        .loteria-section {
-            display: flex; flex-direction: column; background: #0a0a0a;
-            padding: 15px; border-radius: 12px; border: 1px solid #333;
-            align-items: center; overflow-y: auto; box-sizing: border-box;
-        }
+        .loteria-section { display: flex; flex-direction: column; background: #0a0a0a; padding: 15px; border-radius: 12px; border: 1px solid #333; align-items: center; overflow-y: auto; box-sizing: border-box; }
 
-        /* Visor y Historial */
         .visor-y-historial { display: flex; gap: 15px; justify-content: center; width: 100%; }
-        .visor { 
-            width: 160px; height: 160px; background-color: #000; 
-            border: 5px solid #39ff14; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
-        }
+        .visor { width: 160px; height: 160px; background-color: #000; border: 5px solid #39ff14; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
         .numero-grande { color: #39ff14; font-size: 70px; font-weight: 900; text-shadow: 0 0 15px #39ff14; }
         .historial-container { display: flex; flex-direction: column; width: 130px; }
         .historial { height: 180px; background: #111; border: 2px solid #333; border-radius: 10px; padding: 5px; overflow-y: auto; }
         .item-historial { display: flex; align-items: center; justify-content: center; background: #222; border-radius: 50%; border: 1px solid #39ff14; font-size: 14px; width: 35px; height: 35px; margin: 5px auto; color: #39ff14; font-weight: bold; }
 
-        /* Botones generales */
         .controles { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
         button { padding: 10px; font-size: 10px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
 
-        /* Herramientas de Chat Separadas */
         .tool-box { width: 100%; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-top: 8px; box-sizing: border-box; }
         .tool-box label { font-size: 10px; color: #39ff14; display: block; margin-bottom: 5px; }
         .input-chat { background: #000; border: 1px solid #444; color: #39ff14; padding: 8px; border-radius: 4px; font-size: 13px; text-align: center; width: 100%; box-sizing: border-box; margin-bottom: 5px; outline: none; }
-        .btn-copy-small { background: #39ff14; color: #000; width: 100%; padding: 8px; font-size: 10px; }
-        .btn-link-action { background: #ffffff; color: #000; width: 100%; margin-top: 5px; }
-
-        /* Chat de Xat */
+        
         .chat-section { width: 100%; height: 100%; background: #111; border: 2px solid #39ff14; border-radius: 12px; overflow: hidden; }
         .chat-section iframe { width: 100%; height: 100%; border: none; }
 
-        /* Modales */
         #modal-general { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; justify-content:center; align-items:center; }
         .modal-contenedor-dinamico { background:#000; border:2px solid #39ff14; border-radius:10px; padding:20px; position:relative; width: 90%; max-width: 800px; }
         #captura-area { background: #000; padding: 10px; }
         .grid-numeros { display:grid; grid-template-columns: repeat(12, 1fr); gap: 5px; }
         .num-bola-modal { border-radius: 50%; display: flex; align-items: center; justify-content: center; aspect-ratio: 1/1; font-weight: bold; font-size: 14px; border: 1px solid #39ff14; color: #39ff14; }
         .bola-salio { border-color: #ff0000; background: #ff0000; color: #fff; }
-        .bola-orden-neon { border: 2px solid #39ff14; box-shadow: 0 0 8px #39ff14; }
     </style>
 </head>
 <body oncontextmenu="return false">
@@ -91,17 +59,13 @@
     <div id="contenido-protegido">
         <div class="layout-horizontal">
             <div class="loteria-section">
-                
                 <button style="background:#00bcff; color:#000; width:100%; margin-bottom:10px;" onclick="window.abrirTableroFijo()">📊 TABLERO FIJO (1-72)</button>
 
                 <div class="visor-y-historial">
                     <div style="text-align:center;">
-                        <div class="visor" id="visor">
-                            <div class="numero-grande" id="numero-visor">--</div>
-                        </div>
+                        <div class="visor" id="visor"><div class="numero-grande" id="numero-visor">--</div></div>
                         <p id="contador-cartas" style="color:#ffeb3b; font-size: 11px; margin-top: 5px;">SALIERON: 0 / 72</p>
                     </div>
-
                     <div class="historial-container">
                         <div class="historial" id="lista-historial"></div>
                         <button style="background:#ff00ff; color:#fff; margin-top:5px;" onclick="window.abrirTableroOrden()">📋 VER ORDEN</button>
@@ -121,24 +85,24 @@
                 </div>
 
                 <div class="tool-box">
-                    <label>COPIAR NÚMERO PARA EL CHAT:</label>
+                    <label>COPIAR NÚMERO (AUTO):</label>
                     <div style="display:flex; gap:5px;">
                         <input type="text" id="input-adorno" style="width:40px; background:#000; color:#39ff14; border:1px solid #333; text-align:center;" value="☆">
                         <input type="text" id="txt-numero" class="input-chat" readonly placeholder="Esperando...">
                     </div>
-                    <button class="btn-copy-small" onclick="window.copiarTexto()">COPIAR NÚMERO</button>
+                    <button style="background:#39ff14; color:#000; width:100%; font-size:9px;" onclick="window.copiarManual('txt-numero')">COPIAR MANUAL</button>
                 </div>
 
                 <div class="tool-box" style="border-color: #ff00ff;">
-                    <label style="color:#ff00ff;">LINK DE IMAGEN (IMBB):</label>
-                    <input type="text" id="txt-link" class="input-chat" readonly placeholder="Sin link...">
-                    <button class="btn-copy-small" style="background:#ff00ff; color:#fff; margin-bottom:5px;" onclick="window.copiarLink()">COPIAR LINK</button>
-                    <button class="btn-link-action" id="btn-gen" onclick="window.generarLinkInternet()">🌐 GENERAR LINK DE TABLERO</button>
+                    <label style="color:#ff00ff;">LINK DE IMAGEN IMBB:</label>
+                    <input type="text" id="txt-link" class="input-chat" readonly placeholder="Genera el link abajo...">
+                    <button style="background:#ff00ff; color:#fff; width:100%; margin-bottom:5px;" onclick="window.copiarManual('txt-link')">COPIAR LINK</button>
+                    <button style="background:#fff; color:#000; width:100%;" id="btn-gen" onclick="window.generarLinkInternet()">🌐 GENERAR LINK DE TABLERO</button>
                 </div>
             </div>
 
             <div class="chat-section">
-                <iframe id="chat-iframe" src="https://xat.com/embed/chat.php#id=220526680&gn=RINCONCITO_MAGICO_MUSICAL" frameborder="0" scrolling="no"></iframe>
+                <iframe src="https://xat.com/embed/chat.php#id=220526680&gn=RINCONCITO_MAGICO_MUSICAL" frameborder="0" scrolling="no"></iframe>
             </div>
         </div>
     </div>
@@ -163,16 +127,8 @@
 
         let bombo = [], indiceActual = 0, intervalo = null, numerosSalidos = [], audioActivado = true, velocidadS = 4;
 
-        window.prepararBombo = () => {
-            bombo = Array.from({length: 72}, (_, i) => i + 1);
-            bombo.sort(() => Math.random() - 0.5);
-        }
-
-        window.cambiarVelocidad = (val) => {
-            velocidadS = val;
-            document.getElementById('val-velocidad').innerText = val;
-            if (intervalo) { window.pausar(); window.comenzar(); }
-        }
+        window.prepararBombo = () => { bombo = Array.from({length: 72}, (_, i) => i + 1); bombo.sort(() => Math.random() - 0.5); }
+        window.cambiarVelocidad = (val) => { velocidadS = val; document.getElementById('val-velocidad').innerText = val; if (intervalo) { window.pausar(); window.comenzar(); } }
 
         window.comenzar = () => {
             if (bombo.length === 0) window.prepararBombo();
@@ -182,12 +138,7 @@
             intervalo = setInterval(sacarNumero, velocidadS * 1000); 
         }
 
-        window.pausar = () => {
-            clearInterval(intervalo);
-            intervalo = null;
-            document.getElementById('btn-play').disabled = false;
-            document.getElementById('btn-pause').disabled = true;
-        }
+        window.pausar = () => { clearInterval(intervalo); intervalo = null; document.getElementById('btn-play').disabled = false; document.getElementById('btn-pause').disabled = true; }
 
         function sacarNumero() {
             if(indiceActual >= bombo.length) { window.pausar(); return; }
@@ -196,34 +147,29 @@
             document.getElementById('numero-visor').innerText = n;
             document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 72`;
             
+            // Texto y Copiado Automático
             const adorno = document.getElementById('input-adorno').value || "";
-            document.getElementById('txt-numero').value = adorno + " *NÚMERO " + n + "* " + adorno;
+            const textoFinal = adorno + " *NÚMERO " + n + "* " + adorno;
+            document.getElementById('txt-numero').value = textoFinal;
+            navigator.clipboard.writeText(textoFinal).catch(()=>{}); // COPIADO AUTOMÁTICO
             
             if(audioActivado) {
                 window.speechSynthesis.cancel();
                 const m = new SpeechSynthesisUtterance("Número " + n);
-                m.lang = 'es-MX';
-                window.speechSynthesis.speak(m);
+                m.lang = 'es-MX'; window.speechSynthesis.speak(m);
             }
 
             const item = document.createElement('div');
-            item.className = 'item-historial';
-            item.innerText = n;
+            item.className = 'item-historial'; item.innerText = n;
             document.getElementById('lista-historial').prepend(item);
             indiceActual++;
         }
 
-        window.copiarTexto = () => {
-            const el = document.getElementById('txt-numero');
+        window.copiarManual = (id) => {
+            const el = document.getElementById(id);
             el.select();
             navigator.clipboard.writeText(el.value);
-        }
-
-        window.copiarLink = () => {
-            const el = document.getElementById('txt-link');
-            el.select();
-            navigator.clipboard.writeText(el.value);
-            alert("Link copiado");
+            alert("Copiado!");
         }
 
         window.abrirTableroFijo = () => {
@@ -233,8 +179,7 @@
             for (let i = 1; i <= 72; i++) {
                 const item = document.createElement('div');
                 item.className = "num-bola-modal " + (numerosSalidos.includes(i) ? "bola-salio" : "");
-                item.innerText = i;
-                grid.appendChild(item);
+                item.innerText = i; grid.appendChild(item);
             }
             document.getElementById('modal-general').style.display = "flex";
         }
@@ -246,8 +191,7 @@
             numerosSalidos.forEach(n => {
                 const item = document.createElement('div');
                 item.className = "num-bola-modal bola-orden-neon";
-                item.innerText = n;
-                grid.appendChild(item);
+                item.innerText = n; grid.appendChild(item);
             });
             document.getElementById('modal-general').style.display = "flex";
         }
@@ -255,7 +199,7 @@
         window.generarLinkInternet = async () => {
             if(numerosSalidos.length === 0) return alert("Sin números");
             const btn = document.getElementById('btn-gen');
-            btn.innerText = "⏳ SUBIENDO...";
+            btn.innerText = "⏳ PROCESANDO...";
             window.abrirTableroOrden();
             
             setTimeout(async () => {
@@ -271,8 +215,10 @@
                     });
                     const d = await res.json();
                     if(d.success) {
-                        document.getElementById('txt-link').value = d.data.url;
-                        alert("¡LINK LISTO!");
+                        const urlFinal = d.data.url;
+                        document.getElementById('txt-link').value = urlFinal;
+                        navigator.clipboard.writeText(urlFinal); // COPIADO AUTO DEL LINK
+                        alert("✅ LINK GENERADO Y COPIADO AUTOMÁTICAMENTE");
                     }
                 } catch (e) { alert("Error de red"); }
                 btn.innerText = "🌐 GENERAR LINK DE TABLERO";
@@ -280,11 +226,7 @@
             }, 500);
         }
 
-        window.toggleAudio = () => {
-            audioActivado = !audioActivado;
-            document.getElementById('btn-audio').innerText = audioActivado ? "🔊 Audio" : "🔇 Mudo";
-        }
-
+        window.toggleAudio = () => { audioActivado = !audioActivado; document.getElementById('btn-audio').innerText = audioActivado ? "🔊 Audio" : "🔇 Mudo"; }
         window.cerrarModal = () => { document.getElementById('modal-general').style.display = "none"; }
         window.reiniciar = () => { if(confirm("¿Reiniciar?")) location.reload(); }
     </script>
