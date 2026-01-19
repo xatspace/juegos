@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tablero Shere</title>
+    <meta charset="UTF-8">
+    <style>
+        body { background: #000; color: #39ff14; font-family: sans-serif; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; padding: 20px; max-width: 600px; margin: auto; }
+        .bola { border: 2px solid #39ff14; border-radius: 50%; aspect-ratio: 1; display: flex; 
+                align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 0 10px #39ff1444; }
+        h1 { text-shadow: 0 0 10px #39ff14; }
+    </style>
+</head>
+<body>
+    <h1>☆ TABLERO SHERE ☆</h1>
+    <div class="grid" id="grid"></div>
+    <script>
+        // Esta página lee los números de la URL automáticamente
+        const params = new URLSearchParams(window.location.search);
+        const numeros = params.get('n') ? params.get('n').split(',') : [];
+        const grid = document.getElementById('grid');
+        numeros.forEach(num => {
+            const div = document.createElement('div');
+            div.className = 'bola';
+            div.innerText = num;
+            grid.appendChild(div);
+        });
+    </script>
+</body>
+</html>
