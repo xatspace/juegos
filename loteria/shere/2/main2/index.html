@@ -3,85 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lotería 2 Admin | Shere</title>
+    <title>Lotería Mexicana 2 Cartas | Shere Admin</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <style>
-        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; user-select: none; }
-        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 28px; text-transform: uppercase; margin: 15px 0; }
+        body { 
+            background: #000; color: #fff; font-family: 'Arial Black', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 10px; margin: 0; overflow-x: hidden; user-select: none;
+        }
+        .neon-title { color: #39ff14; text-shadow: 0 0 15px #39ff14; font-size: 26px; text-transform: uppercase; margin: 15px 0 15px 0; }
         
         #tablero { 
             display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; 
             width: 100%; max-width: 1050px; background: #111; border: 3px solid #39ff14; 
-            padding: 10px; border-radius: 12px;
+            padding: 10px; border-radius: 12px; box-sizing: border-box;
         }
-        .celda { aspect-ratio: 1.2 / 1.4; border: 1px solid #444; display: flex; flex-direction: column; align-items: center; cursor: pointer; background: #fff; position: relative; overflow: hidden;}
-        .img-carta { width: 100%; height: 65%; object-fit: contain; }
-        .n-user { color: #000; font-weight: 900; text-transform: uppercase; font-size: 10px; text-align: center; }
-        .ocupado { border: 2px solid #ff0000; }
-        .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; width: 100%; height: 30%; display: flex; align-items: center; justify-content: center; }
 
-        .admin-tools { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-admin { background: #000; color: #39ff14; border: 2px solid #39ff14; padding: 15px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #estado-tabla { font-size: 20px; margin: 10px; font-weight: bold; }
+        .celda { 
+            aspect-ratio: 1.2 / 1.4; border: 1px solid #444; display: flex; 
+            flex-direction: column; align-items: center; justify-content: flex-start; 
+            cursor: pointer; border-radius: 4px; background: #fff; padding: 2px;
+            overflow: hidden; position: relative; box-sizing: border-box;
+        }
+        
+        .img-carta { width: 100%; height: 65%; object-fit: contain; display: block; pointer-events: none; margin-top: 2px; }
+
+        .n-user { 
+            color: #000; font-weight: 900; text-transform: uppercase; 
+            text-align: center; width: 100%; z-index: 2; 
+            display: flex; justify-content: center; align-items: center;
+            flex-grow: 1; line-height: 1; padding: 0 2px; box-sizing: border-box;
+        }
+        
+        .seleccionada { outline: 5px solid #ffeb3b; outline-offset: -5px; box-shadow: 0 0 15px #ffeb3b; z-index: 5; }
+        .ocupado { border: 2px solid #ff0000 !important; box-shadow: 0 0 8px #ff0000; }
+        .ocupado .n-user { background: #ff0000; color: #fff; position: absolute; bottom: 0; left: 0; height: 32%; }
+        .es-mia { border: 4px solid #39ff14 !important; box-shadow: 0 0 15px #39ff14 !important; z-index: 6; }
+        .es-mia .n-user { background: #39ff14 !important; color: #000 !important; position: absolute; bottom: 0; height: 32%; }
+
+        #btn-registrar { 
+            display: none; margin: 15px 0; background: #39ff14; color: #000; 
+            border: none; padding: 15px 45px; font-weight: bold; font-size: 20px; 
+            border-radius: 50px; cursor: pointer; box-shadow: 0 0 15px #39ff14;
+            text-transform: uppercase;
+        }
+
+        .info-container { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 15px 0; width: 100%; }
+        #estado-tabla { font-size: 16px; font-weight: bold; }
+        .abierta { color: #39ff14; } .cerrada { color: #ff0000; }
+        #contador { color: #39ff14; font-size: 16px; font-weight: bold; }
+
+        /* PANEL ADMIN MEJORADO */
+        .admin-panel { 
+            display: flex; flex-direction: row; justify-content: center; 
+            gap: 10px; width: 100%; max-width: 1050px; margin-top: 10px;
+        }
+        .btn-admin { 
+            flex: 1; background: #000; color: #39ff14; border: 2px solid #39ff14; 
+            padding: 15px 5px; border-radius: 8px; font-weight: bold; 
+            cursor: pointer; text-transform: uppercase; font-size: 12px;
+        }
+        .btn-admin:hover { background: #39ff14; color: #000; }
+
+        /* MODAL GESTIÓN */
+        #modal-usuarios {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); overflow-y: auto; padding: 20px; box-sizing: border-box;
+        }
+        .lista-usuarios { width: 100%; max-width: 500px; margin: auto; background: #111; border: 2px solid #39ff14; border-radius: 12px; padding: 15px; }
+        .usuario-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
+        .usuario-info { font-family: monospace; color: #39ff14; }
+        .btn-del { background: #ff0000; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+
+        @media (max-width: 850px) { #tablero { grid-template-columns: repeat(6, 1fr); } }
+        @media (max-width: 500px) { 
+            #tablero { grid-template-columns: repeat(4, 1fr); } 
+            .info-container { flex-direction: column; }
+            .admin-panel { gap: 5px; }
+            .btn-admin { font-size: 9px; padding: 12px 2px; }
+        }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-    <div class="neon-title">ADMIN LOTERÍA 2 CARTAS</div>
-    <div id="estado-tabla">Cargando...</div>
+    <div class="neon-title">LOTERÍA 2 CARTAS | SHERE</div>
+
     <div id="tablero"></div>
 
-    <div class="admin-tools">
-        <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR TABLA</button>
-        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR TODO</button>
+    <button id="btn-registrar" onclick="registrarSeleccion()">ENVIAR MIS 2 CARTAS</button>
+
+    <div class="info-container">
+        <div id="estado-tabla">Cargando...</div>
+        <div id="contador">DISPONIBLES: -- / 54</div>
+    </div>
+
+    <div class="admin-panel">
+        <button class="btn-admin" onclick="toggleTabla()">🔓 ABRIR/CERRAR</button>
+        <button class="btn-admin" onclick="gestionUsuarios()">👥 USUARIOS</button>
+        <button class="btn-admin" onclick="resetJuego()">🔄 REINICIAR</button>
+    </div>
+
+    <div id="modal-usuarios">
+        <div class="lista-usuarios">
+            <h2 style="color:#39ff14; text-align:center;">JUGADORES REGISTRADOS</h2>
+            <div id="contenedor-lista"></div>
+            <button class="btn-admin" style="width:100%; margin-top:15px;" onclick="document.getElementById('modal-usuarios').style.display='none'">CERRAR PANEL</button>
+        </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN IGUAL A LA DEL JUEGO
+        const RUTA_IMG = "https://xatspace.github.io/juegos/loteria/mexicana/img/";
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        
+        const refSala = db.ref('loteria_shere_2');
+        const refIPs = db.ref('ips_shere_2');
+        const refConfig = db.ref('config_shere_2');
         const CLAVE = "shere2026";
 
-        // RUTAS CORREGIDAS PARA QUE COINCIDAN CON EL JUEGO
-        const refSala = db.ref('loteria_shere_2'); 
-        const refConfig = db.ref('config_shere_2');
-
-        let datosFirebase = {};
-        let tablaAbierta = true;
         const nombres = ["Gallo", "Diablito", "Dama", "Catrín", "Paraguas", "Sirena", "Escalera", "Botella", "Barril", "Árbol", "Melón", "Valiente", "Gorrito", "Muerte", "Pera", "Bandera", "Bandolón", "Violoncello", "Garza", "Pájaro", "Mano", "Bota", "Luna", "Cotorro", "Borracho", "Negrito", "Corazón", "Sandía", "Tambor", "Camarón", "Jaras", "Músico", "Araña", "Soldado", "Estrella", "Cazo", "Mundo", "Apache", "Nopal", "Alacrán", "Rosa", "Calavera", "Campana", "Cantarito", "Venado", "Sol", "Corona", "Chalupa", "Pino", "Pescado", "Palma", "Maceta", "Arpa", "Rana"];
 
+        let seleccionadas = [];
+        let datosFirebase = {};
+        let tablaAbierta = true;
+        let miIPGlobal = "";
+
+        async function obtenerIP() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                miIPGlobal = data.ip.replace(/\./g, '_');
+                return miIPGlobal;
+            } catch (e) { return "t"+Math.random(); }
+        }
+        obtenerIP();
+
         function pintar() {
-            const tab = document.getElementById('tablero'); tab.innerHTML = "";
+            const tab = document.getElementById('tablero');
+            tab.innerHTML = "";
+            let ocupadas = 0;
+
             nombres.forEach((nom, i) => {
-                const nick = datosFirebase[nom]?.nombre || null;
+                const data = datosFirebase[nom];
+                const nick = data ? data.nombre : null;
+                const ipDuenio = data ? data.ip : null;
+                if(nick) ocupadas++;
+
                 const div = document.createElement('div');
-                div.className = "celda" + (nick ? " ocupado" : "");
-                div.onclick = () => { if(nick && prompt("Clave Admin:") === CLAVE) refSala.child(nom).remove(); };
-                div.innerHTML = `<img src="https://xatspace.github.io/juegos/loteria/mexicana/img/${i+1}.jpg" class="img-carta"><span class="n-user">${nick ? nick : nom.toUpperCase()}</span>`;
+                div.className = "celda";
+                if(nick) div.classList.add("ocupado");
+                if(ipDuenio === miIPGlobal) div.classList.add("es-mia");
+                if(seleccionadas.includes(nom)) div.classList.add("seleccionada");
+                
+                div.onclick = function() {
+                    if(!nick) {
+                        if(!tablaAbierta) return alert("La tabla está cerrada.");
+                        if(seleccionadas.includes(nom)) {
+                            seleccionadas = seleccionadas.filter(a => a !== nom);
+                        } else if(seleccionadas.length < 2) {
+                            seleccionadas.push(nom);
+                        }
+                        document.getElementById('btn-registrar').style.display = (seleccionadas.length === 2) ? 'block' : 'none';
+                        pintar();
+                    } else {
+                        borrarUsuario(nick);
+                    }
+                };
+
+                let texto = nick ? nick : nom.toUpperCase();
+                div.innerHTML = `<img src="${RUTA_IMG}${i+1}.jpg" class="img-carta"><div class="n-user">${texto}</div>`;
                 tab.appendChild(div);
             });
+            document.getElementById('contador').innerText = "DISPONIBLES: " + (54 - ocupadas) + " / 54";
         }
 
-        window.toggleTabla = () => {
-            if(prompt("Clave Admin:") === CLAVE) {
-                refConfig.child('abierta').set(!tablaAbierta);
+        async function registrarSeleccion() {
+            const miIP = await obtenerIP();
+            const snapIP = await refIPs.child(miIP).once('value');
+            if(snapIP.exists()) return alert("🚫 Ya tienes cartas registradas.");
+
+            for(let s of seleccionadas) {
+                const snapCarta = await refSala.child(s).once('value');
+                if(snapCarta.exists()) {
+                    alert(`⚠️ ¡Mala suerte! La carta "${s}" se ocupó. Elige otra.`);
+                    seleccionadas = seleccionadas.filter(item => item !== s);
+                    document.getElementById('btn-registrar').style.display = 'none';
+                    pintar();
+                    return;
+                }
+            }
+
+            const nick = prompt("Tu Nick para las 2 cartas:");
+            if(nick && nick.trim()) {
+                const n = nick.trim().toUpperCase();
+                for(let s of seleccionadas) { await refSala.child(s).set({ nombre: n, ip: miIP }); }
+                await refIPs.child(miIP).set(true);
+                seleccionadas = [];
+                document.getElementById('btn-registrar').style.display = 'none';
+                alert("¡Cartas registradas!");
+            }
+        }
+
+        async function borrarUsuario(nickABorrar) {
+            if (prompt(`¿Borrar a "${nickABorrar}"?\nClave Admin:`) === CLAVE) {
+                let ipParaBorrar = null;
+                Object.keys(datosFirebase).forEach(key => {
+                    if (datosFirebase[key].nombre === nickABorrar) {
+                        ipParaBorrar = datosFirebase[key].ip;
+                        refSala.child(key).remove();
+                    }
+                });
+                if (ipParaBorrar) await refIPs.child(ipParaBorrar).remove();
+            }
+        }
+
+        // NUEVA FUNCIÓN GESTIÓN DE USUARIOS
+        window.gestionUsuarios = () => {
+            if(prompt("Clave Admin:") !== CLAVE) return;
+            
+            const contenedor = document.getElementById('contenedor-lista');
+            contenedor.innerHTML = "";
+            
+            // Obtenemos los nombres únicos de los jugadores actuales
+            const usuariosUnicos = {};
+            Object.keys(datosFirebase).forEach(carta => {
+                const user = datosFirebase[carta].nombre;
+                if(!usuariosUnicos[user]) usuariosUnicos[user] = true;
+            });
+
+            const listaNombres = Object.keys(usuariosUnicos);
+            
+            if(listaNombres.length > 0) {
+                listaNombres.forEach(nick => {
+                    const div = document.createElement('div');
+                    div.className = "usuario-item";
+                    div.innerHTML = `
+                        <div class="usuario-info"><strong>${nick}</strong></div>
+                        <button class="btn-del" onclick="borrarUsuarioDesdeLista('${nick}')">BORRAR</button>
+                    `;
+                    contenedor.appendChild(div);
+                });
+            } else {
+                contenedor.innerHTML = "<p style='text-align:center; color:#888;'>No hay registros activos.</p>";
+            }
+            document.getElementById('modal-usuarios').style.display = 'block';
+        };
+
+        window.borrarUsuarioDesdeLista = async (nick) => {
+            // Reutiliza la lógica de borrarUsuario pero sin pedir clave de nuevo (ya se validó al abrir el modal)
+            if(confirm(`¿Confirmas borrar a ${nick}?`)) {
+                let ipParaBorrar = null;
+                Object.keys(datosFirebase).forEach(key => {
+                    if (datosFirebase[key].nombre === nick) {
+                        ipParaBorrar = datosFirebase[key].ip;
+                        refSala.child(key).remove();
+                    }
+                });
+                if (ipParaBorrar) await refIPs.child(ipParaBorrar).remove();
+                gestionUsuarios(); // Recargar lista
             }
         };
 
-        window.resetJuego = () => {
-            if(confirm("¿Seguro que quieres borrar todas las cartas?") && prompt("CLAVE:") === CLAVE) {
-                refSala.remove();
-            }
-        };
+        window.toggleTabla = () => { if(prompt("Clave:") === CLAVE) refConfig.child('abierta').set(!tablaAbierta); };
+        window.resetJuego = () => { if(prompt("Clave Maestra:") === CLAVE) { refSala.remove(); refIPs.remove(); seleccionadas = []; } };
 
         refSala.on('value', snap => { datosFirebase = snap.val() || {}; pintar(); });
-        refConfig.child('abierta').on('value', snap => { 
-            tablaAbierta = (snap.val() !== false); 
-            const est = document.getElementById('estado-tabla');
-            est.innerText = tablaAbierta ? "● TABLA ABIERTA" : "● TABLA CERRADA";
-            est.style.color = tablaAbierta ? "#39ff14" : "#ff0000";
+        refConfig.child('abierta').on('value', snap => {
+            tablaAbierta = (snap.val() !== false);
+            document.getElementById('estado-tabla').innerText = tablaAbierta ? "● ABIERTA" : "● CERRADA";
+            document.getElementById('estado-tabla').className = tablaAbierta ? "abierta" : "cerrada";
+            pintar();
         });
     </script>
 </body>
