@@ -3,207 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteador 1-72 ☆ Shere</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <title>Sorteador Pro ☆ Shere</title>
     <style>
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; outline: none; box-sizing: border-box; }
-        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 0; margin: 0; overflow: hidden; }
+        body { background: #000; color: #fff; font-family: 'Arial Black', sans-serif; margin: 0; overflow: hidden; }
 
-        #bloqueo-seguridad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        /* Login */
+        #bloqueo-seguridad { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { background: #111; padding: 30px; border: 2px solid #39ff14; border-radius: 12px; text-align: center; box-shadow: 0 0 20px #39ff14; }
-        .login-box input { background: #000; border: 1px solid #333; color: #39ff14; padding: 10px; border-radius: 5px; text-align: center; font-size: 16px; margin-bottom: 15px; }
+        .login-box input { background: #000; border: 1px solid #333; color: #39ff14; padding: 10px; border-radius: 5px; text-align: center; font-size: 16px; margin-bottom: 15px; width: 100%; }
+        .login-box button { background: #39ff14; color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-        #contenido-protegido { display: none; width: 100%; height: 100%; }
-        .layout-horizontal { display: grid; grid-template-columns: 450px 1fr; width: 100vw; height: 100vh; gap: 10px; padding: 10px; }
+        /* App Layout */
+        #contenido-protegido { display: none; width: 100vw; height: 100vh; }
+        .layout-horizontal { display: grid; grid-template-columns: 420px 1fr; height: 100%; gap: 10px; padding: 10px; }
 
-        .loteria-section { display: flex; flex-direction: column; background: #0a0a0a; padding: 15px; border-radius: 12px; border: 1px solid #333; align-items: center; overflow-y: auto; }
-
-        .visor-y-historial { display: flex; gap: 15px; justify-content: center; width: 100%; }
-        .visor { width: 150px; height: 150px; background-color: #000; border: 5px solid #39ff14; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(57, 255, 20, 0.4); }
-        .numero-grande { color: #39ff14; font-size: 75px; font-weight: 900; }
+        /* Panel Izquierdo */
+        .loteria-section { background: #0a0a0a; padding: 15px; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
         
-        .historial-container { display: flex; flex-direction: column; width: 120px; }
-        .historial { height: 180px; background: #111; border: 1px solid #333; border-radius: 10px; padding: 5px; overflow-y: auto; }
-        .item-historial { display: flex; align-items: center; justify-content: center; background: #222; border-radius: 50%; border: 1px solid #39ff14; font-size: 14px; width: 32px; height: 32px; margin: 4px auto; color: #39ff14; font-weight: bold; }
+        .visor { width: 140px; height: 140px; background: #000; border: 5px solid #39ff14; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 0 15px rgba(57,255,20,0.3); }
+        .numero-grande { color: #39ff14; font-size: 70px; font-weight: 900; }
 
-        .controles { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-        button { padding: 10px; font-size: 10px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; }
+        .historial { width: 100%; height: 120px; background: #111; border: 1px solid #333; border-radius: 8px; margin: 10px 0; padding: 8px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+        .item-historial { background: #222; border: 1px solid #39ff14; color: #39ff14; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
 
-        .tool-box { width: 100%; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-top: 8px; }
-        .input-chat { background: #000; border: 1px solid #444; color: #39ff14; padding: 10px; border-radius: 4px; font-size: 13px; text-align: center; width: 100%; outline: none; }
-        
-        .chat-section { width: 100%; height: 100%; background: #111; border: 2px solid #39ff14; border-radius: 12px; overflow: hidden; }
+        .controles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+        button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 10px; }
+
+        .tool-box { width: 100%; background: #1a1a1a; padding: 12px; border-radius: 8px; border: 1px solid #333; margin-top: 10px; }
+        .tool-box label { display: block; color: #39ff14; font-size: 10px; margin-bottom: 5px; }
+        .input-chat { width: 100%; background: #000; border: 1px solid #444; color: #39ff14; padding: 10px; border-radius: 4px; text-align: center; font-size: 13px; }
+
+        /* Chat */
+        .chat-section { background: #111; border: 1px solid #39ff14; border-radius: 12px; overflow: hidden; }
         iframe { width: 100%; height: 100%; border: none; }
-
-        /* Captura Invisible */
-        #modal-general { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; justify-content:center; align-items:center; }
-        #captura-area { background: #000; padding: 25px; border: 3px solid #39ff14; width: 520px; text-align: center; }
-        .grid-numeros { display:grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-top: 15px; }
-        .num-bola { border-radius: 50%; display: flex; align-items: center; justify-content: center; aspect-ratio: 1/1; font-weight: bold; font-size: 14px; border: 1px solid #39ff14; color: #39ff14; background: #000; }
     </style>
 </head>
 <body>
 
     <div id="bloqueo-seguridad">
         <div class="login-box">
-            <h2 style="color:#39ff14">ACCESO SHERE</h2>
-            <input type="password" id="pass-lm" placeholder="PIN">
-            <button style="background:#39ff14; color:#000" id="btn-entrar">ENTRAR</button>
+            <h2 style="color:#39ff14">CONTROL SHERE</h2>
+            <input type="password" id="pin-acceso" placeholder="PIN">
+            <button onclick="verificar()">ENTRAR</button>
         </div>
     </div>
 
     <div id="contenido-protegido">
         <div class="layout-horizontal">
             <div class="loteria-section">
-                <button style="background:#00bcff; color:#000; width:100%; margin-bottom:10px;" onclick="window.abrirTableroFijo()">📊 TABLERO COMPLETO</button>
-
-                <div class="visor-y-historial">
-                    <div style="text-align:center;">
-                        <div class="visor"><div class="numero-grande" id="numero-visor">--</div></div>
-                        <p id="contador-cartas" style="color:#ffeb3b; font-size: 11px; margin-top:5px;">SALIERON: 0 / 72</p>
-                    </div>
-                    <div class="historial-container">
-                        <div class="historial" id="lista-historial"></div>
-                    </div>
-                </div>
+                <div class="visor"><div class="numero-grande" id="num-v">--</div></div>
+                <div id="cont-v" style="color:#ffeb3b; font-size:11px;">SALIERON: 0 / 72</div>
+                
+                <div class="historial" id="lista-h"></div>
 
                 <div class="controles">
-                    <button style="background:#39ff14; color:#000;" id="btn-play" onclick="window.comenzar()">▶ Play</button>
-                    <button style="background:#ffeb3b; color:#000;" id="btn-pause" onclick="window.pausar()" disabled>⏸ Pausa</button>
-                    <button style="background:#ff0000; color:#fff;" onclick="window.reiniciar()">🔄 Reset</button>
-                    <button id="btn-audio" style="background:#555; color:#fff;" onclick="window.toggleAudio()">🔊 Audio</button>
+                    <button id="btn-play" style="background:#39ff14; color:#000" onclick="iniciar()">▶ Play</button>
+                    <button id="btn-pause" style="background:#ffeb3b; color:#000" onclick="pausar()" disabled>⏸ Pausa</button>
+                    <button style="background:#ff0000; color:#fff" onclick="location.reload()">🔄 Reset</button>
+                    <button id="btn-audio" style="background:#555; color:#fff" onclick="toggleAudio()">🔊 Audio</button>
                 </div>
 
                 <div class="tool-box">
-                    <label style="color:#39ff14; font-size: 10px;">NÚMERO ACTUAL (AUTO-COPIA):</label>
-                    <input type="text" id="txt-numero" class="input-chat" readonly>
+                    <label>NÚMERO ACTUAL (AUTO-COPIA):</label>
+                    <input type="text" id="txt-num" class="input-chat" readonly>
                 </div>
 
                 <div class="tool-box" style="border: 2px solid #ff00ff;">
-                    <label style="color:#ff00ff; font-size: 10px;">GENERADOR DE LINK (NUEVO SERVIDOR):</label>
-                    <input type="text" id="txt-link" class="input-chat" style="color:#ff00ff" readonly placeholder="Link automático...">
-                    <button style="background:#ff00ff; color:#fff; width:100%; margin-top:5px; height: 45px; font-weight: bold;" onclick="window.generarLinkNuevo()" id="btn-gen">🌐 GENERAR Y COPIAR LINK</button>
+                    <label style="color:#ff00ff">COMPARTIR TABLERO (LINK):</label>
+                    <input type="text" id="txt-link" class="input-chat" style="color:#ff00ff" readonly placeholder="Esperando números...">
+                    <button style="background:#ff00ff; color:#fff; width:100%; margin-top:8px;" onclick="generarLink()">📋 GENERAR LINK TABLERO</button>
                 </div>
             </div>
 
             <div class="chat-section">
-                <iframe src="https://xat.com/embed/chat.php#id=220526680&gn=RINCONCITO_MAGICO_MUSICAL" frameborder="0" scrolling="no"></iframe>
+                <iframe src="https://xat.com/embed/chat.php#id=220526680&gn=RINCONCITO_MAGICO_MUSICAL"></iframe>
             </div>
         </div>
     </div>
 
-    <div id="modal-general">
-        <div id="captura-area">
-            <h2 style="color: #39ff14; margin:0; font-size: 24px;">ORDEN DE SALIDA</h2>
-            <div id="modal-grid" class="grid-numeros"></div>
-            <p style="color:#39ff14; font-size: 11px; margin-top:20px;">Shere Sorteador ☆ 2026</p>
-        </div>
-    </div>
-
     <script>
-        document.getElementById('btn-entrar').onclick = () => {
-            if(document.getElementById('pass-lm').value === "shere2026") {
-                document.getElementById('bloqueo-seguridad').style.display = 'none';
-                document.getElementById('contenido-protegido').style.display = 'block';
-            } else { alert("PIN INCORRECTO"); }
-        };
+        let bombo = [], salidos = [], indice = 0, timer = null, audio = true;
 
-        let bombo = [], indiceActual = 0, intervalo = null, numerosSalidos = [], audioActivado = true;
+        function verificar() {
+            if(document.getElementById('pin-acceso').value === "shere2026") {
+                document.getElementById('bloqueo-seguridad').style.display='none';
+                document.getElementById('contenido-protegido').style.display='block';
+                preparar();
+            } else { alert("Error"); }
+        }
 
-        window.prepararBombo = () => { bombo = Array.from({length: 72}, (_, i) => i + 1); bombo.sort(() => Math.random() - 0.5); }
+        function preparar() {
+            bombo = Array.from({length: 72}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+        }
 
-        window.comenzar = () => {
-            if (bombo.length === 0) window.prepararBombo();
+        function iniciar() {
             document.getElementById('btn-play').disabled = true;
             document.getElementById('btn-pause').disabled = false;
-            sacarNumero();
-            intervalo = setInterval(sacarNumero, 4000); 
+            sacar();
+            timer = setInterval(sacar, 4000);
         }
 
-        window.pausar = () => { clearInterval(intervalo); intervalo = null; document.getElementById('btn-play').disabled = false; document.getElementById('btn-pause').disabled = true; }
-
-        function copiarTexto(t) {
-            const temp = document.createElement("textarea");
-            temp.value = t; document.body.appendChild(temp);
-            temp.select(); document.execCommand("copy");
-            document.body.removeChild(temp);
+        function pausar() {
+            clearInterval(timer);
+            document.getElementById('btn-play').disabled = false;
+            document.getElementById('btn-pause').disabled = true;
         }
 
-        function sacarNumero() {
-            if(indiceActual >= bombo.length) { window.pausar(); return; }
-            const n = bombo[indiceActual];
-            numerosSalidos.push(n);
-            document.getElementById('numero-visor').innerText = n;
-            document.getElementById('contador-cartas').innerText = `SALIERON: ${indiceActual + 1} / 72`;
+        function copiar(t) {
+            const el = document.createElement('textarea');
+            el.value = t; document.body.appendChild(el);
+            el.select(); document.execCommand('copy');
+            document.body.removeChild(el);
+        }
+
+        function sacar() {
+            if(indice >= 72) return pausar();
+            let n = bombo[indice];
+            salidos.push(n);
+            document.getElementById('num-v').innerText = n;
+            document.getElementById('cont-v').innerText = `SALIERON: ${salidos.length} / 72`;
             
-            const texto = "☆ *NÚMERO " + n + "* ☆";
-            document.getElementById('txt-numero').value = texto;
-            copiarTexto(texto);
-            
-            if(audioActivado) { window.speechSynthesis.cancel(); let m = new SpeechSynthesisUtterance("Número " + n); m.lang = 'es-MX'; window.speechSynthesis.speak(m); }
-            const item = document.createElement('div');
+            // Texto para chat
+            let txt = `☆ *NÚMERO ${n}* ☆`;
+            document.getElementById('txt-num').value = txt;
+            copiar(txt);
+
+            // Historial visual
+            let item = document.createElement('div');
             item.className = 'item-historial'; item.innerText = n;
-            document.getElementById('lista-historial').prepend(item);
-            indiceActual++;
+            document.getElementById('lista-h').prepend(item);
+
+            if(audio) {
+                window.speechSynthesis.cancel();
+                let m = new SpeechSynthesisUtterance("Número " + n);
+                m.lang = 'es-ES'; window.speechSynthesis.speak(m);
+            }
+            indice++;
         }
 
-        window.generarLinkNuevo = async () => {
-            if(numerosSalidos.length === 0) return alert("Saca números primero");
-            const btn = document.getElementById('btn-gen');
-            btn.innerText = "⏳ SUBIENDO A TELEGRAPH...";
-            btn.disabled = true;
-
-            const grid = document.getElementById('modal-grid');
-            grid.innerHTML = "";
-            numerosSalidos.forEach(n => {
-                let d = document.createElement('div'); d.className = "num-bola"; d.innerText = n; grid.appendChild(d);
-            });
-
-            document.getElementById('modal-general').style.display = "flex";
-
-            setTimeout(async () => {
-                try {
-                    const canvas = await html2canvas(document.getElementById('captura-area'), { backgroundColor: "#000", scale: 1 });
-                    
-                    canvas.toBlob(async (blob) => {
-                        const formData = new FormData();
-                        formData.append('file', blob, 'tablero.png');
-
-                        // Subida a Telegraph (Sin API Key, más estable)
-                        const response = await fetch('https://telegra.ph/upload', {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        const result = await response.json();
-
-                        if (result && result[0] && result[0].src) {
-                            const finalLink = "https://telegra.ph" + result[0].src;
-                            document.getElementById('txt-link').value = finalLink;
-                            copiarTexto(finalLink);
-                            btn.innerText = "✅ ¡LINK COPIADO!";
-                            btn.style.background = "#39ff14"; btn.style.color = "#000";
-                        } else {
-                            throw new Error("Fallo en la subida");
-                        }
-                    }, 'image/png');
-
-                } catch (e) {
-                    alert("Error al generar. Intenta de nuevo.");
-                } finally {
-                    setTimeout(() => {
-                        btn.disabled = false;
-                        btn.innerText = "🌐 GENERAR Y COPIAR LINK";
-                        btn.style.background = "#ff00ff"; btn.style.color = "#fff";
-                    }, 3000);
-                    document.getElementById('modal-general').style.display = "none";
-                }
-            }, 800);
+        function generarLink() {
+            if(salidos.length === 0) return alert("Saca números");
+            // Generamos un link que usa un visor de imágenes online con los números
+            const base = "https://textoverimage.com/draw?text=";
+            const data = "ORDEN: " + salidos.join("-");
+            const link = base + encodeURIComponent(data) + "&bgcolor=000000&textcolor=39ff14";
+            
+            document.getElementById('txt-link').value = link;
+            copiar(link);
+            alert("✅ LINK COPIADO AL PORTAPAPELES");
         }
 
-        window.toggleAudio = () => { audioActivado = !audioActivado; document.getElementById('btn-audio').innerText = audioActivado ? "🔊 Audio" : "🔇 Mudo"; }
-        window.reiniciar = () => { if(confirm("¿Reiniciar sorteo?")) location.reload(); }
-        window.abrirTableroFijo = () => { alert("Números: " + numerosSalidos.join(" - ")); }
+        function toggleAudio() {
+            audio = !audio;
+            document.getElementById('btn-audio').innerText = audio ? "🔊 Audio" : "🔇 Mudo";
+        }
     </script>
 </body>
 </html>
