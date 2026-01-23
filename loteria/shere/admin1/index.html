@@ -27,8 +27,9 @@
         #estado-tabla { font-size: 20px; margin: 10px; font-weight: bold; }
         
         /* Modal Usuarios */
-        #modal-usuarios { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid #39ff14; padding: 20px; z-index: 1000; width: 300px; max-height: 400px; overflow-y: auto; }
-        .user-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #333; font-size: 12px; }
+        #modal-usuarios { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid #39ff14; padding: 20px; z-index: 1000; width: 320px; max-height: 450px; overflow-y: auto; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        .user-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #333; font-size: 13px; }
+        .btn-borrar { background: #ff0000; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -45,19 +46,17 @@
     </div>
 
     <div id="modal-usuarios">
-        <h3 style="color:#39ff14; text-align:center;">USUARIOS Y PINs</h3>
+        <h3 style="color:#39ff14; text-align:center; margin-top:0;">USUARIOS Y PINs</h3>
         <div id="lista-usuarios"></div>
-        <button onclick="document.getElementById('modal-usuarios').style.display='none'" style="width:100%; margin-top:10px; cursor:pointer;">Cerrar</button>
+        <button onclick="document.getElementById('modal-usuarios').style.display='none'" style="width:100%; margin-top:15px; padding: 10px; cursor:pointer; background:#333; color:white; border:none;">CERRAR</button>
     </div>
 
     <script>
-        // CONFIGURACIÓN PARA 1 CARTA
         const firebaseConfig = { databaseURL: "https://shere-88414-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const CLAVE = "shere2026";
 
-        // RUTAS ESPECÍFICAS DE 1 CARTA
         const refSala = db.ref('loteria_shere_1'); 
         const refConfig = db.ref('config_shere_1');
         const refUsuarios = db.ref('usuarios_registrados');
@@ -79,26 +78,38 @@
         }
 
         window.toggleTabla = () => {
-            if(prompt("Clave Admin:") === CLAVE) {
-                refConfig.child('abierta').set(!tablaAbierta);
-            }
+            if(prompt("Clave Admin:") === CLAVE) refConfig.child('abierta').set(!tablaAbierta);
         };
 
         window.resetJuego = () => {
-            if(confirm("¿Borrar todos los seleccionados de la tabla?") && prompt("CLAVE:") === CLAVE) {
-                refSala.remove();
+            if(confirm("¿Borrar todos los seleccionados de la tabla?") && prompt("CLAVE:") === CLAVE) refSala.remove();
+        };
+
+        // Función para borrar un usuario específico
+        window.borrarUsuario = (nick) => {
+            if(confirm(`¿Estás seguro de eliminar a ${nick}?`) && prompt("Clave Admin para borrar usuario:") === CLAVE) {
+                refUsuarios.child(nick).remove().then(() => {
+                    alert("Usuario eliminado");
+                    verUsuarios(); // Recargar lista
+                });
             }
         };
 
         window.verUsuarios = () => {
-            if(prompt("Clave para ver PINs:") !== CLAVE) return;
+            // Se puede quitar el prompt si ya se pidió al abrir, pero por seguridad lo mantengo
             refUsuarios.once('value', snap => {
                 const lista = document.getElementById('lista-usuarios');
                 lista.innerHTML = "";
                 snap.forEach(u => {
                     const div = document.createElement('div');
                     div.className = "user-item";
-                    div.innerHTML = `<span>${u.key}</span> <span>${u.val().pin}</span>`;
+                    div.innerHTML = `
+                        <div style="display:flex; flex-direction:column;">
+                            <b style="color:#39ff14">${u.key}</b>
+                            <span style="font-size:10px;">PIN: ${u.val().pin}</span>
+                        </div>
+                        <button class="btn-borrar" onclick="borrarUsuario('${u.key}')">ELIMINAR</button>
+                    `;
                     lista.appendChild(div);
                 });
                 document.getElementById('modal-usuarios').style.display = 'block';
